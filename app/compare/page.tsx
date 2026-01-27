@@ -7,6 +7,9 @@ import { supabase } from '@/lib/supabaseClient'
 import { ArrowLeft, Check, X, Zap, Download, Upload, DollarSign, Calendar, Award } from 'lucide-react'
 import Link from 'next/link'
 
+// Force dynamic rendering - this page uses URL params
+export const dynamic = 'force-dynamic'
+
 type Offer = {
     id: string
     operator_name: string
