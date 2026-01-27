@@ -77,12 +77,12 @@ export default function ResultsPage() {
                 }
 
                 // Score and sort
-                plans = plans.map((p: OfferProps) => ({
+                const plansWithScores = plans.map((p) => ({
                     ...p,
                     matchScore: calculateMatchScore(p, quizAnswers)
                 })).sort((a: any, b: any) => b.matchScore - a.matchScore)
 
-                setOffers(plans.slice(0, 6)) // Top 6
+                setOffers(plansWithScores.slice(0, 6)) // Top 6
             } else {
                 // Fallback data
                 setOffers(getFallbackOffers(quizAnswers))
