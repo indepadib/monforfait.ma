@@ -81,7 +81,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         {children}
-        <CompareBar />
+        {/* <CompareBar /> - Temporarily disabled for launch */}
       </body>
     </html>
   );
