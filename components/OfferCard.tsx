@@ -22,7 +22,7 @@ export interface OfferProps {
     highlight_badge?: string;
 }
 
-export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect: () => void }) {
+export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: () => void }) {
     const [isInComparison, setIsInComparison] = useState(false)
 
     useEffect(() => {
