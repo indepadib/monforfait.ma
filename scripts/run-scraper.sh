@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Simple scraper runner with env vars
+export PATH="/usr/local/bin:$PATH"
+export NEXT_PUBLIC_SUPABASE_URL="https://gpoylrecftylldgslkdh.supabase.co"
+export NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdwb3lscmVjZnR5bGxkZ3Nsa2RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MzEwNzksImV4cCI6MjA4NTEwNzA3OX0.AcMla0hXab5qV8XovA2RaRN6cqlyMhP8n_-5vkXtJVs"
+export SUPABASE_SERVICE_ROLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdwb3lscmVjZnR5bGxkZ3Nsa2RoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTUzMTA3OSwiZXhwIjoyMDg1MTA3MDc5fQ.E_4vY4Rmfzozd5o1LkLcDtG2kS5hMKK-SzFjlILL14g"
+
+cd "$(dirname "$0")/.."
+npx tsx scripts/manual-scrape.ts

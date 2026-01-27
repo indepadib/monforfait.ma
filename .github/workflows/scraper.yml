@@ -1,0 +1,46 @@
+name: Automated Telco Scraper
+
+on:
+  schedule:
+    # Run every day at 2 AM Morocco time (UTC+1)
+    - cron: '0 1 * * *'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run automated scraper
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          npx tsx scripts/auto-scraper.ts &
+          SCRAPER_PID=$!
+          
+          # Let it run for 10 minutes max
+          sleep 600
+          
+          # Kill if still running
+          kill $SCRAPER_PID 2>/dev/null || true
+          
+          echo "✅ Scraper execution completed"
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "❌ Scraper failed, check logs"
