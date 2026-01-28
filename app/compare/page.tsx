@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Navigation } from '@/components/Navigation'
 import { supabase } from '@/lib/supabaseClient'
@@ -26,7 +26,7 @@ type Offer = {
     highlight_badge?: string
 }
 
-export default function ComparePage() {
+function CompareContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
     const [offers, setOffers] = useState<Offer[]>([])
@@ -336,5 +336,19 @@ export default function ComparePage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function ComparePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                </div>
+            </div>
+        }>
+            <CompareContent />
+        </Suspense>
     )
 }
