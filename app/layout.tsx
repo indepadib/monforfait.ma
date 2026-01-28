@@ -90,8 +90,6 @@ export default function RootLayout({
             }),
           }}
         />
-      </head>
-      <head>
         {/* Google Analytics */}
         <Script
           strategy="afterInteractive"
