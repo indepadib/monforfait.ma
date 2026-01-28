@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronRight, Wifi, Smartphone, Users, Zap, DollarSign, TrendingUp, MapPin, User, Mail, Phone, Home, Lock, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { Navigation } from '@/components/Navigation'
+import { event as trackEvent } from '@/lib/analytics'
 
 type QuizAnswers = {
     category?: 'internet' | 'mobile' | 'both'
@@ -67,6 +68,14 @@ export default function QuizPage() {
     function handleAnswer(value: string) {
         const newAnswers = { ...answers, [currentQuestion.id]: value }
         setAnswers(newAnswers)
+
+        // Track step
+        trackEvent({
+            action: 'quiz_step_completed',
+            category: 'quiz',
+            label: `${currentQuestion.id}:${value}`,
+            value: step + 1
+        })
 
         // Save to session storage for retargeting
         if (typeof window !== 'undefined') {

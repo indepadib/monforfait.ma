@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowDown, ArrowUp, Wifi, Smartphone, Phone, MessageSquare, Briefcase, User, Star, GitCompare, Check } from 'lucide-react';
+import { event } from '@/lib/analytics';
 
 export interface OfferProps {
     id?: string;
@@ -69,10 +70,37 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
             const updated = [...current, offer.id]
             localStorage.setItem('compare_offers', JSON.stringify(updated))
             setIsInComparison(true)
+
+            event({
+                action: 'add_to_compare',
+                category: 'engagement',
+                label: offer.title,
+                value: offer.price_dh
+            })
         }
 
         window.dispatchEvent(new Event('compare-updated'))
+        window.dispatchEvent(new Event('compare-updated'))
     }
+
+    // Save to recently viewed on mount
+    useEffect(() => {
+        if (!offer.id) return
+
+        const saved = localStorage.getItem('recently_viewed_offers')
+        let current: OfferProps[] = saved ? JSON.parse(saved) : []
+
+        // Remove existing if present (to bumping to top)
+        current = current.filter(o => o.id !== offer.id)
+
+        // Add to front
+        current.unshift(offer)
+
+        // Limit to 10
+        if (current.length > 10) current = current.slice(0, 10)
+
+        localStorage.setItem('recently_viewed_offers', JSON.stringify(current))
+    }, [offer])
 
     const isOrange = offer.operator_name.toLowerCase().includes('orange');
     const isInwi = offer.operator_name.toLowerCase().includes('inwi');

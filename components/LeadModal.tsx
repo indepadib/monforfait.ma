@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { X, Loader2, CheckCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { OfferProps } from './OfferCard'
+import { event as trackEvent } from '@/lib/analytics'
 
 export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () => void }) {
     const [name, setName] = useState('')
@@ -43,6 +44,14 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
         } else {
             message += ` Je suis à ${city}.`
         }
+
+        // Track Event
+        trackEvent({
+            action: 'lead_submitted_whatsapp',
+            category: 'lead',
+            label: `${offer.operator_name} - ${offer.title}`,
+            value: offer.price_dh
+        })
 
         // Simulate "sending" state before retracting to make it feel robust
         setTimeout(() => {

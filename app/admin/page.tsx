@@ -20,7 +20,7 @@ type Lead = {
     needs_details?: any
 }
 
-const ADMIN_PASSWORD = 'monforfait2026' // CHANGEZ CE MOT DE PASSE !
+const ADMIN_PASSWORD = 'AdminMaroc2026!' // CHANGEZ CE MOT DE PASSE !
 
 export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false)

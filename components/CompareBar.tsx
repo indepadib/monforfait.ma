@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { X, GitCompare } from 'lucide-react'
+import { event } from '@/lib/analytics'
 
 export function CompareBar() {
     const router = useRouter()
@@ -46,6 +47,12 @@ export function CompareBar() {
     }
 
     function goToCompare() {
+        event({
+            action: 'compare_started',
+            category: 'engagement',
+            label: `${selectedOffers.length} offers`,
+            value: selectedOffers.length
+        })
         const ids = selectedOffers.join(',')
         router.push(`/compare?ids=${ids}`)
     }

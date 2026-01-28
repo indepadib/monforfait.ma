@@ -5,6 +5,9 @@ import { OfferCard } from '@/components/OfferCard'
 import { Navigation } from '@/components/Navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Filter, SlidersHorizontal } from 'lucide-react'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { OfferCardSkeleton } from '@/components/LoadingSkeleton'
+import { RecentlyViewed } from '@/components/RecentlyViewed'
 
 type Offer = {
     id: string
@@ -108,6 +111,8 @@ export default function AllOffersPage() {
             <Navigation />
 
             <div className="max-w-7xl mx-auto px-4 py-12">
+                <Breadcrumbs items={[{ label: 'Offres', href: '/offers' }]} />
+
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-black mb-4 text-zinc-900 dark:text-white">
@@ -179,9 +184,10 @@ export default function AllOffersPage() {
 
                 {/* Offers Grid */}
                 {loading ? (
-                    <div className="text-center py-20">
-                        <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="mt-4 text-zinc-600 dark:text-zinc-400">Chargement des offres...</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <OfferCardSkeleton key={i} />
+                        ))}
                     </div>
                 ) : (
                     <>
@@ -205,6 +211,8 @@ export default function AllOffersPage() {
                     </>
                 )}
             </div>
+
+            <RecentlyViewed />
         </div>
     )
 }

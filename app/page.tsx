@@ -1,9 +1,11 @@
 import { ComparisonSection } from '@/components/ComparisonSection';
 import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { FAQ } from '@/components/FAQ';
+import { SavingsCalculator } from '@/components/SavingsCalculator';
 import { Navigation } from '@/components/Navigation';
 import Link from 'next/link';
 import { Sparkles, Target, Shield, Clock } from 'lucide-react';
+import { TrustBadges } from '@/components/TrustBadges';
 
 export default function Home() {
   return (
@@ -104,6 +106,11 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Savings Calculator */}
+      <div className="max-w-4xl mx-auto px-4 py-8 md:py-16">
+        <SavingsCalculator />
+      </div>
+
       {/* Comparison Engine */}
       <ComparisonSection />
 
@@ -129,11 +136,12 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="py-12 border-t border-zinc-100 dark:border-zinc-800 text-center">
-        <div className="text-zinc-500 text-sm font-medium">
-          &copy; 2026 MonForfait.ma • Comparateur indépendant de forfaits au Maroc
-        </div>
-      </footer>
+      {/* Trust Badges */}
+      <div className="max-w-6xl mx-auto px-4">
+        <TrustBadges />
+      </div>
+
+
 
       {/* Exit Intent Popup */}
       <ExitIntentPopup />

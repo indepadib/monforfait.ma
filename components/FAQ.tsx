@@ -100,6 +100,24 @@ export function FAQ() {
                     Contactez-nous
                 </a>
             </div>
+            {/* Structured Data for FAQ */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'FAQPage',
+                        mainEntity: FAQS.map(faq => ({
+                            '@type': 'Question',
+                            name: faq.question,
+                            acceptedAnswer: {
+                                '@type': 'Answer',
+                                text: faq.answer
+                            }
+                        }))
+                    })
+                }}
+            />
         </div>
     )
 }

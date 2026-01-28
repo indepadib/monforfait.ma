@@ -7,6 +7,7 @@ import { LeadModal } from '@/components/LeadModal'
 import { Navigation } from '@/components/Navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Sparkles, TrendingUp, CheckCircle } from 'lucide-react'
+import { ShareResults } from '@/components/ShareResults'
 
 type QuizAnswers = {
     category?: 'internet' | 'mobile' | 'both'
@@ -175,6 +176,10 @@ export default function ResultsPage() {
                             </div>
                         )}
                     </div>
+
+                    <div className="mt-8">
+                        <ShareResults />
+                    </div>
                 </div>
             </div>
 
@@ -240,12 +245,14 @@ export default function ResultsPage() {
                 )}
             </div>
 
-            {selectedOffer && (
-                <LeadModal
-                    offer={selectedOffer}
-                    onClose={() => setSelectedOffer(null)}
-                />
-            )}
-        </div>
+            {
+                selectedOffer && (
+                    <LeadModal
+                        offer={selectedOffer}
+                        onClose={() => setSelectedOffer(null)}
+                    />
+                )
+            }
+        </div >
     )
 }
