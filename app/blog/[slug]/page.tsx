@@ -47,8 +47,10 @@ export default function BlogPostPage({ params }: Props) {
         '@context': 'https://schema.org',
         '@type': 'Article',
         headline: post.title,
+        description: post.excerpt,
         image: post.coverImage,
         datePublished: post.date,
+        dateModified: post.date,
         author: {
             '@type': 'Person',
             name: post.author.name,
@@ -60,6 +62,10 @@ export default function BlogPostPage({ params }: Props) {
                 '@type': 'ImageObject',
                 url: 'https://monforfait.ma/branding/logo-light.png'
             }
+        },
+        mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `https://monforfait.ma/blog/${post.slug}`
         }
     }
 

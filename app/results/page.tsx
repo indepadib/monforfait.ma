@@ -102,16 +102,38 @@ export default function ResultsPage() {
         // Sponsored gets bonus
         if (plan.is_sponsored) score += 20
 
+        const isADSL = plan.technology?.toUpperCase().includes('ADSL')
+        const isFibre = plan.technology?.toUpperCase().includes('FTTH') || plan.technology?.toUpperCase().includes('FIBRE')
+
+        // Penalize ADSL heavily for performance-based users
+        if (isADSL && (answers.priority === 'fastest' || answers.userType === 'enterprise')) {
+            score -= 50
+        }
+
+        // Reward Fibre for families and businesses
+        if (isFibre && (answers.userType === 'family' || answers.userType === 'small_office' || answers.userType === 'enterprise')) {
+            score += 30
+        }
+
         // Priority matching
-        if (answers.priority === 'cheapest' && plan.price_dh < 300) score += 30
+        if (answers.priority === 'cheapest') {
+            if (plan.price_dh < 200) score += 40
+            else if (plan.price_dh < 300) score += 20
+        }
+        
         if (answers.priority === 'fastest' && plan.download_speed && plan.download_speed >= 100) score += 30
-        if (answers.priority === 'best_value' && plan.price_dh < 400 && plan.download_speed && plan.download_speed >= 50) score += 30
+        
+        if (answers.priority === 'best_value') {
+            if (plan.price_dh < 400 && plan.download_speed && plan.download_speed >= 50) score += 30
+            // Reward unlimited calls (-1) for best value mobile
+            if (plan.category === 'mobile' && plan.voice_minutes === -1) score += 25
+        }
 
         // User type matching
         if (answers.userType === 'family' && plan.download_speed && plan.download_speed >= 100) score += 15
         if (answers.userType === 'solo' && plan.price_dh < 350) score += 15
 
-        return score
+        return Math.max(0, Math.min(100, score)) // clamp 0-100
     }
 
     function getFallbackOffers(answers: QuizAnswers): (OfferProps & { matchScore: number })[] {
@@ -134,10 +156,14 @@ export default function ResultsPage() {
     }
 
     function getMatchReason(offer: OfferProps): string {
-        if (answers.priority === 'cheapest') return `Prix compétitif à ${offer.price_dh} DH`
-        if (answers.priority === 'fastest' && offer.download_speed) return `Vitesse ultra-rapide: ${offer.download_speed} Mbps`
-        if (answers.userType === 'family') return 'Idéal pour une famille connectée'
-        return 'Excellent rapport qualité/prix'
+        const isFibre = offer.technology?.toUpperCase().includes('FTTH') || offer.technology?.toUpperCase().includes('FIBRE')
+
+        if (answers.userType === 'family' && isFibre) return 'Idéal pour votre famille : la fibre garantit 0 coupure même si tous les appareils sont connectés.'
+        if (answers.priority === 'fastest' && offer.download_speed && offer.download_speed >= 100) return `Recommandé pour la vitesse : ${offer.download_speed} Mbps pour télécharger instantanément.`
+        if (answers.priority === 'cheapest' && offer.price_dh < 200) return `Meilleur budget : l'offre la plus économique à seulement ${offer.price_dh} DH.`
+        if (answers.priority === 'best_value' && offer.category === 'mobile' && offer.voice_minutes === -1) return 'Rapport qualité/prix imbattable avec appels illimités inclus.'
+        
+        return 'Excellente offre correspondant à votre profil de consommation.'
     }
 
     return (
