@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { ArrowDown, ArrowUp, Wifi, Smartphone, Phone, MessageSquare, Briefcase, User, Star, GitCompare, Check } from 'lucide-react';
 import { event } from '@/lib/analytics';
@@ -23,12 +25,6 @@ export interface OfferProps {
     highlight_badge?: string;
     affiliate_link?: string;
 }
-
-export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: () => void }) {
-    const [isInComparison, setIsInComparison] = useState(false)
-
-// ... Skipping unmodified code up to the button ...
-// Will use multi_replace to handle this properly.
 
 export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: () => void }) {
     const [isInComparison, setIsInComparison] = useState(false)
