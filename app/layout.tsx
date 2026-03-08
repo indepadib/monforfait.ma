@@ -84,7 +84,10 @@ export default function RootLayout({
               url: 'https://monforfait.ma',
               potentialAction: {
                 '@type': 'SearchAction',
-                target: 'https://monforfait.ma/offers?q={search_term_string}',
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: 'https://monforfait.ma/offers?q={search_term_string}'
+                },
                 'query-input': 'required name=search_term_string',
               },
             }),
@@ -106,6 +109,13 @@ export default function RootLayout({
             gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
           `}
         </Script>
+        {/* Google AdSense */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5443016381737012"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
       </head>
       <body className="antialiased">
         {children}

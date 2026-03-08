@@ -22,14 +22,14 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
 
         try {
             await supabase.from('leads').insert({
+                user_name: name,
+                user_email: email || `${phone}@lead.local`, // Fallback for standard leads
                 user_phone: phone,
                 city: city,
                 selected_plan_id: offer.id,
-                status: isPro ? 'new_pro' : 'new', // Tag high value leads
+                status: isPro ? 'new_pro' : 'new_qualified', // Match admin panel
                 is_pro: isPro,
                 needs_details: {
-                    name,
-                    email,
                     source: 'web_v2'
                 }
             })

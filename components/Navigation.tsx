@@ -32,7 +32,11 @@ export function Navigation() {
                     <a href="/#comparateur" className="hover:text-black dark:hover:text-white transition-colors">Comparateur</a>
                     <Link href="/quiz" className="hover:text-black dark:hover:text-white transition-colors">Quiz</Link>
                     <Link href="/speedtest" className="hover:text-black dark:hover:text-white transition-colors">Speed Test</Link>
-                    <a href="/#faq" className="hover:text-black dark:hover:text-white transition-colors">FAQ</a>
+                    <a href="/#comparateur" onClick={() => {
+                        window.dispatchEvent(new CustomEvent('switch-audience-pro'));
+                    }} className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors">
+                        Espace Pro
+                    </a>
                 </div>
 
                 <Link href="/quiz" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2 rounded-full text-sm font-bold hover:shadow-lg transition-shadow">

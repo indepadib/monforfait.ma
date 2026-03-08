@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ChevronRight, Wifi, Smartphone, Users, Zap, DollarSign, TrendingUp, MapPin, User, Mail, Phone, Home, Lock, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { Navigation } from '@/components/Navigation'
@@ -54,12 +54,19 @@ const QUESTIONS = [
 
 export default function QuizPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const [step, setStep] = useState(0)
     const [answers, setAnswers] = useState<QuizAnswers>({})
     const [city, setCity] = useState('')
     const [leadData, setLeadData] = useState<LeadData>({ name: '', phone: '', email: '', address: '' })
     const [loading, setLoading] = useState(false)
     const [emailVerified, setEmailVerified] = useState(false)
+
+    useEffect(() => {
+        if (searchParams.get('type') === 'pro') {
+            setAnswers(prev => ({ ...prev, userType: 'enterprise' }))
+        }
+    }, [searchParams])
 
     const currentQuestion = QUESTIONS[step]
     const totalSteps = QUESTIONS.length + 2 // +2 for city and lead capture
@@ -112,13 +119,13 @@ export default function QuizPage() {
 
             // Save lead to database
             const { data, error } = await supabase.from('leads').insert({
+                user_name: leadData.name,
+                user_email: leadData.email,
                 user_phone: leadData.phone,
                 city: city,
                 status: isPro ? 'new_pro' : 'new_qualified', // High quality lead
                 is_pro: isPro,
                 needs_details: {
-                    name: leadData.name,
-                    email: leadData.email,
                     address: leadData.address,
                     quiz_answers: answers,
                     captured_at: new Date().toISOString(),

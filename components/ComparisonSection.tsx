@@ -43,7 +43,8 @@ export function ComparisonSection() {
                         mobile_data_gb: p.mobile_data_gb,
                         voice_minutes: p.voice_minutes,
                         is_sponsored: p.is_sponsored,
-                        highlight_badge: p.highlight_badge
+                        highlight_badge: p.highlight_badge,
+                        affiliate_link: p.affiliate_link
                     }))
                     setOffers(mapped)
                 } else {
@@ -53,7 +54,7 @@ export function ComparisonSection() {
 
                     if (category === 'internet' && audience === 'individual') {
                         dummies.push(
-                            { id: '1', operator_name: 'Orange', title: 'Fibre 20 Mega', price_dh: 249, download_speed: 20, technology: 'FTTH', category: 'internet', target_audience: 'individual' },
+                            { id: '1', operator_name: 'Orange', title: 'Fibre 20 Mega', price_dh: 249, download_speed: 20, technology: 'FTTH', category: 'internet', target_audience: 'individual', affiliate_link: 'https://orange.ma/' },
                             { id: '2', operator_name: 'Inwi', title: 'Fibre 20 Mega', price_dh: 249, download_speed: 20, technology: 'FTTH', category: 'internet', target_audience: 'individual' },
                             { id: '3', operator_name: 'Maroc Telecom', title: 'Fibre 100 Mega', price_dh: 400, download_speed: 100, technology: 'FTTH', category: 'internet', target_audience: 'individual' },
                         )
@@ -61,14 +62,14 @@ export function ComparisonSection() {
                     if (category === 'internet' && audience === 'professional') {
                         dummies.push(
                             { id: 'p1', operator_name: 'Orange', title: 'Pack Pro Fibre', price_dh: 490, download_speed: 100, technology: 'FTTH', highlight_badge: 'IP Fixe', category: 'internet', target_audience: 'professional' },
-                            { id: 'p2', operator_name: 'Inwi', title: 'Business Link', price_dh: 449, download_speed: 100, technology: 'FTTH', category: 'internet', target_audience: 'professional' },
+                            { id: 'p2', operator_name: 'Inwi', title: 'Business Link', price_dh: 449, download_speed: 100, technology: 'FTTH', category: 'internet', target_audience: 'professional', affiliate_link: 'https://inwi.ma/' },
                             { id: 'p3', operator_name: 'Maroc Telecom', title: 'Fibre Optique Entreprise', price_dh: 990, download_speed: 200, technology: 'FTTH', category: 'internet', target_audience: 'professional', is_sponsored: true }
                         )
                     }
                     if (category === 'mobile' && audience === 'individual') {
                         dummies.push(
                             { id: 'm1', operator_name: 'Inwi', title: 'Forfait 11Go', price_dh: 49, mobile_data_gb: 11, voice_minutes: 1, category: 'mobile', target_audience: 'individual' },
-                            { id: 'm2', operator_name: 'Orange', title: 'Forfait Yo 30Go', price_dh: 99, mobile_data_gb: 30, voice_minutes: -1, highlight_badge: 'Social Media Illimité', category: 'mobile', target_audience: 'individual' },
+                            { id: 'm2', operator_name: 'Orange', title: 'Forfait Yo 30Go', price_dh: 99, mobile_data_gb: 30, voice_minutes: -1, highlight_badge: 'Social Media Illimité', category: 'mobile', target_audience: 'individual', affiliate_link: 'https://orange.ma/yo' },
                             { id: 'm3', operator_name: 'Maroc Telecom', title: 'Forfait Liberté', price_dh: 99, mobile_data_gb: 25, voice_minutes: 2, category: 'mobile', target_audience: 'individual' }
                         )
                     }
@@ -89,6 +90,15 @@ export function ComparisonSection() {
         }
         loadOffers()
     }, [category, audience])
+
+    // Event listener for external triggers to switch to PRO
+    useEffect(() => {
+        const handleSwitchPro = () => {
+            setAudience('professional');
+        };
+        window.addEventListener('switch-audience-pro', handleSwitchPro);
+        return () => window.removeEventListener('switch-audience-pro', handleSwitchPro);
+    }, []);
 
     const sortedOffers = [...offers].sort((a, b) => {
         // Sponsored always on top

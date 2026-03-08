@@ -21,7 +21,14 @@ export interface OfferProps {
     features?: any;
     is_sponsored?: boolean;
     highlight_badge?: string;
+    affiliate_link?: string;
 }
+
+export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: () => void }) {
+    const [isInComparison, setIsInComparison] = useState(false)
+
+// ... Skipping unmodified code up to the button ...
+// Will use multi_replace to handle this properly.
 
 export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: () => void }) {
     const [isInComparison, setIsInComparison] = useState(false)
@@ -194,16 +201,33 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                 </div>
 
                 <div className="mt-auto space-y-2">
-                    <button
-                        onClick={onSelect}
-                        className={`w-full py-3 px-4 rounded-xl font-bold text-white shadow-md transform transition-all group-hover:-translate-y-0.5
-                    ${isOrange ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20' : ''}
-                    ${isInwi ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/20' : ''}
-                    ${isIam ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : ''}
-                    ${!isOrange && !isInwi && !isIam ? 'bg-zinc-900 hover:bg-zinc-800' : ''}
-                `}>
-                        {isPro ? 'Demander un devis' : 'Commander'}
-                    </button>
+                    {offer.affiliate_link ? (
+                        <a
+                            href={offer.affiliate_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`block text-center w-full py-3 px-4 rounded-xl font-bold text-white shadow-md transform transition-all group-hover:-translate-y-0.5
+                                ${isOrange ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20' : ''}
+                                ${isInwi ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/20' : ''}
+                                ${isIam ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : ''}
+                                ${!isOrange && !isInwi && !isIam ? 'bg-zinc-900 hover:bg-zinc-800' : ''}
+                            `}
+                        >
+                            {isPro ? 'Demander un devis' : 'Voir l\'offre'}
+                        </a>
+                    ) : (
+                        <button
+                            onClick={onSelect}
+                            className={`w-full py-3 px-4 rounded-xl font-bold text-white shadow-md transform transition-all group-hover:-translate-y-0.5
+                                ${isOrange ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20' : ''}
+                                ${isInwi ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/20' : ''}
+                                ${isIam ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : ''}
+                                ${!isOrange && !isInwi && !isIam ? 'bg-zinc-900 hover:bg-zinc-800' : ''}
+                            `}
+                        >
+                            {isPro ? 'Demander un devis' : 'Commander'}
+                        </button>
+                    )}
 
                     {/* Compare Button */}
                     {offer.id && (

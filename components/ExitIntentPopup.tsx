@@ -7,31 +7,49 @@ export function ExitIntentPopup() {
     const [showPopup, setShowPopup] = useState(false)
     const [email, setEmail] = useState('')
 
+    const [loading, setLoading] = useState(false)
+    const [success, setSuccess] = useState(false)
+
     useEffect(() => {
-        let hasShown = sessionStorage.getItem('exit_popup_shown')
+        let hasShown = localStorage.getItem('exit_popup_shown')
 
         const handleMouseLeave = (e: MouseEvent) => {
             if (e.clientY <= 0 && !hasShown) {
                 setShowPopup(true)
-                sessionStorage.setItem('exit_popup_shown', 'true')
+                localStorage.setItem('exit_popup_shown', 'true')
             }
         }
 
-        document.addEventListener('mouseleave', handleMouseLeave)
+        // Wait 3 seconds before enabling to avoid immediate triggers
+        const timer = setTimeout(() => {
+            document.addEventListener('mouseleave', handleMouseLeave)
+        }, 3000)
 
-        return () => document.removeEventListener('mouseleave', handleMouseLeave)
+        return () => {
+            clearTimeout(timer)
+            document.removeEventListener('mouseleave', handleMouseLeave)
+        }
     }, [])
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
+        setLoading(true)
 
-        // Save email for retargeting
-        // Could send to email marketing service here
-        console.log('Exit intent email captured:', email)
-
-        // Download guide (dummy action)
-        alert('Guide envoyé à ' + email)
-        setShowPopup(false)
+        try {
+            await fetch('/api/send-guide', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            setSuccess(true)
+            setTimeout(() => {
+                setShowPopup(false)
+            }, 3000)
+        } catch (error) {
+            console.error('Failed to send guide', error)
+        } finally {
+            setLoading(false)
+        }
     }
 
     if (!showPopup) return null

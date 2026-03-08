@@ -6,8 +6,11 @@ import { Navigation } from '@/components/Navigation';
 import Link from 'next/link';
 import { Sparkles, Target, Shield, Clock } from 'lucide-react';
 import { TrustBadges } from '@/components/TrustBadges';
+import { B2BBanner } from '@/components/B2BBanner';
 
 export default function Home() {
+// ... Skipped lines to the comparison engine ...
+// Let's use multi_replace.
   return (
     <main className="min-h-screen bg-white dark:bg-black font-sans">
       {/* Navigation */}
@@ -80,7 +83,8 @@ export default function Home() {
       </div>
 
       {/* Value Props - Trust Signals */}
-      <div className="max-w-6xl mx-auto px-4 py-16 border-b border-zinc-100 dark:border-zinc-800">
+      <section aria-labelledby="features-heading" className="max-w-6xl mx-auto px-4 py-16 border-b border-zinc-100 dark:border-zinc-800">
+        <h2 id="features-heading" className="sr-only">Pourquoi choisir MonForfait.ma</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600">
@@ -104,23 +108,32 @@ export default function Home() {
             <p className="text-zinc-600 dark:text-zinc-400">Nos données sont mises à jour chaque jour pour garantir les meilleurs tarifs.</p>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Savings Calculator */}
-      <div className="max-w-4xl mx-auto px-4 py-8 md:py-16">
+      <section aria-label="Calculateur d'économies" className="max-w-4xl mx-auto px-4 py-8 md:py-16">
         <SavingsCalculator />
-      </div>
+      </section>
+
+      {/* B2B Banner Offer */}
+      <section aria-label="Offre Entreprise" className="max-w-6xl mx-auto px-4 py-8">
+        <B2BBanner />
+      </section>
 
       {/* Comparison Engine */}
-      <ComparisonSection />
+      <section aria-label="Outil de comparaison" id="comparateur">
+         <ComparisonSection />
+      </section>
 
       {/* FAQ Section */}
-      <FAQ />
+      <section aria-label="Questions Fréquentes">
+          <FAQ />
+      </section>
 
       {/* CTA Banner Before Footer */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white py-16">
+      <section aria-labelledby="cta-heading" className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-black mb-4">
+          <h2 id="cta-heading" className="text-3xl md:text-4xl font-black mb-4">
             Prêt à économiser sur votre facture ?
           </h2>
           <p className="text-xl text-white/90 mb-8">
@@ -134,12 +147,12 @@ export default function Home() {
             Commencer maintenant (60 sec)
           </Link>
         </div>
-      </div>
+      </section>
 
       {/* Trust Badges */}
-      <div className="max-w-6xl mx-auto px-4">
+      <section aria-label="Nos partenaires" className="max-w-6xl mx-auto px-4">
         <TrustBadges />
-      </div>
+      </section>
 
 
 
