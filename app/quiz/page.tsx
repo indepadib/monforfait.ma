@@ -133,6 +133,11 @@ function QuizContent() {
                 }
             }).select()
 
+            if (error) {
+                console.error("Supabase insert error:", error);
+                throw error;
+            }
+
             // Save full context to session for results page
             const fullContext = {
                 ...answers,
