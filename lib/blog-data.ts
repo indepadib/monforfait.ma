@@ -19,7 +19,7 @@ export const BLOG_POSTS: BlogPost[] = [
         slug: 'meilleure-fibre-optique-maroc-2026',
         title: 'Quelle est la Meilleure Fibre Optique au Maroc en 2026 ? Comparatif Orange, Inwi et IAM',
         excerpt: 'Découvrez notre comparatif complet pour choisir la meilleure offre de fibre optique au Maroc. Vitesse, prix, routeur inclus : tout ce qu\'il faut savoir avant de s\'abonner.',
-        coverImage: 'https://images.unsplash.com/photo-1544197150-b99a580bbcbf?auto=format&fit=crop&q=80',
+        coverImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
         date: '2026-03-08',
         author: {
             name: 'Amine Alaoui',
@@ -128,7 +128,7 @@ export const BLOG_POSTS: BlogPost[] = [
         slug: 'comment-resilier-abonnement-internet-maroc',
         title: 'Comment Résilier son Abonnement Internet au Maroc ? (Guide Pratique)',
         excerpt: 'Démarches, préavis de résiliation, frais cachés : le guide ultime pour changer d\'opérateur ou couper votre ligne en toute tranquillité.',
-        coverImage: 'https://images.unsplash.com/photo-1554252116-431bf4eb7b79?auto=format&fit=crop&q=80',
+        coverImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80',
         date: '2026-03-05',
         author: {
             name: 'Sarah Benamor',
@@ -161,7 +161,7 @@ export const BLOG_POSTS: BlogPost[] = [
         slug: '5g-maroc-deploiement-villes-compatibles',
         title: 'La 5G au Maroc : Date de lancement, Forfaits et Villes Compatibles',
         excerpt: 'Où en est le déploiement de la 5G par Inwi, Orange et Maroc Telecom ? Tout savoir sur les débits monstrueux de la nouvelle norme réseau mobile.',
-        coverImage: 'https://images.unsplash.com/photo-1614064641913-6b70aca1ce03?auto=format&fit=crop&q=80',
+        coverImage: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80',
         date: '2026-02-28',
         author: {
             name: 'Amine Alaoui',
@@ -186,7 +186,7 @@ export const BLOG_POSTS: BlogPost[] = [
         slug: 'optimiser-wifi-maison-box-operateur',
         title: 'Routeur Fibre : 5 Astuces pour Booster et Étendre votre WiFi à la Maison',
         excerpt: 'Votre débit fibre est excellent mais votre WiFi coupe dans la chambre ? Découvrez comment optimiser le routeur de votre opérateur sans vous ruiner.',
-        coverImage: 'https://images.unsplash.com/photo-1558237910-1c3906353380?auto=format&fit=crop&q=80',
+        coverImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80',
         date: '2026-02-10',
         author: {
             name: 'Youssef Rami',

@@ -8,11 +8,12 @@ import { Calendar, User, ChevronLeft, Share2 } from 'lucide-react'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 
 type Props = {
-    params: { slug: string }
+    params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const post = BLOG_POSTS.find(p => p.slug === params.slug)
+    const resolvedParams = await params
+    const post = BLOG_POSTS.find(p => p.slug === resolvedParams.slug)
     if (!post) return {}
 
     return {
@@ -35,8 +36,9 @@ export async function generateStaticParams() {
     }))
 }
 
-export default function BlogPostPage({ params }: Props) {
-    const post = BLOG_POSTS.find(p => p.slug === params.slug)
+export default async function BlogPostPage({ params }: Props) {
+    const resolvedParams = await params
+    const post = BLOG_POSTS.find(p => p.slug === resolvedParams.slug)
 
     if (!post) {
         notFound()
