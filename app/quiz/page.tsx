@@ -123,10 +123,10 @@ function QuizContent() {
                 user_email: leadData.email,
                 user_phone: leadData.phone,
                 city: city,
+                address: leadData.address,
                 status: isPro ? 'new_pro' : 'new_qualified', // High quality lead
                 is_pro: isPro,
                 needs_details: {
-                    address: leadData.address,
                     quiz_answers: answers,
                     captured_at: new Date().toISOString(),
                     lead_source: 'quiz_pre_results'
