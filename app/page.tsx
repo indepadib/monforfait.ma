@@ -5,6 +5,7 @@ import { SavingsCalculator } from '@/components/SavingsCalculator';
 import { Navigation } from '@/components/Navigation';
 import Link from 'next/link';
 import { Sparkles, Target, Shield, Clock } from 'lucide-react';
+import { BLOG_POSTS } from '@/lib/blog-data';
 import { TrustBadges } from '@/components/TrustBadges';
 import { B2BBanner } from '@/components/B2BBanner';
 
@@ -118,6 +119,47 @@ export default function Home() {
       {/* B2B Banner Offer */}
       <section aria-label="Offre Entreprise" className="max-w-6xl mx-auto px-4 py-8">
         <B2BBanner />
+      </section>
+
+      {/* Blog Teaser Section */}
+      <section aria-labelledby="blog-heading" className="max-w-6xl mx-auto px-4 py-16 bg-zinc-50 dark:bg-zinc-900/50 rounded-[3rem] my-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4 px-4 sm:px-8">
+          <div>
+            <h2 id="blog-heading" className="text-3xl font-black mb-2 dark:text-white">Derniers Articles & Guides</h2>
+            <p className="text-zinc-600 dark:text-zinc-400">Actualités, comparatifs et astuces pour faire le bon choix.</p>
+          </div>
+          <Link href="/blog" className="hidden sm:inline-flex text-blue-600 font-bold hover:text-blue-700 items-center gap-1 group">
+            Voir tout le blog <Sparkles className="w-4 h-4 group-hover:scale-110 transition-transform" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 sm:px-8">
+          {BLOG_POSTS.slice(0, 3).map((post) => (
+            <Link key={post.slug} href={`/blog/${post.slug}`} className="group flex flex-col rounded-2xl overflow-hidden shadow-sm border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:shadow-xl transition-all hover:-translate-y-1">
+              <div className="aspect-[16/9] w-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden relative">
+                <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-blue-600 dark:text-blue-400">
+                  {post.category}
+                </div>
+              </div>
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="font-bold text-lg mb-2 dark:text-white line-clamp-2 group-hover:text-blue-600 transition-colors">{post.title}</h3>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-3 mb-4 flex-grow">{post.excerpt}</p>
+                <div className="flex items-center gap-2 mt-auto">
+                  <img src={post.author.avatar} alt={post.author.name} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-900" />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold dark:text-white">{post.author.name}</span>
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">{new Date(post.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="mt-8 text-center px-4 sm:hidden">
+          <Link href="/blog" className="inline-flex w-full justify-center px-6 py-4 bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 font-bold rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 active:scale-95 transition-all">
+            Voir tous les articles
+          </Link>
+        </div>
       </section>
 
       {/* Comparison Engine */}

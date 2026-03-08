@@ -24,7 +24,7 @@ export const BLOG_POSTS: BlogPost[] = [
         author: {
             name: 'Amine Alaoui',
             role: 'Expert Telecom',
-            avatar: '/avatars/amine.jpg'
+            avatar: 'https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff'
         },
         category: 'Comparatif',
         tags: ['Fibre Optique Maroc', 'Orange', 'Inwi', 'IAM', 'Internet Très Haut Débit'],
@@ -69,7 +69,7 @@ export const BLOG_POSTS: BlogPost[] = [
         author: {
             name: 'Sarah Benamor',
             role: 'Conseillère Télécom',
-            avatar: '/avatars/sarah.jpg'
+            avatar: 'https://ui-avatars.com/api/?name=Sarah+Benamor&background=9333EA&color=fff'
         },
         category: 'Guide',
         tags: ['ADSL', 'Fibre Optique', 'Migration', 'Internet Fixe'],
@@ -99,7 +99,7 @@ export const BLOG_POSTS: BlogPost[] = [
         author: {
             name: 'Youssef Rami',
             role: 'Rédacteur Tech',
-            avatar: '/avatars/youssef.jpg'
+            avatar: 'https://ui-avatars.com/api/?name=Youssef+Rami&background=10B981&color=fff'
         },
         category: 'Astuce',
         tags: ['Forfait Mobile', 'Pas Cher', 'Inwi', 'Orange', 'Win'],
@@ -122,6 +122,92 @@ export const BLOG_POSTS: BlogPost[] = [
       <p>Réfléchissez à votre consommation : êtes-vous le roi du WiFi à la maison (dans ce cas, un forfait à 49 DH suffit) ou scrollez-vous TikTok toute la journée dans les transports ? Dans le deuxième cas, priorisez la Data avec un budget autour de 99 DH.</p>
       
       <p>💡 <em>Astuce :</em> Vous pouvez croiser plusieurs offres 4G et 5G en deux clics grâce à notre <strong><a href="/quiz">outil de recommandation intelligent</a></strong>, qui analysera vos habitudes pour vous proposer le seul abonnement qu'il vous faut.</p>
+    `
+    },
+    {
+        slug: 'comment-resilier-abonnement-internet-maroc',
+        title: 'Comment Résilier son Abonnement Internet au Maroc ? (Guide Pratique)',
+        excerpt: 'Démarches, préavis de résiliation, frais cachés : le guide ultime pour changer d\'opérateur ou couper votre ligne en toute tranquillité.',
+        coverImage: 'https://images.unsplash.com/photo-1554252116-431bf4eb7b79?auto=format&fit=crop&q=80',
+        date: '2026-03-05',
+        author: {
+            name: 'Sarah Benamor',
+            role: 'Conseillère Télécom',
+            avatar: 'https://ui-avatars.com/api/?name=Sarah+Benamor&background=9333EA&color=fff'
+        },
+        category: 'Guide',
+        tags: ['Résiliation', 'Contrat', 'Changement d\'opérateur', 'Litige'],
+        content: `
+      <h2>Les règles d'or de la résiliation au Maroc</h2>
+      <p>Résilier une ligne Fibre ou ADSL peut parfois être un parcours du combattant si l'on ne connaît pas ses droits. L'ANRT (Agence Nationale de Réglementation des Télécommunications) encadre strictement ces pratiques.</p>
+
+      <h2>L'Engagement : Le piège n°1</h2>
+      <p>La majorité des offres Internet fixes (Box, Fibre, ADSL) sont soumises à un engagement de 12 mois. <strong>Si vous résiliez avant la fin de cet engagement</strong>, l'opérateur est en droit de vous facturer l'intégralité des mois restants.</p>
+      <p><em>Exemple :</em> Vous résiliez au 10ème mois un abonnement à 250 DH/mois. L'opérateur vous facturera 2 x 250 DH = 500 DH de frais de pénalité.</p>
+
+      <h2>Les étapes de la résiliation</h2>
+      <ol>
+        <li>Vérifier sa date de fin d'engagement sur sa facture ou l'espace client.</li>
+        <li>Rédiger une lettre de résiliation manuscrite ou tapuscrite (l'opérateur fournit souvent un formulaire en agence).</li>
+        <li>Se présenter physiquement en agence muni de sa CIN et éventuellement la restitution du matériel (routeur).</li>
+        <li>Exiger un reçu ou une décharge prouvant la demande de résiliation !</li>
+      </ol>
+
+      <h2>Conservation de son numéro mobile (Portabilité)</h2>
+      <p>Si vous souhaitez changer d'opérateur mobile sans perdre votre numéro (06XX...), <strong>ne résiliez surtout pas vous-même.</strong> Demandez simplement la portabilité au nouvel opérateur que vous avez choisi via notre <a href="/#comparateur">comparateur</a>, c'est lui qui se chargera techniquement de la résiliation avec votre ancien fournisseur.</p>
+    `
+    },
+    {
+        slug: '5g-maroc-deploiement-villes-compatibles',
+        title: 'La 5G au Maroc : Date de lancement, Forfaits et Villes Compatibles',
+        excerpt: 'Où en est le déploiement de la 5G par Inwi, Orange et Maroc Telecom ? Tout savoir sur les débits monstrueux de la nouvelle norme réseau mobile.',
+        coverImage: 'https://images.unsplash.com/photo-1614064641913-6b70aca1ce03?auto=format&fit=crop&q=80',
+        date: '2026-02-28',
+        author: {
+            name: 'Amine Alaoui',
+            role: 'Expert Telecom',
+            avatar: 'https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff'
+        },
+        category: 'Astuce',
+        tags: ['5G', 'Technologie Mobile', 'Nouveauté'],
+        content: `
+      <h2>L'arrivée très attendue de la 5G</h2>
+      <p>Prévue pour l'horizon de la Coupe du Monde 2030, la 5G est la prochaine révolution des télécommunications au Maroc. Elle promet des débits jusqu'à 10 fois supérieurs à l'actuelle 4G+ et un ping ultra-bas (latence de quelques millisecondes).</p>
+
+      <h2>Quels seront les forfaits 5G ?</h2>
+      <p>Pour l'instant, aucun opérateur ne commercialise commercialement d'offres "100% 5G" sur le marché grand public marocain, bien que des phases de tests géolocalisées soient en cours dans les grandes métropoles (Casablanca, Rabat, Tanger).</p>
+      <p>Le futur marché proposera très probablement des <strong>Box 5G</strong> domestiques qui viendront concurrencer frontalement les abonnements à la Fibre Optique dans les zones rurales ou périurbaines où il est difficile de tirer des câbles.</p>
+
+      <h2>Comment s'y préparer ?</h2>
+      <p>Inutile de se précipiter sur le changement de forfait. Par contre, si vous achetez un nouveau smartphone cette année, veillez absolument à ce qu'il soit certifié "5G Ready". Ainsi, le jour où les offres <a href="/offers">Forfaits Mobiles Premium</a> s'activeront, votre puce basculera automatiquement sur le nouveau réseau ultra-rapide.</p>
+    `
+    },
+    {
+        slug: 'optimiser-wifi-maison-box-operateur',
+        title: 'Routeur Fibre : 5 Astuces pour Booster et Étendre votre WiFi à la Maison',
+        excerpt: 'Votre débit fibre est excellent mais votre WiFi coupe dans la chambre ? Découvrez comment optimiser le routeur de votre opérateur sans vous ruiner.',
+        coverImage: 'https://images.unsplash.com/photo-1558237910-1c3906353380?auto=format&fit=crop&q=80',
+        date: '2026-02-10',
+        author: {
+            name: 'Youssef Rami',
+            role: 'Rédacteur Tech',
+            avatar: 'https://ui-avatars.com/api/?name=Youssef+Rami&background=10B981&color=fff'
+        },
+        category: 'Astuce',
+        tags: ['WiFi', 'Routeur', 'Maison Connectée', 'Réseau'],
+        content: `
+      <h2>Le problème n'est pas (toujours) votre offre Fibre</h2>
+      <p>Beaucoup de clients optent pour les meilleures offres identifiées sur notre <a href="/quiz">outil de diagnostic de forfaits</a>, souscrivent à du 100 Mega, et sont déçus car Netflix bufferise dans la télévision du salon. Dans 90% des cas, c'est le signal WiFi de la box qui peine à traverser les murs épais marocains.</p>
+
+      <h2>Les 5 règles d'or d'un bon réseau intérieur</h2>
+      <ul>
+        <li><strong>L'emplacement du routeur :</strong> Ne cachez JAMAIS votre Livebox ou routeur FTTH IAM dans un placard ou derrière une télé. Le signal Radio est absorbé par les parois. Placez-le en hauteur, au centre de l'appartement.</li>
+        <li><strong>5 GHz vs 2.4 GHz :</strong> Connectez toujours vos Smarts TVs et consoles sur le réseau 5GHz ! Il a moins de portée mais délivre le plein potentiel de la fibre. Laissez les smartphones sur le 2.4 GHz.</li>
+        <li><strong>Les CPL (Courant Porteur en Ligne) :</strong> Pour une chambre éloignée, utilisez des prises CPL filaires plutôt que des répéteurs WiFi qui divisent la bande passante par deux.</li>
+        <li><strong>Changez le canal d'émission :</strong> Si vous habitez dans un immeuble dense, les routeurs des voisins créent des interférences. Dans l'administration de la box (192.168.1.1), fixez le canal WiFi sur le 1, 6 ou 11 pour éviter les embouteillages d'ondes.</li>
+        <li><strong>Passez au système Mesh :</strong> Pour les grandes villas ou duplex, c'est l'investissement ultime (comptez entre 1500 et 3000 DH). Des boitiers intelligents gèrent le "roaming" transparent dans toute la maison avec un débit à 100%.</li>
+      </ul>
+      <p>Avant d'acheter du matériel, assurez-vous simplement de bénéficier de la meilleure fondation possible : comparez les fournisseurs sur <strong>MonForfait.ma</strong>.</p>
     `
     }
 ]

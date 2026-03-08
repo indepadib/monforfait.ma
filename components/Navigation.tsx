@@ -34,6 +34,7 @@ export function Navigation() {
                     <a href="/#comparateur" className="hover:text-black dark:hover:text-white transition-colors">Comparateur</a>
                     <Link href="/quiz" className="hover:text-black dark:hover:text-white transition-colors">Quiz</Link>
                     <Link href="/speedtest" className="hover:text-black dark:hover:text-white transition-colors">Speed Test</Link>
+                    <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors text-blue-600 dark:text-blue-400 font-medium">Blog</Link>
                     <a href="/#comparateur" onClick={() => {
                         window.dispatchEvent(new CustomEvent('switch-audience-pro'));
                     }} className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors">
