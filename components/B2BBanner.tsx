@@ -1,3 +1,5 @@
+"use client";
+
 import { Briefcase, ArrowRight, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { event } from "@/lib/analytics";
