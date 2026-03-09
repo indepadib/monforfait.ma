@@ -97,44 +97,50 @@ export function PromoUnlockerForm() {
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 shadow-2xl border-[3px] border-yellow-400 dark:border-yellow-500 text-left max-w-xl mx-auto transform transition-all relative">
+    <div className="bg-[#111827]/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)] border border-white/10 text-left w-full mx-auto transform transition-all relative group overflow-hidden">
+      
+      {/* Background glow effect relative to form */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] -z-10 group-hover:bg-blue-500/20 transition-colors duration-500"></div>
+
       {/* FOMO Badge */}
-      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-950 px-4 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider shadow-md whitespace-nowrap flex items-center gap-2">
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-5 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-blue-500/20 whitespace-nowrap flex items-center gap-2 border border-white/20">
           <BellRing className="w-4 h-4" /> Offres Cachées Actives
       </div>
 
-      <div className="mb-6 mt-2 text-center">
-        <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-2 leading-tight">
-          Calculez vos économies réelles
+      <div className="mb-6 mt-3 text-center">
+        <h3 className="text-2xl font-black text-white mb-2 leading-tight">
+          Calculez vos économies
         </h3>
-        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 p-2 rounded-lg">
-          Jusqu'à <strong className="text-green-600 dark:text-green-400">{getSavings()} DH</strong> d'économies estimées par an !
-        </p>
+        <div className="inline-block bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+            <p className="text-sm font-medium text-zinc-400">
+            Jusqu'à <strong className="text-blue-400 text-lg">{getSavings()} DH</strong> d'économies par an
+            </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
         
         {/* Step 1: Current Bill */}
         <div>
-           <label htmlFor="currentBill" className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-2">
-             1. Combien payez-vous actuellement par mois ?
+           <label htmlFor="currentBill" className="block text-sm font-bold text-zinc-300 mb-2">
+             1. Combien payez-vous actuellement ?
            </label>
            <select
               id="currentBill"
               value={formData.currentBill}
               onChange={(e) => setFormData({ ...formData, currentBill: e.target.value })}
-              className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-yellow-400 outline-none text-zinc-900 dark:text-white font-medium text-lg cursor-pointer transition-colors"
+              className="w-full px-4 py-3.5 rounded-xl bg-[#0A0F1C]/80 border border-white/10 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 outline-none text-white font-medium text-lg cursor-pointer transition-all hover:bg-[#0A0F1C]"
             >
-              <option value="100">Moins de 100 DH</option>
-              <option value="150">Entre 100 et 199 DH</option>
-              <option value="250">Entre 200 et 299 DH</option>
-              <option value="350">Plus de 300 DH</option>
+              <option value="100">Moins de 100 DH / mois</option>
+              <option value="150">Entre 100 et 199 DH / mois</option>
+              <option value="250">Entre 200 et 299 DH / mois</option>
+              <option value="350">Plus de 300 DH / mois</option>
             </select>
         </div>
 
         {/* Step 2: Need & Phone */}
         <div>
-            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-2">
+            <label className="block text-sm font-bold text-zinc-300 mb-2">
                 2. Laissez votre numéro pour voir les promos
             </label>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -144,7 +150,7 @@ export function PromoUnlockerForm() {
                     id="need"
                     value={formData.need}
                     onChange={(e) => setFormData({ ...formData, need: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-yellow-400 outline-none text-zinc-900 dark:text-white font-medium cursor-pointer transition-colors"
+                    className="w-full px-4 py-3.5 rounded-xl bg-[#0A0F1C]/80 border border-white/10 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 outline-none text-white font-medium cursor-pointer transition-all hover:bg-[#0A0F1C]"
                     >
                     <option value="fibre">Internet Fibre</option>
                     <option value="mobile">Forfait Mobile</option>
@@ -156,7 +162,7 @@ export function PromoUnlockerForm() {
                 <div className="flex-[1.5] relative">
                     <label htmlFor="phone" className="sr-only">Numéro de téléphone</label>
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-zinc-400" />
+                    <Phone className="h-5 w-5 text-zinc-500" />
                     </div>
                     <input
                     type="tel"
@@ -164,7 +170,7 @@ export function PromoUnlockerForm() {
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="06 XX XX XX XX"
-                    className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-yellow-400 outline-none text-zinc-900 dark:text-white font-bold placeholder:font-normal transition-colors"
+                    className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-[#0A0F1C]/80 border border-white/10 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 outline-none text-white font-bold placeholder:font-normal transition-all hover:bg-[#0A0F1C] placeholder:text-zinc-600"
                     required
                     />
                 </div>
@@ -181,7 +187,7 @@ export function PromoUnlockerForm() {
         <button
           type="submit"
           disabled={isLoading || !formData.phone}
-          className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-black text-lg rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5"
+          className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.4)] text-white font-black text-lg transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 border border-white/10"
         >
           {isLoading ? (
             <Loader2 className="w-6 h-6 animate-spin" />
@@ -191,8 +197,9 @@ export function PromoUnlockerForm() {
             </>
           )}
         </button>
-        <p className="text-center text-[11px] text-zinc-500 dark:text-zinc-500 uppercase tracking-widest font-bold mt-3">
-             Sans engagement • Données sécurisées
+        <p className="text-center text-[10px] text-zinc-500 uppercase tracking-widest font-bold mt-4 flex items-center justify-center gap-2">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+             Connexion chiffrée & Données sécurisées
         </p>
       </form>
     </div>

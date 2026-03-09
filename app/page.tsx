@@ -18,66 +18,67 @@ export default function Home() {
       {/* Navigation */}
       <Navigation />
 
-      {/* Hero Section - Funnel Optimized */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Hero Section - Premium 2-Column Layout */}
+      <div className="relative overflow-hidden bg-[#0A0F1C] text-white">
+        {/* Animated Premium Background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-        <div className="max-w-5xl mx-auto px-4 py-20 md:py-28 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-yellow-400/20 backdrop-blur-sm border border-yellow-400/50 text-yellow-100 px-5 py-2 rounded-full text-xs md:text-sm font-black uppercase tracking-widest mb-8 shadow-lg">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-400"></span>
-            </span>
-            Alerte Promos Cachées 2026
-          </div>
-
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-[1.1]">
-            92% des marocains paient<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">leur abonnement trop cher.</span>
-          </h1>
-
-          <p className="text-lg md:text-2xl text-white/90 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
-            Les opérateurs cachent leurs meilleures offres de rétention. <br className="hidden md:block"/>
-            Découvrez combien vous pouvez économiser dès aujourd'hui.
-          </p>
-
-          {/* Promo Unlocker Form - Fast Lane */}
-          <div className="mb-12 relative z-20">
-             <PromoUnlockerForm />
-          </div>
-
-          {/* Primary CTA (Secondary fallback) */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto mb-10">
-            <a
-              href="#comparateur"
-              className="px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white font-bold rounded-2xl hover:bg-white/20 hover:border-white/40 transition-all flex items-center justify-center gap-2"
-            >
-              Parcourir manuellement les offres
-            </a>
-          </div>
-
-          {/* Social Proof */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/80">
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white"></div>
-                <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white"></div>
-                <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white"></div>
+        <div className="max-w-7xl mx-auto px-4 py-12 md:py-20 lg:py-24 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+            
+            {/* Left Column: Text & Hook */}
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-blue-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest mb-6 lg:mb-8 transition-colors hover:bg-blue-500/20 cursor-default">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-400"></span>
+                </span>
+                Mise à jour Février 2026
               </div>
-              <span className="font-medium">+1 200 utilisateurs ce mois-ci</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-4 h-4 fill-yellow-400" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.15]">
+                92% des marocains paient<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                  leur abonnement trop cher.
+                </span>
+              </h1>
+
+              <p className="text-lg md:text-xl text-zinc-300 max-w-2xl mx-auto lg:mx-0 mb-8 leading-relaxed font-normal">
+                Les opérateurs cachent leurs meilleures offres de rétention. <br className="hidden sm:block"/>
+                Faites le test gratuitement et découvrez combien vous pouvez économiser dès aujourd'hui.
+              </p>
+
+              {/* Social Proof & Badges */}
+              <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-6 text-sm text-zinc-400">
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2">
+                    <img src="https://i.pravatar.cc/100?img=1" alt="User" className="w-8 h-8 rounded-full border-2 border-[#0A0F1C]" />
+                    <img src="https://i.pravatar.cc/100?img=2" alt="User" className="w-8 h-8 rounded-full border-2 border-[#0A0F1C]" />
+                    <img src="https://i.pravatar.cc/100?img=3" alt="User" className="w-8 h-8 rounded-full border-2 border-[#0A0F1C]" />
+                  </div>
+                  <span className="font-medium text-zinc-300">+1 200 tests aujourd'hui</span>
+                </div>
+                <div className="hidden sm:block w-px h-8 bg-zinc-800"></div>
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="w-4 h-4 fill-yellow-500" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <span className="font-medium text-zinc-300">Totalement Gratuit</span>
+                </div>
               </div>
-              <span className="font-medium">4.8/5 satisfaction</span>
             </div>
+
+            {/* Right Column: Promo Unlocker Form */}
+            <div className="relative z-20 mx-auto w-full max-w-lg lg:max-w-full">
+               <PromoUnlockerForm />
+            </div>
+
           </div>
         </div>
       </div>
