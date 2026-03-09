@@ -1,0 +1,200 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { BellRing, Loader2, Phone, Coins } from 'lucide-react'
+import { supabase } from '@/lib/supabaseClient'
+import { trackEvent } from '@/lib/analytics'
+
+export function PromoUnlockerForm() {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
+
+  const [formData, setFormData] = useState({
+    need: 'fibre',
+    currentBill: '200',
+    phone: '',
+  })
+
+  // Simulated dynamic savings calculation
+  const getSavings = () => {
+      const bill = parseInt(formData.currentBill);
+      if (isNaN(bill)) return 1140; // Default
+      return Math.round((bill * 0.4) * 12); // Assuming 40% savings per year
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
+
+    try {
+      if (!formData.phone || formData.phone.length < 9) {
+        throw new Error('Veuillez entrer un numéro de téléphone valide')
+      }
+
+      const { error: submitError } = await supabase
+        .from('leads')
+        .insert([
+          {
+            phone: formData.phone,
+            status: 'new',
+            needs_details: {
+              interest: formData.need,
+              current_bill: formData.currentBill,
+              source: 'hero_promo_unlocker'
+            }
+          }
+        ])
+
+      if (submitError) throw submitError
+
+      // Trigger B2B Notification Pipeline
+      fetch('/api/leads/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              phone: formData.phone,
+              needs_details: { interest: formData.need, current_bill: formData.currentBill },
+              source: 'hero_promo_unlocker'
+          })
+      }).catch(err => console.error("Webhook trigger failed", err))
+
+      trackEvent('promo_lead_submitted', { interest: formData.need, bill: formData.currentBill })
+      setSuccess(true)
+      
+      // Delay before routing to results so the user can see the success message
+      setTimeout(() => {
+        router.push(`/offers?type=${formData.need}&unlocked=true`)
+      }, 1500)
+
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (success) {
+    return (
+      <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-3xl p-8 text-center animate-in fade-in zoom-in duration-300 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+            <Coins className="w-32 h-32 text-green-500" />
+        </div>
+        <div className="relative z-10">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+            </div>
+            <h3 className="text-2xl text-green-800 dark:text-green-300 font-black mb-2">Promos débloquées !</h3>
+            <p className="text-green-700 dark:text-green-400 font-medium text-lg">Préparation de vos offres secrètes en cours...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 shadow-2xl border-[3px] border-yellow-400 dark:border-yellow-500 text-left max-w-xl mx-auto transform transition-all relative">
+      {/* FOMO Badge */}
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-950 px-4 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider shadow-md whitespace-nowrap flex items-center gap-2">
+          <BellRing className="w-4 h-4" /> Offres Cachées Actives
+      </div>
+
+      <div className="mb-6 mt-2 text-center">
+        <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-2 leading-tight">
+          Calculez vos économies réelles
+        </h3>
+        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 p-2 rounded-lg">
+          Jusqu'à <strong className="text-green-600 dark:text-green-400">{getSavings()} DH</strong> d'économies estimées par an !
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        
+        {/* Step 1: Current Bill */}
+        <div>
+           <label htmlFor="currentBill" className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-2">
+             1. Combien payez-vous actuellement par mois ?
+           </label>
+           <select
+              id="currentBill"
+              value={formData.currentBill}
+              onChange={(e) => setFormData({ ...formData, currentBill: e.target.value })}
+              className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-yellow-400 outline-none text-zinc-900 dark:text-white font-medium text-lg cursor-pointer transition-colors"
+            >
+              <option value="100">Moins de 100 DH</option>
+              <option value="150">Entre 100 et 199 DH</option>
+              <option value="250">Entre 200 et 299 DH</option>
+              <option value="350">Plus de 300 DH</option>
+            </select>
+        </div>
+
+        {/* Step 2: Need & Phone */}
+        <div>
+            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-2">
+                2. Laissez votre numéro pour voir les promos
+            </label>
+            <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1">
+                    <label htmlFor="need" className="sr-only">Type d'offre</label>
+                    <select
+                    id="need"
+                    value={formData.need}
+                    onChange={(e) => setFormData({ ...formData, need: e.target.value })}
+                    className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-yellow-400 outline-none text-zinc-900 dark:text-white font-medium cursor-pointer transition-colors"
+                    >
+                    <option value="fibre">Internet Fibre</option>
+                    <option value="mobile">Forfait Mobile</option>
+                    <option value="adsl">Internet ADSL</option>
+                    <option value="box">Box 4G/5G</option>
+                    </select>
+                </div>
+
+                <div className="flex-[1.5] relative">
+                    <label htmlFor="phone" className="sr-only">Numéro de téléphone</label>
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <Phone className="h-5 w-5 text-zinc-400" />
+                    </div>
+                    <input
+                    type="tel"
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="06 XX XX XX XX"
+                    className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-yellow-400 outline-none text-zinc-900 dark:text-white font-bold placeholder:font-normal transition-colors"
+                    required
+                    />
+                </div>
+            </div>
+        </div>
+
+        {error && (
+          <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isLoading || !formData.phone}
+          className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-black text-lg rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5"
+        >
+          {isLoading ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : (
+            <>
+              Débloquer mes promos (Gratuit)
+            </>
+          )}
+        </button>
+        <p className="text-center text-[11px] text-zinc-500 dark:text-zinc-500 uppercase tracking-widest font-bold mt-3">
+             Sans engagement • Données sécurisées
+        </p>
+      </form>
+    </div>
+  )
+}

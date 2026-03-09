@@ -8,7 +8,7 @@ import { Sparkles, Target, Shield, Clock } from 'lucide-react';
 import { BLOG_POSTS } from '@/lib/blog-data';
 import { TrustBadges } from '@/components/TrustBadges';
 import { B2BBanner } from '@/components/B2BBanner';
-import { QuickCaptureForm } from '@/components/QuickCaptureForm';
+import { PromoUnlockerForm } from '@/components/PromoUnlockerForm';
 
 export default function Home() {
 // ... Skipped lines to the comparison engine ...
@@ -24,45 +24,38 @@ export default function Home() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="max-w-5xl mx-auto px-4 py-24 md:py-32 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-8">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+        <div className="max-w-5xl mx-auto px-4 py-20 md:py-28 text-center relative z-10">
+          <div className="inline-flex items-center gap-2 bg-yellow-400/20 backdrop-blur-sm border border-yellow-400/50 text-yellow-100 px-5 py-2 rounded-full text-xs md:text-sm font-black uppercase tracking-widest mb-8 shadow-lg">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-400"></span>
             </span>
-            Mise à jour 2026
+            Alerte Promos Cachées 2026
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6">
-            Trouvez l'offre parfaite<br />
-            <span className="text-white/90">en 60 secondes</span>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-[1.1]">
+            92% des marocains paient<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">leur abonnement trop cher.</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-12 leading-relaxed">
-            Comparez <b>Mobile</b>, <b>Fibre</b> et <b>ADSL</b> au Maroc.<br />
-            Orange, Inwi, Maroc Telecom. 100% gratuit, sans engagement.
+          <p className="text-lg md:text-2xl text-white/90 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
+            Les opérateurs cachent leurs meilleures offres de rétention. <br className="hidden md:block"/>
+            Découvrez combien vous pouvez économiser dès aujourd'hui.
           </p>
 
-          {/* Primary CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-10">
-            <Link
-              href="/quiz"
-              className="flex-1 px-8 py-5 bg-white text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-all shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg"
-            >
-              <Sparkles className="w-5 h-5" />
-              Démarrer le quiz
-            </Link>
-            <a
-              href="#comparateur"
-              className="flex-1 px-8 py-5 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center justify-center gap-2"
-            >
-              Parcourir toutes les offres
-            </a>
+          {/* Promo Unlocker Form - Fast Lane */}
+          <div className="mb-12 relative z-20">
+             <PromoUnlockerForm />
           </div>
 
-          {/* Quick Capture Form - Fast Lane */}
-          <div className="mb-12">
-             <QuickCaptureForm />
+          {/* Primary CTA (Secondary fallback) */}
+          <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto mb-10">
+            <a
+              href="#comparateur"
+              className="px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white font-bold rounded-2xl hover:bg-white/20 hover:border-white/40 transition-all flex items-center justify-center gap-2"
+            >
+              Parcourir manuellement les offres
+            </a>
           </div>
 
           {/* Social Proof */}
