@@ -31,7 +31,7 @@ export function QuickCaptureForm() {
         .from('leads')
         .insert([
           {
-            phone: formData.phone,
+            user_phone: formData.phone,
             status: 'new',
             needs_details: {
               interest: formData.need,

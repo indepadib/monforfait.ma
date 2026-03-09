@@ -42,13 +42,13 @@ export function PromoUnlockerForm() {
         .from('leads')
         .insert([
           {
-            first_name: formData.firstName,
-            phone: formData.phone,
+            user_name: formData.firstName,
+            user_phone: formData.phone,
+            city: formData.city,
             status: 'new',
             needs_details: {
               interest: formData.need,
               current_bill: formData.currentBill,
-              city: formData.city,
               source: 'hero_promo_unlocker'
             }
           }
