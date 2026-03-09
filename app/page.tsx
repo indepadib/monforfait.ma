@@ -8,6 +8,7 @@ import { Sparkles, Target, Shield, Clock } from 'lucide-react';
 import { BLOG_POSTS } from '@/lib/blog-data';
 import { TrustBadges } from '@/components/TrustBadges';
 import { B2BBanner } from '@/components/B2BBanner';
+import { QuickCaptureForm } from '@/components/QuickCaptureForm';
 
 export default function Home() {
 // ... Skipped lines to the comparison engine ...
@@ -43,7 +44,7 @@ export default function Home() {
           </p>
 
           {/* Primary CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-12">
+          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-10">
             <Link
               href="/quiz"
               className="flex-1 px-8 py-5 bg-white text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-all shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg"
@@ -57,6 +58,11 @@ export default function Home() {
             >
               Parcourir toutes les offres
             </a>
+          </div>
+
+          {/* Quick Capture Form - Fast Lane */}
+          <div className="mb-12">
+             <QuickCaptureForm />
           </div>
 
           {/* Social Proof */}

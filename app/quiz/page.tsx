@@ -138,6 +138,21 @@ function QuizContent() {
                 throw error;
             }
 
+            // Trigger B2B Notification Pipeline
+            fetch('/api/leads/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    leadId: data?.[0]?.id || null, // Best effort
+                    phone: leadData.phone,
+                    needs_details: { 
+                        quiz_answers: answers,
+                        leadData
+                    },
+                    source: 'quiz_completion'
+                })
+            }).catch(err => console.error("Webhook trigger failed", err))
+
             // Save full context to session for results page
             const fullContext = {
                 ...answers,

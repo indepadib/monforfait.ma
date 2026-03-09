@@ -4,6 +4,7 @@ import "./globals.css";
 import { CompareBar } from '@/components/CompareBar';
 import { CookieConsent } from '@/components/CookieConsent';
 import { Footer } from '@/components/Footer';
+import { StickyMobileCTA } from '@/components/StickyMobileCTA';
 
 export const viewport: Viewport = {
   themeColor: "#3B82F6",
@@ -122,6 +123,7 @@ export default function RootLayout({
         <Footer />
         <CookieConsent />
         <CompareBar />
+        <StickyMobileCTA />
       </body>
     </html>
   );
