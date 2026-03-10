@@ -68,7 +68,7 @@ export default function Home() {
                           </svg>
                         ))}
                       </div>
-                      <span className="font-medium text-zinc-300 mt-0.5">Approuvé par >5000 Marocains</span>
+                      <span className="font-medium text-zinc-300 mt-0.5">Approuvé par + de 5000 Marocains</span>
                     </div>
                   </div>
                 </div>
