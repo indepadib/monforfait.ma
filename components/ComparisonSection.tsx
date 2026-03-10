@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { OfferCard, OfferProps } from './OfferCard'
 import { LeadModal } from './LeadModal'
 import { supabase } from '@/lib/supabaseClient'
-import { Wifi, Smartphone, Briefcase, User, Filter } from 'lucide-react'
+import { Wifi, Smartphone, Briefcase, User, Filter, LockKeyhole } from 'lucide-react'
+import { PromoUnlockerForm } from './PromoUnlockerForm'
 
 export function ComparisonSection() {
     const [offers, setOffers] = useState<OfferProps[]>([])
@@ -15,6 +16,22 @@ export function ComparisonSection() {
     const [audience, setAudience] = useState<'individual' | 'professional'>('individual')
     const [category, setCategory] = useState<'internet' | 'mobile'>('internet')
     const [sortBy, setSortBy] = useState<'cheapest' | 'fastest'>('cheapest')
+    const [isUnlocked, setIsUnlocked] = useState(false)
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search)
+            const urlUnlocked = params.get('unlocked') === 'true'
+            const localUnlocked = localStorage.getItem('monforfait_unlocked') === 'true'
+            
+            if (urlUnlocked) {
+                localStorage.setItem('monforfait_unlocked', 'true')
+                setIsUnlocked(true)
+            } else if (localUnlocked) {
+                setIsUnlocked(true)
+            }
+        }
+    }, [])
 
     useEffect(() => {
         async function loadOffers() {
@@ -189,14 +206,54 @@ export function ComparisonSection() {
                     <div className="text-zinc-400 font-medium">Searching best deals...</div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {sortedOffers.map((offer, idx) => (
-                        <OfferCard
-                            key={offer.id || idx}
-                            offer={offer}
-                            onSelect={() => setSelectedOffer(offer)}
-                        />
-                    ))}
+                <div className="relative">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Unlocked / Visible Offers (Top 2) */}
+                        {sortedOffers.slice(0, 2).map((offer, idx) => (
+                            <div key={offer.id || idx} className="relative z-10">
+                                {/* AI Banner for top offer */}
+                                {idx === 0 && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-orange-500/30 z-20 whitespace-nowrap">
+                                        ✨ Meilleur Choix
+                                    </div>
+                                )}
+                                <OfferCard
+                                    offer={offer}
+                                    onSelect={() => setSelectedOffer(offer)}
+                                />
+                            </div>
+                        ))}
+
+                        {/* Locked / Blurred Offers */}
+                        {sortedOffers.slice(2).map((offer, idx) => (
+                            <div key={offer.id || `locked-${idx}`} className={`relative ${!isUnlocked ? 'filter blur-md opacity-40 select-none pointer-events-none' : ''} transition-all duration-1000`}>
+                                <OfferCard
+                                    offer={offer}
+                                    onSelect={() => isUnlocked ? setSelectedOffer(offer) : null}
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Smart Wall Overlay */}
+                    {!isUnlocked && sortedOffers.length > 2 && (
+                        <div className="absolute inset-x-0 bottom-0 top-[400px] flex items-center justify-center z-30 pt-20 pb-10 px-4 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-black dark:via-black/90">
+                            <div className="max-w-xl w-full text-center">
+                                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                    <LockKeyhole className="w-8 h-8" />
+                                </div>
+                                <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-4">
+                                    Débloquez le classement complet
+                                </h3>
+                                <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8 max-w-md mx-auto">
+                                    Découvrez les {sortedOffers.length - 2} offres cachées restantes et nos promotions exclusives en complétant ce rapide test.
+                                </p>
+                                <div className="shadow-2xl rounded-3xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-2 md:p-0">
+                                    <PromoUnlockerForm />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

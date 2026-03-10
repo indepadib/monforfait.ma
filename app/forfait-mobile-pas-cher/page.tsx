@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
-import { QuickCaptureForm } from '@/components/QuickCaptureForm'
+import { PromoUnlockerForm } from '@/components/PromoUnlockerForm'
 import { Sparkles, Smartphone, CheckCircle2, TrendingDown } from 'lucide-react'
 import Link from 'next/link'
 import { TrustBadges } from '@/components/TrustBadges'
@@ -17,8 +17,25 @@ export const metadata: Metadata = {
 }
 
 export default function ForfaitPasCherPage() {
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Forfait Mobile Pas Cher Maroc - Comparateur',
+        description: 'Économisez sur votre facture mobile. Trouvez les forfaits les moins chers (Orange, Inwi, IAM).',
+        url: 'https://monforfait.ma/forfait-mobile-pas-cher',
+        publisher: {
+            '@type': 'Organization',
+            name: 'MonForfait.ma',
+            logo: { '@type': 'ImageObject', url: 'https://monforfait.ma/branding/logo-light.png' }
+        }
+    }
+
     return (
         <main className="min-h-screen bg-white dark:bg-black font-sans">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <Navigation />
 
             {/* Hero Section */}
@@ -50,7 +67,7 @@ export default function ForfaitPasCherPage() {
                     </div>
 
                     <div className="flex-1 w-full max-w-md">
-                        <QuickCaptureForm />
+                        <PromoUnlockerForm />
                     </div>
                 </div>
             </div>

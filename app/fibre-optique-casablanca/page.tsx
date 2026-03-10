@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
-import { QuickCaptureForm } from '@/components/QuickCaptureForm'
+import { PromoUnlockerForm } from '@/components/PromoUnlockerForm'
 import { Sparkles, MapPin, Wifi, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { TrustBadges } from '@/components/TrustBadges'
@@ -17,8 +17,25 @@ export const metadata: Metadata = {
 }
 
 export default function FibreCasablancaPage() {
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Offres Fibre Optique Casablanca - Comparateur',
+        description: 'Trouvez la fibre la moins chère et la plus rapide à Casablanca.',
+        url: 'https://monforfait.ma/fibre-optique-casablanca',
+        publisher: {
+            '@type': 'Organization',
+            name: 'MonForfait.ma',
+            logo: { '@type': 'ImageObject', url: 'https://monforfait.ma/branding/logo-light.png' }
+        }
+    }
+
     return (
         <main className="min-h-screen bg-white dark:bg-black font-sans">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <Navigation />
 
             {/* Hero Section */}
@@ -51,7 +68,7 @@ export default function FibreCasablancaPage() {
                     </div>
 
                     <div className="flex-1 w-full max-w-md">
-                        <QuickCaptureForm />
+                        <PromoUnlockerForm />
                     </div>
                 </div>
             </div>
