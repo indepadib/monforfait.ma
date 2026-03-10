@@ -9,6 +9,7 @@ import { BLOG_POSTS } from '@/lib/blog-data';
 import { TrustBadges } from '@/components/TrustBadges';
 import { B2BBanner } from '@/components/B2BBanner';
 import { PromoUnlockerForm } from '@/components/PromoUnlockerForm';
+import { LiveFOMOTicker } from '@/components/LiveFOMOTicker';
 
 export default function Home() {
 // ... Skipped lines to the comparison engine ...
@@ -30,12 +31,8 @@ export default function Home() {
             
             {/* Left Column: Text & Hook */}
             <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-blue-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest mb-6 lg:mb-8 transition-colors hover:bg-blue-500/20 cursor-default">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-400"></span>
-                </span>
-                Mise à jour Février 2026
+              <div className="mb-6 lg:mb-8 h-10 flex items-center justify-center lg:justify-start overflow-hidden">
+                 <LiveFOMOTicker />
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.15]">
@@ -50,26 +47,48 @@ export default function Home() {
                 Faites le test gratuitement et découvrez combien vous pouvez économiser dès aujourd'hui.
               </p>
 
-              {/* Social Proof & Badges */}
-              <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-6 text-sm text-zinc-400">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    <img src="https://i.pravatar.cc/100?img=1" alt="User" className="w-8 h-8 rounded-full border-2 border-[#0A0F1C]" />
-                    <img src="https://i.pravatar.cc/100?img=2" alt="User" className="w-8 h-8 rounded-full border-2 border-[#0A0F1C]" />
-                    <img src="https://i.pravatar.cc/100?img=3" alt="User" className="w-8 h-8 rounded-full border-2 border-[#0A0F1C]" />
+              {/* Social Proof & Trust Badges */}
+              <div className="flex flex-col gap-6 mt-8">
+                {/* User Avatars Row */}
+                <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 text-sm text-zinc-400">
+                  <div className="flex items-center gap-3">
+                    <div className="flex -space-x-2">
+                      <img src="https://i.pravatar.cc/100?img=11" alt="User" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
+                      <img src="https://i.pravatar.cc/100?img=12" alt="User" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
+                      <img src="https://i.pravatar.cc/100?img=13" alt="User" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
+                      <div className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-blue-500/20">
+                        +5k
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <svg key={i} className="w-4 h-4 fill-yellow-500" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <span className="font-medium text-zinc-300 mt-0.5">Approuvé par >5000 Marocains</span>
+                    </div>
                   </div>
-                  <span className="font-medium text-zinc-300">+1 200 tests aujourd'hui</span>
                 </div>
-                <div className="hidden sm:block w-px h-8 bg-zinc-800"></div>
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className="w-4 h-4 fill-yellow-500" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
+
+                {/* Trust Icons Row */}
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-green-400" />
+                    100% Gratuit
                   </div>
-                  <span className="font-medium text-zinc-300">Totalement Gratuit</span>
+                  <div className="hidden sm:block w-1 h-1 rounded-full bg-zinc-700"></div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    Sans Engagement
+                  </div>
+                  <div className="hidden sm:block w-1 h-1 rounded-full bg-zinc-700"></div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-400" />
+                    En 60 Secondes
+                  </div>
                 </div>
               </div>
             </div>
