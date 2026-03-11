@@ -48,7 +48,7 @@ export default function PartenairesPage() {
                         </div>
                         <h2 className="text-2xl font-bold dark:text-white mb-4">Échange d'Articles & Backlinks</h2>
                         <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-                            Nous sommes ouverts aux articles invités (Guest Blogging) et aux échanges d'articles de qualité (DR > 20). Nous publions sur le thème des télécoms, de l'internet et des technologies au Maroc.
+                            Nous sommes ouverts aux articles invités (Guest Blogging) et aux échanges d'articles de qualité (DR &gt; 20). Nous publions sur le thème des télécoms, de l'internet et des technologies au Maroc.
                         </p>
                         <a href="mailto:contact@monforfait.ma" className="bg-zinc-900 dark:bg-white text-white dark:text-black px-6 py-2 rounded-lg font-bold inline-flex items-center gap-2 hover:bg-zinc-800 transition-colors">
                             <Mail className="w-4 h-4"/> Proposer un échange
