@@ -5,11 +5,15 @@ import { Swords, CheckCircle2, XCircle } from 'lucide-react';
 import Link from 'next/link';
 
 type Props = {
-    params: Promise<{ operator1: string, operator2: string }>
+    params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const { operator1, operator2 } = await params;
+    const { slug } = await params;
+    const parts = slug.split('-vs-');
+    const operator1 = parts[0] || 'Opérateur 1';
+    const operator2 = parts[1] || 'Opérateur 2';
+
     const op1 = operator1.charAt(0).toUpperCase() + operator1.slice(1).toLowerCase();
     const op2 = operator2.charAt(0).toUpperCase() + operator2.slice(1).toLowerCase();
 
@@ -29,8 +33,13 @@ const getScore = (op: string) => {
 }
 
 export default async function VersusPage({ params }: Props) {
-    const { operator1, operator2 } = await params;
+    const { slug } = await params;
     
+    // Parse the slug safely
+    const parts = slug.split('-vs-');
+    const operator1 = parts[0] || 'Unknown1';
+    const operator2 = parts[1] || 'Unknown2';
+
     const op1 = operator1.charAt(0).toUpperCase() + operator1.slice(1).toLowerCase();
     const op2 = operator2.charAt(0).toUpperCase() + operator2.slice(1).toLowerCase();
 
