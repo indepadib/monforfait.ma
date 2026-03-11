@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, Loader2, MapPin, Phone, User, ChevronRight, Shield, Coins, BellRing } from 'lucide-react'
+import { CheckCircle, Loader2, MapPin, Phone, User, ChevronRight, Shield, Coins, BellRing, ArrowRight } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { trackEvent } from '@/lib/analytics'
 
