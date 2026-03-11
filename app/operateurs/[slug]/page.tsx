@@ -96,8 +96,11 @@ export default async function OperatorPage({ params }: { params: Promise<{ slug:
         console.error('Error fetching operator offers:', error)
     }
 
-    // Fallback if no offers but slug is valid
-    const displayOffers = offers || []
+    // Map data to match OfferProps, especially operator_name
+    const displayOffers = offers ? offers.map((p: any) => ({
+        ...p,
+        operator_name: p.operators?.name || operatorInfo.name
+    })) : []
 
     return (
         <div className="min-h-screen bg-white dark:bg-black">
