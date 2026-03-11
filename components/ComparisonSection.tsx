@@ -255,13 +255,13 @@ export function ComparisonSection() {
                                 </div>
                                 
                                 <h3 className="text-3xl md:text-4xl font-black mb-4 dark:text-white leading-tight">
-                                    {activeTab === 'pro' 
+                                    {audience === 'professional' 
                                         ? "Déléguez la négociation de votre flotte."
                                         : "Débloquez le reste du classement (jusqu'à -50%)."
                                     }
                                 </h3>
                                 <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-6 leading-relaxed">
-                                    {activeTab === 'pro'
+                                    {audience === 'professional'
                                         ? "Nos experts analysent vos factures et négocient directement avec les opérateurs pour obtenir les meilleurs tarifs PME/GE."
                                         : "Certaines offres de rétention sont trop incroyables pour être affichées publiquement. Vérifiez votre éligibilité en 10 secondes."
                                     }
@@ -270,18 +270,18 @@ export function ComparisonSection() {
                                 <div className="flex flex-col gap-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
                                     <div className="flex items-center gap-2 justify-center lg:justify-start">
                                         <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
-                                        {activeTab === 'pro' ? "Analyse Gratuite 100% Sans Engagement" : "Gratuit et 100% Sans Engagement"}
+                                        {audience === 'professional' ? "Analyse Gratuite 100% Sans Engagement" : "Gratuit et 100% Sans Engagement"}
                                     </div>
                                     <div className="flex items-center gap-2 justify-center lg:justify-start">
                                         <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
-                                        {activeTab === 'pro' ? "Tarifs grossiste inaccessibles aux particuliers" : "Offres Exclusives Non Disponibles en Boutique"}
+                                        {audience === 'professional' ? "Tarifs grossiste inaccessibles aux particuliers" : "Offres Exclusives Non Disponibles en Boutique"}
                                     </div>
                                 </div>
                             </div>
 
                             {/* Right Side: The Form */}
                             <div className="flex-[0.8] w-full max-w-md transform transition-all hover:-translate-y-1">
-                                <PromoUnlockerForm mode={activeTab === 'pro' ? 'b2b' : 'b2c'} />
+                                <PromoUnlockerForm mode={audience === 'professional' ? 'b2b' : 'b2c'} />
                             </div>
                         </div>
                     </div>
