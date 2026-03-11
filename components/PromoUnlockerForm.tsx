@@ -273,8 +273,6 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
                     </div>
                 </div>
 
-                </div>
-
                 <div className="relative">
                     <label htmlFor="phone" className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1 ml-1">Numéro de téléphone</label>
                     <div className="absolute inset-y-0 left-0 pl-3.5 pt-[14px] pointer-events-none">
