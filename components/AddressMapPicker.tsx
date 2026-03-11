@@ -36,7 +36,6 @@ export function AddressMapPicker({ onChange }: AddressMapPickerProps) {
             const L = await import('leaflet');
 
             // Fix default icon paths broken by webpack
-            // @ts-expect-error - accessing internal icon option
             delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
             L.Icon.Default.mergeOptions({
                 iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
