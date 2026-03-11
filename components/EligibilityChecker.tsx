@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { Wifi, Home, MapPin, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Wifi, Home, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
+import { AddressMapPicker } from '@/components/AddressMapPicker';
 
 type Step = 'NEED' | 'LOCATION' | 'CONTACT' | 'SCANNING' | 'RESULT';
 
@@ -9,6 +10,8 @@ export function EligibilityChecker() {
     const [step, setStep] = useState<Step>('NEED');
     const [need, setNeed] = useState('');
     const [address, setAddress] = useState('');
+    const [lat, setLat] = useState<number | null>(null);
+    const [lon, setLon] = useState<number | null>(null);
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,6 +42,8 @@ export function EligibilityChecker() {
                         source: 'eligibility',
                         need,
                         address,
+                        lat,
+                        lon,
                         name,
                         phone,
                         timestamp: new Date().toISOString()
@@ -100,27 +105,24 @@ export function EligibilityChecker() {
             {step === 'LOCATION' && (
                 <div className="animate-in fade-in slide-in-from-right-8 duration-500">
                     <button onClick={() => setStep('NEED')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">← Retour</button>
-                    <div className="mb-8">
+                    <div className="mb-6">
                         <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">Où habitez-vous ?</h3>
-                        <p className="text-zinc-500 dark:text-zinc-400">Nous devons vérifier le raccordement technique de votre rue (Plaques IAM, Orange, Inwi).</p>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm">Recherchez votre adresse puis glissez le marqueur pour ajuster précisément votre position.</p>
                     </div>
                     <form onSubmit={handleLocationSubmit} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">Votre adresse complète</label>
-                            <div className="relative">
-                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                                <input 
-                                    type="text" 
-                                    required 
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    placeholder="Ex: Quartier Maarif, Casablanca" 
-                                    className="w-full pl-10 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
-                                />
-                            </div>
-                        </div>
-                        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95">
-                            Continuer <ChevronRight className="w-5 h-5" />
+                        <AddressMapPicker
+                            onChange={({ address: addr, lat: la, lon: lo }) => {
+                                setAddress(addr);
+                                setLat(la);
+                                setLon(lo);
+                            }}
+                        />
+                        <button
+                            type="submit"
+                            disabled={!address}
+                            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95"
+                        >
+                            Confirmer l'adresse <ChevronRight className="w-5 h-5" />
                         </button>
                     </form>
                 </div>
