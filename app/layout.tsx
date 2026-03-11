@@ -5,6 +5,9 @@ import { CompareBar } from '@/components/CompareBar';
 import { CookieConsent } from '@/components/CookieConsent';
 import { Footer } from '@/components/Footer';
 import { StickyMobileFooter } from '@/components/StickyMobileFooter';
+import { SocialProofToast } from '@/components/SocialProofToast';
+import { AgentChatbot } from '@/components/AgentChatbot';
+import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 
 export const viewport: Viewport = {
   themeColor: "#3B82F6",
@@ -96,12 +99,12 @@ export default function RootLayout({
         />
         {/* Google Analytics */}
         <Script
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
         />
         <Script
           id="google-analytics"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         >
           {`
             window.dataLayer = window.dataLayer || [];
@@ -115,11 +118,14 @@ export default function RootLayout({
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5443016381737012"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
       </head>
       <body className="antialiased">
         {children}
+        <SocialProofToast />
+        <AgentChatbot />
+        <ExitIntentPopup />
         <Footer />
         <CookieConsent />
         <CompareBar />

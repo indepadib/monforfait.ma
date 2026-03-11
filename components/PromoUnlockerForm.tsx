@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, Loader2, MapPin, Phone, User, ChevronRight, Shield, Coins, BellRing, ArrowRight } from 'lucide-react'
+import { CheckCircle, Loader2, MapPin, Phone, User, ChevronRight, Shield, Coins, BellRing, ArrowRight, Timer } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { trackEvent } from '@/lib/analytics'
 
@@ -12,6 +12,21 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [timeLeft, setTimeLeft] = useState(899) // 14 mins 59 seconds
+
+  React.useEffect(() => {
+     if (timeLeft <= 0) return;
+     const interval = setInterval(() => {
+         setTimeLeft(prev => prev - 1);
+     }, 1000);
+     return () => clearInterval(interval);
+  }, [timeLeft]);
+
+  const formatTime = (seconds: number) => {
+      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const s = (seconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+  };
 
   const [formData, setFormData] = useState({
     need: 'fibre',
@@ -139,10 +154,17 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
                   : "Remplissez ce formulaire pour savoir si votre numéro est éligible aux réductions jusqu'à -50% et voir le classement secret."}
             </p>
         {mode === 'b2c' && (
-            <div className="inline-block bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                <p className="text-sm font-medium text-zinc-400">
-                Jusqu'à <strong className="text-blue-400 text-lg">{getSavings()} DH</strong> d'économies par an
-                </p>
+            <div className="flex flex-col items-center gap-3">
+                <div className="inline-block bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+                    <p className="text-sm font-medium text-zinc-400">
+                    Jusqu'à <strong className="text-blue-400 text-lg">{getSavings()} DH</strong> d'économies par an
+                    </p>
+                </div>
+                {/* Scarcity Timer */}
+                <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-1.5 rounded-full text-xs font-bold font-mono shadow-sm">
+                    <Timer className="w-4 h-4 animate-pulse" />
+                    Offre expire dans : {formatTime(timeLeft)}
+                </div>
             </div>
         )}
       </div>
@@ -310,13 +332,16 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
                     >
                         Retour
                     </button>
-                    <div className="pt-2">
-            <button
-              type="submit"
-              disabled={isLoading || !formData.firstName || !formData.phone}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-blue-500/30 transform active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
-            >
-              {isLoading ? (
+            <div className="pt-2 relative overflow-hidden rounded-xl">
+              {/* Button Shine Effect */}
+              <div className="absolute top-0 -inset-full h-full w-1/2 z-20 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 animate-[shine_2s_infinite]"></div>
+              
+              <button
+                type="submit"
+                disabled={isLoading || !formData.firstName || !formData.phone}
+                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-blue-500/50 transform rounded-xl active:scale-95 disabled:opacity-50 disabled:pointer-events-none relative z-10"
+              >
+                {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   Vérification en cours...

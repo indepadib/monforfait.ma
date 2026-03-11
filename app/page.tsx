@@ -11,6 +11,7 @@ import { B2BBanner } from '@/components/B2BBanner';
 import { HeroQuickFilter } from '@/components/HeroQuickFilter';
 import { PromoUnlockerForm } from '@/components/PromoUnlockerForm';
 import { LiveFOMOTicker } from '@/components/LiveFOMOTicker';
+import { ScamDetector } from '@/components/ScamDetector';
 
 export default function Home() {
 // ... Skipped lines to the comparison engine ...
@@ -43,15 +44,15 @@ export default function Home() {
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.15]">
-                92% des marocains paient<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                  leur abonnement trop cher.
+                Ne vous faites plus <br className="hidden sm:block" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">
+                  arnaquer par votre opérateur.
                 </span>
               </h1>
 
               <p className="text-lg md:text-xl text-zinc-300 max-w-2xl mx-auto lg:mx-0 mb-8 leading-relaxed font-normal">
-                Trouvez le <strong>meilleur forfait mobile</strong> et la <strong>fibre optique au Maroc</strong> (IAM, Inwi, Orange). Les opérateurs cachent leurs meilleures réductions. <br className="hidden sm:block"/>
-                Comparez gratuitement et découvrez l'offre idéale en 60 secondes.
+                Trouvez la <strong>meilleure fibre optique</strong> et le <strong>forfait mobile le moins cher au Maroc</strong>. Ne payez plus le prix fort chez IAM, Inwi ou Orange. <br className="hidden sm:block"/>
+                Passez notre détecteur d'arnaque et débloquez les offres privées B2B.
               </p>
 
               {/* Social Proof & Trust Badges */}
@@ -100,9 +101,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Column: Interactive Hook (No friction) */}
-            <div className="relative z-20 mx-auto w-full max-w-lg lg:max-w-full">
-               <HeroQuickFilter />
+            {/* Right Column: Interactive Hook (Aggressive Trap) */}
+            <div className="relative z-20 mx-auto w-full max-w-lg lg:max-w-full lg:pl-10">
+               <ScamDetector />
             </div>
 
           </div>
