@@ -40,8 +40,9 @@ export function generateStaticParams() {
 }
 
 // Dynamic Metadata Generation
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-    const operator = OPERATORS[params.slug.toLowerCase()]
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const resolvedParams = await params;
+    const operator = OPERATORS[resolvedParams.slug.toLowerCase()]
 
     if (!operator) {
         return { title: 'Opérateur non trouvé' }
@@ -51,7 +52,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         title: `Forfaits ${operator.fullName} : Les Meilleures Offres (2026)`,
         description: `Comparez tous les forfaits mobile et fibre optique de ${operator.fullName}. Économisez jusqu'à -50% avec notre comparateur de forfaits au Maroc.`,
         alternates: {
-            canonical: `https://monforfait.ma/operateurs/${params.slug}`
+            canonical: `https://monforfait.ma/operateurs/${resolvedParams.slug}`
         },
         openGraph: {
             title: `Comparatif Forfaits ${operator.fullName} - MonForfait.ma`,
@@ -60,8 +61,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     }
 }
 
-export default async function OperatorPage({ params }: { params: { slug: string } }) {
-    const slug = params.slug.toLowerCase()
+export default async function OperatorPage({ params }: { params: Promise<{ slug: string }> }) {
+    const resolvedParams = await params;
+    const slug = resolvedParams.slug.toLowerCase()
     const operatorInfo = OPERATORS[slug]
 
     if (!operatorInfo) {
