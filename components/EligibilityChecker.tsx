@@ -62,7 +62,7 @@ export function EligibilityChecker() {
                 <div className="flex gap-2 mb-8">
                     <div className={`h-2 flex-1 rounded-full ${step === 'NEED' ? 'bg-blue-600' : 'bg-blue-200 dark:bg-blue-900'}`}></div>
                     <div className={`h-2 flex-1 rounded-full ${step === 'LOCATION' ? 'bg-blue-600' : (step === 'CONTACT' ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800')}`}></div>
-                    <div className={`h-2 flex-1 rounded-full ${step === 'CONTACT' ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800')}`}></div>
+                    <div className={`h-2 flex-1 rounded-full ${step === 'CONTACT' ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800'}`}></div>
                 </div>
             )}
 
