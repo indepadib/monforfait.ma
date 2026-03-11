@@ -10,6 +10,7 @@ import { OfferCardSkeleton } from '@/components/LoadingSkeleton'
 import { RecentlyViewed } from '@/components/RecentlyViewed'
 import { useSearchParams } from 'next/navigation'
 import { PromoUnlockerForm } from '@/components/PromoUnlockerForm'
+import { Sparkles, CheckCircle, ArrowDown } from 'lucide-react'
 
 type Offer = {
     id: string
@@ -229,11 +230,11 @@ function AllOffersContent() {
                         ) : (
                             <div className="relative">
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {/* Unlocked / Visible Offers (Top 2) */}
-                                    {offers.slice(0, 2).map((offer) => (
-                                        <div key={offer.id} className="relative z-10">
+                                    {/* Unlocked / Visible Offers (Top 2 or all if <= 2) */}
+                                    {offers.slice(0, (!isUnlocked && offers.length > 2) ? 2 : offers.length).map((offer, idx) => (
+                                        <div key={offer.id || `visible-${idx}`} className="relative z-10">
                                             {/* AI Banner for top offer */}
-                                            {offers.indexOf(offer) === 0 && (
+                                            {idx === 0 && (
                                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-orange-500/30 z-20 whitespace-nowrap">
                                                     ✨ Meilleur Choix
                                                 </div>
@@ -242,29 +243,51 @@ function AllOffersContent() {
                                         </div>
                                     ))}
 
-                                    {/* Locked / Blurred Offers */}
-                                    {offers.slice(2).map((offer, i) => (
-                                        <div key={offer.id} className={`relative ${!isUnlocked ? 'filter blur-md opacity-40 select-none pointer-events-none' : ''} transition-all duration-1000`}>
+                                    {/* Locked / Blurred Offers - MAX 1 to keep form high */}
+                                    {!isUnlocked && offers.length > 2 && offers.slice(2, 3).map((offer, idx) => (
+                                        <div key={offer.id || `locked-${idx}`} className="relative filter blur-[6px] opacity-60 select-none pointer-events-none transition-all duration-1000 overflow-hidden">
+                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/90 dark:to-zinc-900/90 z-20"></div>
                                             <OfferCard offer={offer as any} />
                                         </div>
                                     ))}
                                 </div>
 
-                                {/* Smart Wall Overlay */}
-                                {!isUnlocked && offers.length > 2 && (
-                                    <div className="absolute inset-x-0 bottom-0 top-[400px] flex items-center justify-center z-30 pt-20 pb-10 px-4 bg-gradient-to-t from-zinc-50 via-zinc-50/90 to-transparent dark:from-black dark:via-black/90">
-                                        <div className="max-w-xl w-full text-center">
-                                            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                                <LockKeyhole className="w-8 h-8" />
+                                {/* The Conversion Block - Renders IN FLOW directly underneath, not absolute positioned */}
+                                {!isUnlocked && (
+                                    <div className="w-full mt-12 bg-zinc-50/80 dark:bg-zinc-900/40 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 p-4 sm:p-8 lg:p-12 relative overflow-hidden flex flex-col items-center">
+                                        <div className="absolute top-[-50%] left-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
+                                        <div className="absolute bottom-[-50%] right-[-10%] w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+                                        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 w-full max-w-5xl items-center relative z-10">
+                                            {/* Left Side: Value Prop */}
+                                            <div className="flex-1 text-center lg:text-left">
+                                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded-full text-sm font-bold mb-6 border border-blue-200 dark:border-blue-500/30">
+                                                    <Sparkles className="w-4 h-4" />
+                                                    Accès Réservé
+                                                </div>
+                                                
+                                                <h3 className="text-3xl md:text-4xl font-black mb-4 dark:text-white leading-tight">
+                                                    Débloquez le reste du classement (jusqu'à -50%).
+                                                </h3>
+                                                <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-6 leading-relaxed">
+                                                    Certaines offres de rétention sont trop incroyables pour être affichées publiquement. Vérifiez votre éligibilité en 10 secondes.
+                                                </p>
+                                                
+                                                <div className="flex flex-col gap-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                                                    <div className="flex items-center gap-2 justify-center lg:justify-start">
+                                                        <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
+                                                        Gratuit et 100% Sans Engagement
+                                                    </div>
+                                                    <div className="flex items-center gap-2 justify-center lg:justify-start">
+                                                        <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
+                                                        Offres Exclusives Non Disponibles en Boutique
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-4">
-                                                Débloquez les {offers.length - 2} autres offres
-                                            </h3>
-                                            <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8 max-w-md mx-auto">
-                                                Les opérateurs ont supprimé leurs meilleurs prix du marché public. Laissez vos informations pour voir le comparatif complet et les promotions secrètes.
-                                            </p>
-                                            <div className="shadow-2xl rounded-3xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-2 md:p-0">
-                                                <PromoUnlockerForm />
+
+                                            {/* Right Side: The Form */}
+                                            <div className="flex-[0.8] w-full max-w-md transform transition-all hover:-translate-y-1">
+                                                <PromoUnlockerForm mode="b2c" />
                                             </div>
                                         </div>
                                     </div>

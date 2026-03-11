@@ -8,6 +8,7 @@ import { Sparkles, Target, Shield, Clock } from 'lucide-react';
 import { BLOG_POSTS } from '@/lib/blog-data';
 import { TrustBadges } from '@/components/TrustBadges';
 import { B2BBanner } from '@/components/B2BBanner';
+import { HeroQuickFilter } from '@/components/HeroQuickFilter';
 import { PromoUnlockerForm } from '@/components/PromoUnlockerForm';
 import { LiveFOMOTicker } from '@/components/LiveFOMOTicker';
 
@@ -35,6 +36,12 @@ export default function Home() {
                  <LiveFOMOTicker />
               </div>
 
+              {/* SEO Surtitle */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-blue-300 mb-6 uppercase tracking-wider">
+                <Target className="w-3 h-3" />
+                Comparateur Télécom N°1 au Maroc
+              </div>
+
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.15]">
                 92% des marocains paient<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
@@ -43,8 +50,8 @@ export default function Home() {
               </h1>
 
               <p className="text-lg md:text-xl text-zinc-300 max-w-2xl mx-auto lg:mx-0 mb-8 leading-relaxed font-normal">
-                Les opérateurs cachent leurs meilleures offres de rétention. <br className="hidden sm:block"/>
-                Faites le test gratuitement et découvrez combien vous pouvez économiser dès aujourd'hui.
+                Trouvez le <strong>meilleur forfait mobile</strong> et la <strong>fibre optique au Maroc</strong> (IAM, Inwi, Orange). Les opérateurs cachent leurs meilleures réductions. <br className="hidden sm:block"/>
+                Comparez gratuitement et découvrez l'offre idéale en 60 secondes.
               </p>
 
               {/* Social Proof & Trust Badges */}
@@ -53,9 +60,9 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 text-sm text-zinc-400">
                   <div className="flex items-center gap-3">
                     <div className="flex -space-x-2">
-                      <img src="https://i.pravatar.cc/100?img=11" alt="User" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
-                      <img src="https://i.pravatar.cc/100?img=12" alt="User" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
-                      <img src="https://i.pravatar.cc/100?img=13" alt="User" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
+                      <img src="https://i.pravatar.cc/100?img=11" alt="User" width="40" height="40" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
+                      <img src="https://i.pravatar.cc/100?img=12" alt="User" width="40" height="40" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
+                      <img src="https://i.pravatar.cc/100?img=13" alt="User" width="40" height="40" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
                       <div className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-blue-500/20">
                         +5k
                       </div>
@@ -68,7 +75,7 @@ export default function Home() {
                           </svg>
                         ))}
                       </div>
-                      <span className="font-medium text-zinc-300 mt-0.5">Approuvé par + de 5000 Marocains</span>
+                      <span className="font-medium text-zinc-300 mt-0.5">Approuvé pour trouver le meilleur forfait</span>
                     </div>
                   </div>
                 </div>
@@ -93,9 +100,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Column: Promo Unlocker Form */}
+            {/* Right Column: Interactive Hook (No friction) */}
             <div className="relative z-20 mx-auto w-full max-w-lg lg:max-w-full">
-               <PromoUnlockerForm />
+               <HeroQuickFilter />
             </div>
 
           </div>
@@ -104,28 +111,28 @@ export default function Home() {
 
       {/* Value Props - Trust Signals */}
       <section aria-labelledby="features-heading" className="max-w-6xl mx-auto px-4 py-16 border-b border-zinc-100 dark:border-zinc-800">
-        <h2 id="features-heading" className="sr-only">Pourquoi choisir MonForfait.ma</h2>
+        <h2 id="features-heading" className="sr-only">Pourquoi choisir MonForfait.ma pour comparer les offres internet et mobile</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600">
               <Target className="w-7 h-7" />
             </div>
             <h3 className="text-lg font-bold mb-2 text-zinc-900 dark:text-white">Recommandations personnalisées</h3>
-            <p className="text-zinc-600 dark:text-zinc-400">Notre quiz intelligent trouve les offres adaptées à VOS besoins en 60 secondes.</p>
+            <p className="text-zinc-600 dark:text-zinc-400">Notre quiz trouve le meilleur forfait adapté à VOS besoins (Fibre, forfait pas cher) en 60 secondes.</p>
           </div>
           <div className="text-center">
             <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-green-600">
               <Shield className="w-7 h-7" />
             </div>
             <h3 className="text-lg font-bold mb-2 text-zinc-900 dark:text-white">100% gratuit et sans engagement</h3>
-            <p className="text-zinc-600 dark:text-zinc-400">Aucun frais caché. Comparez librement, sans obligation d'achat.</p>
+            <p className="text-zinc-600 dark:text-zinc-400">Aucun frais caché. Comparez librement les offres d'Orange, Maroc Telecom et Inwi.</p>
           </div>
           <div className="text-center">
             <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-purple-600">
               <Clock className="w-7 h-7" />
             </div>
             <h3 className="text-lg font-bold mb-2 text-zinc-900 dark:text-white">Prix vérifiés quotidiennement</h3>
-            <p className="text-zinc-600 dark:text-zinc-400">Nos données sont mises à jour chaque jour pour garantir les meilleurs tarifs.</p>
+            <p className="text-zinc-600 dark:text-zinc-400">Nos données télécom sont mises à jour chaque jour pour vous garantir les meilleurs tarifs du marché.</p>
           </div>
         </div>
       </section>
@@ -155,7 +162,7 @@ export default function Home() {
           {BLOG_POSTS.slice(0, 3).map((post) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} className="group flex flex-col rounded-2xl overflow-hidden shadow-sm border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="aspect-[16/9] w-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden relative">
-                <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={post.coverImage} alt={post.title} width="800" height="450" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-blue-600 dark:text-blue-400">
                   {post.category}
                 </div>
@@ -164,7 +171,7 @@ export default function Home() {
                 <h3 className="font-bold text-lg mb-2 dark:text-white line-clamp-2 group-hover:text-blue-600 transition-colors">{post.title}</h3>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-3 mb-4 flex-grow">{post.excerpt}</p>
                 <div className="flex items-center gap-2 mt-auto">
-                  <img src={post.author.avatar} alt={post.author.name} className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-900" />
+                  <img src={post.author.avatar} alt={post.author.name} width="32" height="32" className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-900" />
                   <div className="flex flex-col">
                     <span className="text-xs font-bold dark:text-white">{post.author.name}</span>
                     <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">{new Date(post.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>

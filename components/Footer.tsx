@@ -19,7 +19,7 @@ export function Footer() {
                     </div>
 
                     {/* Quick Links */}
-                    <div>
+                    <div className="col-span-1">
                         <h4 className="font-bold text-zinc-900 dark:text-white mb-4">Navigation</h4>
                         <ul className="space-y-2 text-sm text-zinc-500">
                             <li><Link href="/offers" className="hover:text-blue-600 transition-colors">Toutes les offres</Link></li>
@@ -29,8 +29,19 @@ export function Footer() {
                         </ul>
                     </div>
 
+                    {/* SEO Hubs (Internal Linking Matrix) */}
+                    <div className="col-span-1">
+                        <h4 className="font-bold text-zinc-900 dark:text-white mb-4">Recherches populaires</h4>
+                        <ul className="space-y-2 text-sm text-zinc-500">
+                            <li><Link href="/operateurs/inwi" className="hover:text-blue-600 transition-colors">Forfait Inwi Maroc</Link></li>
+                            <li><Link href="/operateurs/orange" className="hover:text-blue-600 transition-colors">Offres Orange Mobile</Link></li>
+                            <li><Link href="/operateurs/iam" className="hover:text-blue-600 transition-colors">Fibre Maroc Telecom</Link></li>
+                            <li><Link href="/forfait-mobile-pas-cher" className="hover:text-blue-600 transition-colors">Forfait mobile pas cher</Link></li>
+                        </ul>
+                    </div>
+
                     {/* Legal */}
-                    <div>
+                    <div className="col-span-1">
                         <h4 className="font-bold text-zinc-900 dark:text-white mb-4">Légal</h4>
                         <ul className="space-y-2 text-sm text-zinc-500">
                             <li><Link href="/legal/mentions" className="hover:text-blue-600 transition-colors">Mentions Légales</Link></li>
