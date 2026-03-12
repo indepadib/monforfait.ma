@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Wifi, Home, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Wifi, Home, MapPin, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
 import { AddressMapPicker } from '@/components/AddressMapPicker';
 
 type Step = 'NEED' | 'LOCATION' | 'CONTACT' | 'SCANNING' | 'RESULT';
