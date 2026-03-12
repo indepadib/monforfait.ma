@@ -63,8 +63,11 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-icon.png",
+    icon: [
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: '/icon.png',
+    shortcut: '/icon.png',
   }
 };
 
@@ -76,6 +79,10 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
+        {/* Favicon – hardcoded to bypass Next.js metadata cache */}
+        <link rel="icon" type="image/png" href="/icon.png" />
+        <link rel="shortcut icon" type="image/png" href="/icon.png" />
+        <link rel="apple-touch-icon" href="/icon.png" />
         {/* Structured Data for SEO */}
         <script
           type="application/ld+json"
