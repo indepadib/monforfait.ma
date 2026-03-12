@@ -64,10 +64,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/icon.png', type: 'image/png' },
+      { url: '/branding/forfait.png', type: 'image/png' },
     ],
-    apple: '/icon.png',
-    shortcut: '/icon.png',
+    apple: '/branding/forfait.png',
+    shortcut: '/branding/forfait.png',
   }
 };
 
@@ -79,10 +79,10 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
-        {/* Favicon – hardcoded to bypass Next.js metadata cache */}
-        <link rel="icon" type="image/png" href="/icon.png" />
-        <link rel="shortcut icon" type="image/png" href="/icon.png" />
-        <link rel="apple-touch-icon" href="/icon.png" />
+        {/* Favicon */}
+        <link rel="icon" type="image/png" href="/branding/forfait.png" />
+        <link rel="shortcut icon" type="image/png" href="/branding/forfait.png" />
+        <link rel="apple-touch-icon" href="/branding/forfait.png" />
         {/* Structured Data for SEO */}
         <script
           type="application/ld+json"
