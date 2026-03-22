@@ -1,0 +1,29 @@
+name: Blog Automation
+
+on:
+  schedule:
+    - cron: "0 9 * * 1,4" # Lundi et Jeudi à 09:00 UTC
+  workflow_dispatch: # Permet de lancer manuellement pour tester
+
+jobs:
+  update-blog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run automation script
+        run: node scripts/automate-blog.js
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions [Bot]"
+          git config --global user.email "bot@github.com"
+          git add lib/blog-data.ts lib/automation-state.json
+          git commit -m "chore: automated blog post publication [skip ci]" || echo "No changes to commit"
+          git push

@@ -195,9 +195,14 @@ export default function SpeedTestPage() {
                     <h1 className="text-4xl md:text-6xl font-black mb-4 text-zinc-900 dark:text-white">
                         Quelle est votre vitesse internet ?
                     </h1>
-                    <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-                        Découvrez votre vitesse actuelle et comparez avec ce que vous pourriez avoir
+                    <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-6">
+                        Découvrez votre vitesse actuelle et comparez avec ce que vous pourriez avoir.
                     </p>
+                    <div className="flex justify-center">
+                        <Link href="/blog/5g-maroc-couverture-villes-2026" className="text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-full border border-blue-100 dark:border-blue-800 transition-all flex items-center gap-2">
+                            <Zap className="w-4 h-4" /> Voir la carte de couverture 5G au Maroc
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Speed Test Widget */}

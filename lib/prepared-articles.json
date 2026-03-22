@@ -1,0 +1,92 @@
+[
+  {
+    "slug": "fibre-optique-auto-entrepreneur-maroc-2026",
+    "title": "Fibre Optique pour les Auto-Entrepreneurs au Maroc : Le Guide Pro",
+    "excerpt": "Comment profiter du statut auto-entrepreneur pour optimiser sa connexion sans payer le prix fort. Comparatif des offres pro et résidentielles.",
+    "coverImage": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80",
+    "date": "2026-03-23",
+    "author": {
+      "name": "Amine Alaoui",
+      "role": "Expert Telecom",
+      "avatar": "https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff"
+    },
+    "category": "Guide",
+    "tags": ["Auto-Entrepreneur", "Fibre Pro", "IAM", "Orange", "Inwi"],
+    "content": "<h2>Pourquoi choisir une offre Pro ?</h2><p>Le statut d'auto-entrepreneur au Maroc permet d'accéder à des offres internet spécifiques. Mais est-ce toujours rentable ?</p><h3>Les avantages de la Fibre Pro</h3><ul><li>Une assistance technique prioritaire (souvent sous 24h).</li><li>Une adresse IP fixe (essentiel pour certains serveurs).</li><li>Des débits symétriques garantis.</li></ul><p>Consultez notre <a href='/quiz'>quiz</a> pour voir si votre usage justifie le surcoût d'une offre professionnelle.</p>"
+  },
+  {
+    "slug": "cih-vs-bmce-vitesse-paiement-forfait-maroc",
+    "title": "CIH Bank vs BMCE : Quelle App est la Plus Rapide pour vos Forfaits ?",
+    "excerpt": "Comparatif de rapidité et de facilité d'usage des applications bancaires pour la gestion de vos recharges et abonnements telecom.",
+    "coverImage": "https://images.unsplash.com/photo-1563013544-824ae14f4826?auto=format&fit=crop&q=80",
+    "date": "2026-03-26",
+    "author": {
+      "name": "Youssef Rami",
+      "role": "Rédacteur Tech",
+      "avatar": "https://ui-avatars.com/api/?name=Youssef+Rami&background=10B981&color=fff"
+    },
+    "category": "Comparatif",
+    "tags": ["Banque Mobile", "Paiement Forfait", "CIH", "BMCE"],
+    "content": "<h2>Le match des applications bancaires</h2><p>Payer sa facture IAM, Orange ou Inwi en deux clics est devenu un standard. Nous avons testé le parcours utilisateur sur les deux leaders du marché.</p><h3>Vitesse et UX</h3><p>CIH Mobile reste le favori des jeunes pour son interface intuitive, mais BMCE Direct rattrape son retard avec une intégration native des facturiers télécom très efficace.</p>"
+  },
+  {
+    "slug": "starlink-maroc-prix-performance-2026",
+    "title": "Starlink au Maroc : L'alternative réelle à la Fibre IAM en zone rurale",
+    "excerpt": "Délais, prix, installation et performances comparées aux offres locales. Starlink est-il enfin une solution viable pour les Marocains ?",
+    "coverImage": "https://images.unsplash.com/photo-1544006659-f0b21f04cb1d?auto=format&fit=crop&q=80",
+    "date": "2026-03-30",
+    "author": {
+      "name": "Amine Alaoui",
+      "role": "Expert Telecom",
+      "avatar": "https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff"
+    },
+    "category": "Comparatif",
+    "tags": ["Starlink", "Satellite", "Internet Rural", "IAM"],
+    "content": "<h2>Starlink vs Infrastructure Locale</h2><p>Le déploiement de Starlink au Maroc change la donne pour les zones blanches. Là où IAM ou Inwi ne tirent pas de câbles, SpaceX propose une connexion haut débit venue du ciel.</p><h3>Vitesse et Latence</h3><p>Nos tests montrent un débit descendant entre 150 et 250 Mbps, mais un ping légèrement plus instable que la fibre optique (40-60ms). C'est idéal pour le télétravail mais peut être frustrant pour le gaming compétitif.</p>"
+  },
+  {
+    "slug": "promo-ramadan-telecom-maroc-2026",
+    "title": "Pass 4G/5G Spécial Ramadan : Profiter des Promos Data Nocturnes",
+    "excerpt": "Guide des meilleures offres data pour les nuits du Ramadan. Découvrez comment rester connecté jusqu'au Shour sans vous ruiner.",
+    "coverImage": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80",
+    "date": "2026-04-02",
+    "author": {
+      "name": "Sarah Benamor",
+      "role": "Conseillère Télécom",
+      "avatar": "https://ui-avatars.com/api/?name=Sarah+Benamor&background=9333EA&color=fff"
+    },
+    "category": "Astuce",
+    "tags": ["Ramadan", "Promo Telecom", "Data Mobile", "IAM", "Orange", "Inwi"],
+    "content": "<h2>Les offres nocturnes du Ramadan</h2><p>Comme chaque année, les opérateurs marocains lancent des forfaits 'Nuits illimitées'. Orange et Inwi proposent souvent des pass à 10 DH pour 2 Go valables de minuit à 8h.</p><h3>Notre recommandation</h3><p>Vérifiez toujours la validité du pass. Certains expirent au bout de 24h, d'autres durent toute une semaine. Utilisez notre <a href='/offers'>comparateur d'offres</a> pour suivre les mises à jour en temps réel.</p>"
+  },
+  {
+    "slug": "forfait-illimite-maroc-realite-bridage",
+    "title": "Forfait Mobile illimité au Maroc : Réalité ou Argument Marketing ?",
+    "excerpt": "Analyse du bridage (fair use) chez les trois opérateurs majeurs. Ce que cachent réellement les offres dites illimitées.",
+    "coverImage": "https://images.unsplash.com/photo-1512428559083-a4979b20944a?auto=format&fit=crop&q=80",
+    "date": "2026-04-06",
+    "author": {
+      "name": "Youssef Rami",
+      "role": "Rédacteur Tech",
+      "avatar": "https://ui-avatars.com/api/?name=Youssef+Rami&background=10B981&color=fff"
+    },
+    "category": "Guide",
+    "tags": ["Forfait illimité", "Bridage", "ANRT", "IAM", "Orange", "Inwi"],
+    "content": "<h2>Le mythe de l'illimité</h2><p>Au Maroc, un forfait mobile 'illimité' ne l'est jamais techniquement à 100%. Il existe toujours une politique d'usage raisonnable (Fair Use Policy).</p><h3>Les seuils de bridage</h3><p>Généralement, après 50 Go ou 100 Go de consommation, votre vitesse est réduite à un débit dérisoire (128 kbps). Nous avons décortiqué les conditions générales de vente pour vous montrer les chiffres réels.</p>"
+  },
+  {
+    "slug": "fibre-optique-zenata-bouskoura-guide",
+    "title": "Fibre Optique à Zenata et Bouskoura : Le Guide des Nouveaux Arrivants",
+    "excerpt": "Quels opérateurs couvrent le mieux les nouveaux pôles urbains de Casablanca ? Tout savoir pour s'équiper avant d'emménager.",
+    "coverImage": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80",
+    "date": "2026-04-09",
+    "author": {
+      "name": "Amine Alaoui",
+      "role": "Expert Telecom",
+      "avatar": "https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff"
+    },
+    "category": "Guide",
+    "tags": ["Casablanca", "Zenata", "Bouskoura", "Fibre Optique"],
+    "content": "<h2>S'installer dans les nouveaux pôles de Casablanca</h2><p>Zenata (Ville Eco) et Bouskoura (Ville Verte) ont été conçues dès le départ pour la fibre optique. Contrairement à Casa-Anfa, le réseau est ici 100% souterrain et moderne.</p><h3>Qui choisir ?</h3><p>Inwi et Orange dominent souvent ces nouvelles zones avec des installations plus rapides que l'opérateur historique. Utilisez notre <a href='/eligibilite'>test d'éligibilité par adresse</a> pour confirmer quel boitier est déjà installé dans votre immeuble.</p>"
+  }
+]

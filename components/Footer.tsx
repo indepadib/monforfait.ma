@@ -26,7 +26,9 @@ export function Footer() {
                             <li><Link href="/quiz" className="hover:text-blue-600 transition-colors">Quiz personnalisé</Link></li>
                             <li><Link href="/compare" className="hover:text-blue-600 transition-colors">Comparateur</Link></li>
                             <li><Link href="/blog" className="hover:text-blue-600 transition-colors">Blog & Actualités</Link></li>
+                            <li><Link href="/confiance" className="hover:text-blue-600 transition-colors font-bold text-zinc-900 dark:text-white">Pourquoi nous faire confiance ?</Link></li>
                         </ul>
+
                     </div>
 
                     {/* SEO Hubs (Internal Linking Matrix) */}

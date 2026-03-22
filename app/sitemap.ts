@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { BLOG_POSTS, BlogPost } from '@/lib/blog-data'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -29,11 +30,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq('is_active', true)
 
     const offerRoutes = (offers || []).map((offer) => ({
-        url: `${baseUrl}/offers/${offer.id}`, // Assuming we have detail pages, if not we point to anchors or just lists
+        url: `${baseUrl}/offers/${offer.id}`,
         lastModified: new Date(offer.created_at),
         changeFrequency: 'weekly' as const,
         priority: 0.6,
     }))
 
-    return [...routes, ...offerRoutes]
+    // Blog routes
+    const blogRoutes = BLOG_POSTS.map((post: BlogPost) => ({
+        url: `${baseUrl}/blog/${post.slug}`,
+        lastModified: new Date(post.date),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+    }))
+
+    return [...routes, ...offerRoutes, ...blogRoutes]
 }

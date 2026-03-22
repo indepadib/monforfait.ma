@@ -50,7 +50,7 @@ export const BLOG_POSTS: BlogPost[] = [
       </ul>
 
       <h3>3. Maroc Telecom (IAM) : La couverture reine</h3>
-      <p>Souvent plus chère, la fibre de Maroc Telecom (à partir de 500 DH/mois pour 100 Mbps) compense par le réseau le plus vaste du Royaume.</p>
+      <p>Souvent plus chère, la fibre de Maroc Telecom (à partir de 500 DH/mois for 100 Mbps) compense par le réseau le plus vaste du Royaume.</p>
       <ul>
         <li><strong>Avantage :</strong> Stabilité éprouvée, intervention technique rapide dans les grandes villes.</li>
         <li><strong>Inconvénient :</strong> Matériel (routeur) parfois vieillissant comparé aux concurrents, prix d'entrée élevé.</li>
@@ -178,7 +178,7 @@ export const BLOG_POSTS: BlogPost[] = [
       <p>Pour l'instant, aucun opérateur ne commercialise commercialement d'offres "100% 5G" sur le marché grand public marocain, bien que des phases de tests géolocalisées soient en cours dans les grandes métropoles (Casablanca, Rabat, Tanger).</p>
       <p>Le futur marché proposera très probablement des <strong>Box 5G</strong> domestiques qui viendront concurrencer frontalement les abonnements à la Fibre Optique dans les zones rurales ou périurbaines où il est difficile de tirer des câbles.</p>
 
-      <h2>Comment s'y préparer ?</h2>
+      <h2>How s'y préparer ?</h2>
       <p>Inutile de se précipiter sur le changement de forfait. Par contre, si vous achetez un nouveau smartphone cette année, veillez absolument à ce qu'il soit certifié "5G Ready". Ainsi, le jour où les offres <a href="/offers">Forfaits Mobiles Premium</a> s'activeront, votre puce basculera automatiquement sur le nouveau réseau ultra-rapide.</p>
     `
     },
@@ -208,6 +208,154 @@ export const BLOG_POSTS: BlogPost[] = [
         <li><strong>Passez au système Mesh :</strong> Pour les grandes villas ou duplex, c'est l'investissement ultime (comptez entre 1500 et 3000 DH). Des boitiers intelligents gèrent le "roaming" transparent dans toute la maison avec un débit à 100%.</li>
       </ul>
       <p>Avant d'acheter du matériel, assurez-vous simplement de bénéficier de la meilleure fondation possible : comparez les fournisseurs sur <strong>MonForfait.ma</strong>.</p>
+    `
+    },
+    {
+        slug: 'portabilite-numero-maroc-guide-complet',
+        title: 'Portabilité au Maroc : Comment Garder son Numéro en Changeant d\'Opérateur (Guide 2026)',
+        excerpt: 'Marre de votre opérateur ? Découvrez comment changer pour Orange, Inwi ou IAM tout en gardant votre numéro 06. Délais, procédure et conseils pour une transition sans coupure.',
+        coverImage: 'https://images.unsplash.com/photo-1543941323-8bc65338d948?auto=format&fit=crop&q=80',
+        date: '2026-03-22',
+        author: {
+            name: 'Sarah Benamor',
+            role: 'Conseillère Télécom',
+            avatar: 'https://ui-avatars.com/api/?name=Sarah+Benamor&background=9333EA&color=fff'
+        },
+        category: 'Guide',
+        tags: ['Portabilité', 'Changement Opérateur', 'IAM', 'Orange', 'Inwi'],
+        content: `
+      <h2>La portabilité : un droit garanti par l'ANRT</h2>
+      <p>Depuis 2007, la <strong>portabilité du numéro au Maroc</strong> permet à tout client de changer d'opérateur mobile ou fixe tout en conservant son numéro d'appel. C'est le moyen le plus simple de faire jouer la concurrence sans avoir à prévenir tous vos contacts de votre changement de numéro (06...).</p>
+
+      <h2>Les 3 règles d'or pour une portabilité réussie</h2>
+      <ol>
+        <li><strong>NE RÉSILIEZ PAS vous-même :</strong> C'est l'erreur la plus fréquente. Si vous résiliez votre contrat actuel avant de demander la portabilité, votre numéro sera définitivement perdu.</li>
+        <li><strong>Vérifiez votre engagement :</strong> Si vous êtes encore sous contrat (12 ou 24 mois), vous pouvez quand même partir, mais vous devrez payer les mois restants à votre ancien opérateur.</li>
+        <li><strong>Délai légal de 3 jours :</strong> Depuis 2015, le délai de transfert est de 3 jours ouvrables maximum.</li>
+      </ol>
+
+      <h2>La procédure étape par étape</h2>
+      <p>1. Rendez-vous chez votre futur opérateur muni de votre CIN.<br>
+      2. Signez la demande de portabilité.<br>
+      3. On vous remettra une nouvelle carte SIM.<br>
+      4. Dans 3 jours, votre ancienne SIM s'éteindra et la nouvelle s'activera avec votre ancien numéro.</p>
+
+      <p>Besoin de savoir quel opérateur offre le meilleur bonus de portabilité en ce moment ? Utilisez notre <strong><a href="/quiz">comparateur intelligent</a></strong> pour voir les promos "Bienvenue" chez Orange ou Inwi.</p>
+    `
+    },
+    {
+        slug: '5g-maroc-couverture-villes-2026',
+        title: '5G au Maroc par Ville : Où Est la Couverture Réelle en 2026 ?',
+        excerpt: 'La 5G est là ! Découvrez la carte du déploiement à Casablanca, Rabat, Marrakech et Tanger. Testez votre débit et comparez les offres 5G des opérateurs marocains.',
+        coverImage: 'https://images.unsplash.com/photo-1562408590-e32931084e23?auto=format&fit=crop&q=80',
+        date: '2026-03-20',
+        author: {
+            name: 'Amine Alaoui',
+            role: 'Expert Telecom',
+            avatar: 'https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff'
+        },
+        category: 'Comparatif',
+        tags: ['5G Maroc', 'Vitesse Internet', 'Casablanca', 'Rabat'],
+        content: `
+      <h2>L'état des lieux de la 5G au Maroc</h2>
+      <p>Lancée officiellement fin 2025, la <strong>5G au Maroc</strong> transforme radicalement l'expérience mobile. Avec des vitesses dépassant le Gigabit par seconde, elle rivalise désormais avec la fibre optique pour les usages domestiques et professionnels.</p>
+
+      <h2>Top 5 des villes les mieux couvertes</h2>
+      <ul>
+        <li><strong>Casablanca :</strong> Couverture quasi-totale des quartiers d'affaires (Casa Nearshore, CFC) et du centre-ville.</li>
+        <li><strong>Rabat :</strong> Excellente réception dans les zones administratives, Agdal et Hay Riad.</li>
+        <li><strong>Tanger :</strong> Priorité donnée à la zone franche et au port Tanger Med.</li>
+        <li><strong>Marrakech :</strong> Centres touristiques et Guéliz déjà équipés.</li>
+        <li><strong>Agadir :</strong> Déploiement en cours sur la corniche et les zones hôtelières.</li>
+      </ul>
+
+      <h2>Faut-il changer de forfait pour la 5G ?</h2>
+      <p>Pour profiter du débit maximal, vous devez posséder un smartphone compatible 5G et un forfait "Data" conséquent. Les opérateurs proposent désormais des forfaits 5G illimités ou avec de larges quotas (50 Go et +).</p>
+      
+      <p>💡 <em>Astuce :</em> Avant de souscrire, vérifiez la qualité réelle du signal chez vous grâce à notre <strong><a href="/speedtest">Test de Débit Mobile</a></strong> gratuit.</p>
+    `
+    },
+    {
+        slug: 'forfait-mobile-mre-maroc-vacances',
+        title: 'Forfait Mobile pour MRE au Maroc : Quelle Option Choisir en 2026 ?',
+        excerpt: 'Vous visitez le Maroc ? Ne vous ruinez pas en roaming. Comparatif des meilleures cartes SIM locales et forfaits spéciaux pour les Marocains Résidant à l\'Étranger.',
+        coverImage: 'https://images.unsplash.com/photo-1539635278303-d4002c07dee3?auto=format&fit=crop&q=80',
+        date: '2026-03-18',
+        author: {
+            name: 'Youssef Rami',
+            role: 'Rédacteur Tech',
+            avatar: 'https://ui-avatars.com/api/?name=Youssef+Rami&background=10B981&color=fff'
+        },
+        category: 'Astuce',
+        tags: ['MRE', 'SIM Vacances', 'Roaming', 'Tourisme'],
+        content: `
+      <h2>SIM Locale vs Roaming : Le match des tarifs</h2>
+      <p>Si vous êtes un <strong>Marocain Résidant à l'Étranger (MRE)</strong>, utiliser votre forfait français, espagnol ou belge au Maroc peut vous coûter des centaines d'euros en quelques gigaoctets. La solution la plus économique reste l'achat d'une SIM locale dès votre arrivée à l'aéroport ou en agence.</p>
+
+      <h2>Les meilleures options pour l'été 2026</h2>
+      <ol>
+        <li><strong>Forfait Win (Inwi) :</strong> 100% digital, vous pouvez commander votre SIM en ligne et la récupérer en boutique. Flexibilité totale sans engagement.</li>
+        <li><strong>Pass Vacances Orange :</strong> Des recharges data généreuses valables 1 mois, idéales pour le streaming et les réseaux sociaux.</li>
+        <li><strong>eSIM Maroc :</strong> Si votre smartphone le permet, achetez une eSIM "Maroc" sur des plateformes internationales ou directement via les apps Orange/Inwi pour ne pas avoir à manipuler de carte physique.</li>
+      </ol>
+
+      <p>Besoin de comparer les prix en temps réel avant votre vol ? Consultez notre <a href="/offers">liste des forfaits prépayés</a> mis à jour quotidiennement.</p>
+    `
+    },
+    {
+        slug: 'frais-caches-arnaques-operateurs-maroc',
+        title: 'Frais Cachés des Opérateurs Marocains : Ce Que Votre Contrat Ne Dit Pas',
+        excerpt: 'Ne vous faites plus avoir ! Activation, restitution de matériel, bridage de débit : nous décryptons les petites lignes des contrats IAM, Orange et Inwi.',
+        coverImage: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80',
+        date: '2026-03-15',
+        author: {
+            name: 'Sarah Benamor',
+            role: 'Conseillère Télécom',
+            avatar: 'https://ui-avatars.com/api/?name=Sarah+Benamor&background=9333EA&color=fff'
+        },
+        category: 'Guide',
+        tags: ['Arnaques', 'Consommation', 'Droit', 'Contrats'],
+        content: `
+      <h2>"Ne vous faites plus arnaquer"</h2>
+      <p>Le slogan de <strong>MonForfait.ma</strong> est clair : nous sommes là pour vous protéger. Voici les 4 pièges les plus courants à éviter lors de la signature de votre prochain contrat telecom au Maroc.</p>
+
+      <h2>1. Les frais de mise en service "oubliés"</h2>
+      <p>Chez certains opérateurs, l'activation d'une ligne fibre peut coûter entre 500 et 1000 DH. Ces frais sont parfois offerts en promotion, mais vérifiez bien qu'ils ne réapparaissent pas sur votre première facture sous une autre appellation.</p>
+
+      <h2>2. La restitution du matériel (Le piège IAM)</h2>
+      <p>Saviez-vous que le routeur fourni par Maroc Telecom reste la propriété de l'opérateur ? En cas de résiliation, si vous ne le rendez pas sous 15 jours, des pénalités pouvant aller jusqu'à 1500 DH peuvent vous être prélevées.</p>
+
+      <h2>3. Le bridage (Throttling) de la 4G/5G</h2>
+      <p>Certains forfaits dits "illimités" ne le sont que jusqu'à un certain seuil. Une fois ce volume dépassé, votre vitesse peut être divisée par 10 (passage à 128 kbps), rendant la navigation quasi impossible.</p>
+
+      <p>Soyez vigilant et comparez les <strong>conditions réelles</strong> d'utilisation sur notre <a href="/">comparateur indépendant</a>.</p>
+    `
+    },
+    {
+        slug: 'meilleur-internet-teletravail-maroc-2026',
+        title: 'Meilleur Forfait Internet pour Télétravailler au Maroc en 2026 (Fibre, 4G, 5G)',
+        excerpt: 'Freelance ou télétravailleur ? Découvrez quelles offres offrent la meilleure stabilité et le meilleur débit d\'upload pour vos réunions Zoom et transferts de fichiers.',
+        coverImage: 'https://images.unsplash.com/photo-1587614382346-4ec7063f9b2c?auto=format&fit=crop&q=80',
+        date: '2026-03-10',
+        author: {
+            name: 'Amine Alaoui',
+            role: 'Expert Telecom',
+            avatar: 'https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff'
+        },
+        category: 'Guide',
+        tags: ['Télétravail', 'Productivité', 'Fibre', 'Home Office'],
+        content: `
+      <h2>Pourquoi le télétravail exige plus qu'un simple abonnement ?</h2>
+      <p>Pour un usage professionnel (visioconférences HD, VPN, envois de fichiers lourds), le débit de téléchargement (download) n'est pas le seul critère. C'est le <strong>débit d'upload</strong> (envoi) et la <strong>stabilité du ping</strong> qui feront la différence entre une réunion fluide et un écran figé.</p>
+
+      <h2>Le top 3 pour les pros du digital</h2>
+      <ul>
+        <li><strong>Fibre Optique Orange 200 Mega :</strong> Probablement le meilleur rapport qualité/prix pour l'upload symétrique. Idéal pour les graphistes et monteurs vidéo.</li>
+        <li><strong>Box 5G Inwi :</strong> Une excellente alternative si vous n'êtes pas éligible à la fibre. Offre une mobilité et une activation instantanée.</li>
+        <li><strong>IAM Fibre Premium :</strong> Pour une stabilité maximale et un service client dédié aux professionnels.</li>
+      </ul>
+
+      <p>Ne laissez pas une mauvaise connexion gâcher votre carrière. Trouvez l'offre la plus stable de votre ville via notre <a href="/eligibilite">test d'éligibilité avancée</a>.</p>
     `
     }
 ]
