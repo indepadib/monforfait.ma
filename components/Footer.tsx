@@ -49,6 +49,7 @@ export function Footer() {
                             <li><Link href="/legal/mentions" className="hover:text-blue-600 transition-colors">Mentions Légales</Link></li>
                             <li><Link href="/legal/privacy" className="hover:text-blue-600 transition-colors">Confidentialité</Link></li>
                             <li><Link href="/legal/cgu" className="hover:text-blue-600 transition-colors">Conditions Générales</Link></li>
+                            <li><Link href="/contact" className="hover:text-blue-600 transition-colors">Contact</Link></li>
                         </ul>
                     </div>
                 </div>

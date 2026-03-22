@@ -35,7 +35,7 @@ export default function PrivacyPage() {
                 <h2>4. Vos droits (loi 09-08)</h2>
                 <p>
                     Conformément à la loi n° 09-08 relative à la protection des personnes physiques à l'égard du traitement des données à caractère personnel, vous disposez d'un droit d'accès, de rectification et d'opposition.
-                    Pour exercer ce droit, contactez-nous à : contact@monforfait.ma
+                    Pour toute question concernant cette politique, contactez-nous à : <span className="font-bold">contact@maplyo.com</span>
                 </p>
 
                 <h2>5. Cookies</h2>

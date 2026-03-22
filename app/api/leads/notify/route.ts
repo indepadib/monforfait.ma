@@ -38,7 +38,8 @@ export async function POST(req: Request) {
             const resend = new Resend(process.env.RESEND_API_KEY)
             
             await resend.emails.send({
-                from: 'MonForfait.ma Leads <leads@monforfait.ma>', // Update domain when verified
+                from: 'Lead Alert <contact@maplyo.com>',
+ // Update domain when verified
                 to: process.env.ADMIN_EMAIL_NOTIFICATION.split(','),
                 subject: `🚨 Nouveau Lead Télecom: ${needs_details?.interest || 'Offre'} - ${phone}`,
                 html: `

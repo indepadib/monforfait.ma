@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
         // Send the email with the guide link
         const data = await resend.emails.send({
-            from: 'MonForfait.ma <guide@monforfait.ma>', // Ensure this domain is verified in Resend, or use onboarding@resend.dev for testing
+            from: 'MonForfait.ma <contact@maplyo.com>', // Ensure this domain is verified in Resend, or use onboarding@resend.dev for testing
             to: [email],
             subject: 'Votre Guide Gratuit : Comment choisir son forfait au Maroc',
             html: `

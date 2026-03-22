@@ -29,10 +29,11 @@ export default function PartenairesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
                     {/* Option 1 */}
                     <div className="bg-white dark:bg-zinc-950 p-8 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800">
-                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl flex items-center justify-center mb-6">
-                            <Code className="w-6 h-6" />
-                        </div>
-                        <h2 className="text-2xl font-bold dark:text-white mb-4">Intégration du Widget (Dofollow)</h2>
+                        <a href="mailto:contact@maplyo.com" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center gap-2">
+                  <Mail className="w-5 h-5" />
+                  Devenir Partenaire
+                </a>
+        <h2 className="text-2xl font-bold dark:text-white mb-4">Intégration du Widget (Dofollow)</h2>
                         <p className="text-zinc-600 dark:text-zinc-400 mb-6">
                             Vous gérez un blog tech ou un site d'actualité marocaine ? Intégrez notre widget "Test d'éligibilité" sur vos pages. En échange, le widget contient un lien Dofollow naturel vers notre site, ce qui renforce nos SEO respectifs.
                         </p>

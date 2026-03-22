@@ -187,9 +187,7 @@ Proprietary - All rights reserved
 
 This is a private project. Contact the owner for collaboration.
 
-## 📧 Contact
-
-**MonForfait.ma**  
+## 📩 Contact : contact@maplyo.com
 Website: https://monforfait.ma  
 Support: support@monforfait.ma
 

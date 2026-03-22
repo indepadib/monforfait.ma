@@ -93,7 +93,7 @@ export function FAQ() {
                     Notre équipe est là pour vous aider
                 </p>
                 <a
-                    href="mailto:contact@monforfait.ma"
+                    href="mailto:contact@maplyo.com"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors"
                 >
                     <Check className="w-5 h-5" />

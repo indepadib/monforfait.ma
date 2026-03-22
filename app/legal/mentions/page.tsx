@@ -12,7 +12,7 @@ export default function MentionsPage() {
                     Le site <strong>MonForfait.ma</strong> est édité par une équipe indépendante de développeurs et passionnés de telecom basés au Maroc.
                 </p>
                 <p>
-                    <strong>Contact :</strong> contact@monforfait.ma
+                    <strong>Contact :</strong> contact@maplyo.com
                 </p>
 
                 <h2>2. Hébergement</h2>
