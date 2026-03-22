@@ -1,4 +1,20 @@
-,
+export interface BlogPost {
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImage: string;
+  date: string;
+  author: {
+    name: string;
+    role: string;
+    avatar: string;
+  };
+  category: string;
+  tags: string[];
+  content: string;
+}
+
+export const BLOG_POSTS: BlogPost[] = [
     {
     "slug": "fibre-optique-casablanca-orange",
     "title": "Fibre Optique à Casablanca : Meilleure offre Orange en 2026",
