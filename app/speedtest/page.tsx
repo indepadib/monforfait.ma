@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { TrendingUp, TrendingDown, Wifi, Zap, AlertCircle, CheckCircle, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
