@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabaseClient"
 import { Navigation } from "@/components/Navigation"
 import { 
@@ -25,7 +25,17 @@ interface Lead {
   address: string;
   status: string;
   is_pro: boolean;
-  needs_details: any;
+  needs_details: {
+    source?: string;
+    lead_source?: string;
+    speedtest?: {
+      isp: string;
+      downloadMbps: number;
+      uploadMbps: number;
+      ping: number;
+    };
+    quiz_answers?: Record<string, any>;
+  };
   plan?: Plan;
 }
 
@@ -43,16 +53,31 @@ export default function AdminLeadsPage() {
   async function fetchLeads() {
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      // Try to fetch with join first
+      // We use !selected_plan_id to specify the foreign key if Supabase is confused
+      let { data, error } = await supabase
         .from('leads')
-        .select('*, plan:plans(title, operator_name, price_dh)')
+        .select('*, plan:plans!selected_plan_id(title, operator_name, price_dh)')
         .order('created_at', { ascending: false })
 
-      if (!error && data) {
+      // Fallback: if join fails (e.g. relationship not defined in DB), fetch leads only
+      if (error) {
+        console.warn("Join failed, fetching leads without plans:", error)
+        const { data: simpleData, error: simpleError } = await supabase
+          .from('leads')
+          .select('*')
+          .order('created_at', { ascending: false })
+        
+        if (!simpleError && simpleData) {
+          setLeads(simpleData as any[])
+        } else if (simpleError) {
+          console.error("Simple fetch failed:", simpleError)
+        }
+      } else if (data) {
         setLeads(data as any[])
       }
     } catch (err) {
-      console.error("Fetch error:", err)
+      console.error("Critical fetch error:", err)
     } finally {
       setLoading(false)
     }
@@ -63,7 +88,7 @@ export default function AdminLeadsPage() {
   }, [])
 
   // Filtered Leads
-  const filteredLeads = leads.filter(lead => {
+  const filteredLeads = leads.filter((lead: Lead) => {
     const matchesCity = filterCity === "all" || lead.city?.toLowerCase() === filterCity.toLowerCase()
     const matchesStatus = filterStatus === "all" || lead.status === filterStatus
     const source = lead.needs_details?.source || lead.needs_details?.lead_source || "direct"
@@ -92,7 +117,7 @@ export default function AdminLeadsPage() {
       "Statut", "Source", "Forfait Voulu", "Opérateur Actuel", "Vitesse Download", "Vitesse Upload"
     ]
     
-    const rows = filteredLeads.map(lead => {
+    const rows = filteredLeads.map((lead: Lead) => {
       const date = new Date(lead.created_at).toLocaleString('fr-FR')
       return [
         lead.id,
