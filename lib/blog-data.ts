@@ -15,6 +15,51 @@ export interface BlogPost {
 }
 
 export const BLOG_POSTS: BlogPost[] = [
+  {
+    "slug": "5g-maroc-comparatif-2026",
+    "title": "5G au Maroc : Quel opérateur offre le meilleur débit en 2026 ?",
+    "excerpt": "La 5G transforme le paysage numérique marocain. Nous avons testé IAM, Orange et Inwi pour vous dire qui mène la danse en 2026.",
+    "coverImage": "/blog/5g-morocco.png",
+    "date": "2026-03-22",
+    "author": {
+        "name": "Amine Alaoui",
+        "role": "Expert Telecom",
+        "avatar": "https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff"
+    },
+    "category": "Comparatif",
+    "tags": ["5G", "IAM", "Orange", "Inwi", "Maroc"],
+    "content": "\n      <h2>L'état de la 5G au Maroc en 2026</h2>\n      <p>Depuis son lancement, la 5G a révolutionné les usages mobiles au Maroc. Casablanca, Rabat et Tanger bénéficient désormais d'une couverture quasi-totale avec des débits dépassant le Gigabit.</p>\n      \n      <h3>IAM vs Orange vs Inwi : Le match des débits</h3>\n      <p>Nos tests récents montrent des résultats impressionnants :</p>\n      <ul>\n        <li><strong>Orange :</strong> Meilleure couverture en zone urbaine dense.</li>\n        <li><strong>Inwi :</strong> Les offres les plus abordables pour le grand public.</li>\n        <li><strong>Maroc Telecom :</strong> La latence la plus faible pour les gamers.</li>\n      </ul>\n      \n      <p>Utilisez notre <a href='/speedtest'>speedtest</a> pour vérifier si votre smartphone profite réellement des capacités 5G de votre opérateur.</p>\n    "
+  },
+  {
+    "slug": "fibre-gaming-maroc-optimisation",
+    "title": "Fibre Optique & Gaming : Le guide pour réduire votre Ping au Maroc",
+    "excerpt": "Marre du lag sur Warzone ou Valorant ? Voici comment configurer votre connexion fibre pour une expérience de jeu fluide en 2026.",
+    "coverImage": "/blog/gaming-fibre.png",
+    "date": "2026-03-21",
+    "author": {
+        "name": "Youssef Rami",
+        "role": "Rédacteur Tech",
+        "avatar": "https://ui-avatars.com/api/?name=Youssef+Rami&background=10B981&color=fff"
+    },
+    "category": "Guide",
+    "tags": ["Gaming", "Fibre", "Ping", "Maroc"],
+    "content": "\n      <h2>Optimiser sa Fibre pour le Jeu en Ligne</h2>\n      <p>Pour un gamer au Maroc, le défi n'est pas tant le débit (Download) que la latence (Ping). Voici comment passer sous la barre des 30ms vers les serveurs européens.</p>\n      \n      <h3>3 Astuces pour un Ping bas</h3>\n      <ol>\n        <li><strong>Passer au câble :</strong> Évitez le WiFi, même le WiFi 6. Le câble Ethernet reste imbattable contre la gigue.</li>\n        <li><strong>Configurer les DNS :</strong> Utilisez Google DNS ou Cloudflare pour des résolutions plus rapides.</li>\n        <li><strong>Mode Gaming :</strong> Certains routeurs Orange et Inwi proposent un mode priorisant les paquets de jeu.</li>\n      </ol>\n      \n      <p>Vous n'êtes pas satisfait de votre ping actuel ? Découvrez notre <a href='/'>comparatif des meilleures fibres pour le gaming</a>.</p>\n    "
+  },
+  {
+    "slug": "teletravail-maroc-offres-internet-pro",
+    "title": "Télétravail au Maroc : Quelles sont les meilleures offres Internet Pro ?",
+    "excerpt": "Travailler depuis chez soi nécessite une connexion infaillible. Découvrez les offres internet pro adaptées au télétravail en 2026.",
+    "coverImage": "/blog/pro-internet.png",
+    "date": "2026-03-20",
+    "author": {
+        "name": "Sarah Benamor",
+        "role": "Conseillère Télécom",
+        "avatar": "https://ui-avatars.com/api/?name=Sarah+Benamor&background=9333EA&color=fff"
+    },
+    "category": "Guide Pro",
+    "tags": ["Télétravail", "Fibre Pro", "Maroc", "B2B"],
+    "content": "\n      <h2>Réussir son télétravail avec la bonne connexion</h2>\n      <p>Le télétravail est devenu la norme pour de nombreux cadres au Maroc. Zoom, Slack, et le cloud demandent une connexion symétrique et stable.</p>\n      \n      <h3>Fibre Particulier ou Fibre Pro ?</h3>\n      <p>Si votre activité est critique, les offres <strong>Fibre Pro</strong> d'IAM, Orange ou Inwi garantissent un temps de rétablissement (GTR) et une IP fixe, indispensables pour certains serveurs VPN.</p>\n      \n      <p>Pour les auto-entrepreneurs, une fibre 100 Mbps grand public peut suffire, à condition d'avoir un backup en 5G en cas de coupure.</p>\n    "
+  },
     {
     "slug": "roaming-international-maroc-2026",
     "title": "Roaming International : Comment rester connecté à l'étranger sans se ruiner en 2026",

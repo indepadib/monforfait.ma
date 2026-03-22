@@ -6,13 +6,16 @@ import { Navigation } from "@/components/Navigation"
 import { 
   Download, Users, Phone, MapPin, Mail, RefreshCcw, 
   Search, Filter, ExternalLink, Calendar, Zap, 
-  BarChart3, Clock, AlertCircle, X
+  BarChart3, Clock, AlertCircle, X,
+  TrendingUp, ThumbsUp, AlertTriangle, Star, Crown
 } from "lucide-react"
 
 interface Plan {
   title: string;
-  operator_name: string;
   price_dh: number;
+  operator?: {
+    name: string;
+  };
 }
 
 interface Lead {
@@ -28,6 +31,8 @@ interface Lead {
   needs_details: {
     source?: string;
     lead_source?: string;
+    installation_timing?: 'asap' | '1_month' | 'compare';
+    preferred_operator?: string;
     speedtest?: {
       isp: string;
       downloadMbps: number;
@@ -57,7 +62,7 @@ export default function AdminLeadsPage() {
       // We use !selected_plan_id to specify the foreign key if Supabase is confused
       let { data, error } = await supabase
         .from('leads')
-        .select('*, plan:plans!selected_plan_id(title, operator_name, price_dh)')
+        .select('*, plan:plans!selected_plan_id(title, price_dh, operator:operators(name))')
         .order('created_at', { ascending: false })
 
       // Fallback: if join fails (e.g. relationship not defined in DB), fetch leads only
@@ -104,6 +109,7 @@ export default function AdminLeadsPage() {
   // Stats calculation
   const stats = {
     total: leads.length,
+    hot: leads.filter((l: Lead) => l.needs_details?.installation_timing === 'asap').length,
     new: leads.filter((l: Lead) => l.status === 'new' || l.status === 'new_qualified').length,
     pro: leads.filter((l: Lead) => l.is_pro || l.status === 'new_pro').length,
     cities: [...new Set(leads.map((l: Lead) => l.city).filter(Boolean))].length
@@ -114,7 +120,7 @@ export default function AdminLeadsPage() {
 
     const headers = [
       "ID", "Date", "Nom", "Téléphone", "Email", "Ville", "Adresse", 
-      "Statut", "Source", "Forfait Voulu", "Opérateur Actuel", "Vitesse Download", "Vitesse Upload"
+      "Statut", "Source", "Forfait Voulu", "Délai", "Opérateur Préféré", "Opérateur Actuel", "Vitesse Download", "Vitesse Upload"
     ]
     
     const rows = filteredLeads.map((lead: Lead) => {
@@ -129,7 +135,9 @@ export default function AdminLeadsPage() {
         `"${lead.address || ''}"`,
         lead.status || 'new',
         lead.needs_details?.source || lead.needs_details?.lead_source || 'direct',
-        `"${lead.plan?.operator_name || ''} ${lead.plan?.title || ''}"`,
+        `"${lead.plan?.operator?.name || ''} ${lead.plan?.title || ''}"`,
+        `"${lead.needs_details?.installation_timing || ''}"`,
+        `"${lead.needs_details?.preferred_operator || ''}"`,
         `"${lead.needs_details?.speedtest?.isp || ''}"`,
         lead.needs_details?.speedtest?.downloadMbps || '',
         lead.needs_details?.speedtest?.uploadMbps || ''
@@ -182,9 +190,9 @@ export default function AdminLeadsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
             { label: 'Total Leads', val: stats.total, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: 'Nouveaux / Qualifiés', val: stats.new, icon: Zap, color: 'text-orange-500', bg: 'bg-orange-50' },
-            { label: 'Leads PRO / B2B', val: stats.pro, icon: BarChart3, color: 'text-purple-600', bg: 'bg-purple-50' },
-            { label: 'Villes couvertes', val: stats.cities, icon: MapPin, color: 'text-green-600', bg: 'bg-green-50' }
+            { label: 'LEADS HOT 🔥', val: stats.hot, icon: Zap, color: 'text-red-500', bg: 'bg-red-50' },
+            { label: 'PRO / B2B', val: stats.pro, icon: BarChart3, color: 'text-purple-600', bg: 'bg-purple-50' },
+            { label: 'Villes', val: stats.cities, icon: MapPin, color: 'text-green-600', bg: 'bg-green-50' }
           ].map((s, i) => (
             <div key={i} className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
               <div className="flex justify-between items-start mb-4">
@@ -258,8 +266,8 @@ export default function AdminLeadsPage() {
               <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 font-bold">
                 <tr>
                   <th className="px-6 py-5">Prospect</th>
-                  <th className="px-6 py-5">Forfait Souhaité</th>
-                  <th className="px-6 py-5">Installation actuelle</th>
+                  <th className="px-6 py-5">Offre / Intention</th>
+                  <th className="px-6 py-5">Délai / Score</th>
                   <th className="px-6 py-5">Statut</th>
                   <th className="px-6 py-5 text-right">Action</th>
                 </tr>
@@ -304,34 +312,41 @@ export default function AdminLeadsPage() {
                         {lead.plan ? (
                           <div>
                             <div className="font-bold text-zinc-900 dark:text-white">
-                              {lead.plan.operator_name} {lead.plan.title}
+                              {lead.plan?.operator?.name} {lead.plan.title}
                             </div>
-                            <div className="text-xs text-blue-600 font-bold">{lead.plan.price_dh} DH/mois</div>
+                            <div className="text-[10px] text-blue-600 font-black uppercase tracking-widest flex items-center gap-1.5 mt-1">
+                               <Zap className="w-3 h-3" /> Préférence : {lead.needs_details?.preferred_operator || 'Match'}
+                            </div>
                           </div>
                         ) : (
-                          <div className="text-zinc-400 italic">Non spécifié</div>
+                          <div className="text-zinc-400 italic">Comparaison libre</div>
                         )}
                       </td>
                       <td className="px-6 py-5">
-                        {lead.needs_details?.speedtest ? (
-                          <div>
-                            <div className="flex items-center gap-1 font-bold text-green-600">
-                              <Zap className="w-3 h-3" /> {lead.needs_details.speedtest.isp}
-                            </div>
-                            <div className="text-xs text-zinc-500">
-                              ↓ {lead.needs_details.speedtest.downloadMbps} / ↑ {lead.needs_details.speedtest.uploadMbps} Mbps
-                            </div>
+                        <div className="flex flex-col gap-1">
+                          {lead.needs_details?.installation_timing === 'asap' ? (
+                            <span className="inline-flex items-center gap-1 text-red-600 font-black text-[10px] bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full w-fit">
+                              <Zap className="w-3 h-3" /> HOT / IMMÉDIAT
+                            </span>
+                          ) : lead.needs_details?.installation_timing === '1_month' ? (
+                            <span className="inline-flex items-center gap-1 text-orange-600 font-black text-[10px] bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-full w-fit">
+                              <Clock className="w-3 h-3" /> WARM / 1 MOIS
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-zinc-500 font-black text-[10px] bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full w-fit">
+                              COLD / PRIX
+                            </span>
+                          )}
+                          <div className="text-[10px] text-zinc-400 font-bold ml-1">
+                            {lead.needs_details?.speedtest?.isp ? `Actuel: ${lead.needs_details.speedtest.isp}` : 'Nouveau client'}
                           </div>
-                        ) : (
-                          <div className="text-zinc-400">Pas de test effectué</div>
-                        )}
+                        </div>
                       </td>
                       <td className="px-6 py-5">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
                           ${lead.status === 'new' ? 'bg-zinc-100 text-zinc-600' : ''}
                           ${lead.status === 'new_qualified' ? 'bg-green-100 text-green-700' : ''}
                           ${lead.status === 'new_pro' ? 'bg-purple-100 text-purple-700' : ''}
-                          ${lead.status === 'speedtest_captured' ? 'bg-orange-100 text-orange-700' : ''}
                         `}>
                           {lead.status?.replace('_', ' ') || 'New'}
                         </span>
@@ -432,8 +447,20 @@ export default function AdminLeadsPage() {
                       <div className="p-5 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-600/20">
                          {selectedLead.plan ? (
                            <>
-                              <div className="text-xs text-blue-100 uppercase font-bold tracking-widest mb-1">Cible : {selectedLead.plan.operator_name}</div>
+                              <div className="text-xs text-blue-100 uppercase font-bold tracking-widest mb-1">Cible : {selectedLead.plan?.operator?.name}</div>
                               <div className="text-2xl font-black leading-tight mb-4">{selectedLead.plan.title}</div>
+                              
+                              <div className="space-y-2 mb-4">
+                                <div className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm text-xs">
+                                  <span>Délai souhaité</span>
+                                  <span className="font-black uppercase">{selectedLead.needs_details?.installation_timing || 'N/A'}</span>
+                                </div>
+                                <div className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm text-xs">
+                                  <span>Opérateur Préféré</span>
+                                  <span className="font-black uppercase">{selectedLead.needs_details?.preferred_operator || 'Aucun'}</span>
+                                </div>
+                              </div>
+
                               <div className="flex justify-between items-center bg-white/10 p-3 rounded-xl backdrop-blur-sm">
                                 <span className="text-sm font-bold">Coût estimé</span>
                                 <span className="text-xl font-black">{selectedLead.plan.price_dh} DH</span>
