@@ -16,8 +16,9 @@ export function EligibilityChecker() {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [reason, setReason] = useState('');
+    const [city, setCity] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [sent, setSent] = useState(false); // To handle results display more cleanly
+    const [sent, setSent] = useState(false);
 
     const handleNeedSelection = (selectedNeed: string) => {
         setNeed(selectedNeed);
@@ -66,7 +67,7 @@ export function EligibilityChecker() {
                         leadId: leadData?.id,
                         phone: phone,
                         user_name: name,
-                        city: city,
+                        city: city || address.split(',').slice(-3, -2)[0]?.trim() || 'Casablanca',
                         address: address,
                         source: 'eligibility_checker',
                         needs_details: {
