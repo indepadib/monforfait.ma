@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import { Wifi, Home, MapPin, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
 import { AddressMapPicker } from '@/components/AddressMapPicker';
 
-type Step = 'NEED' | 'LOCATION' | 'CONTACT' | 'SCANNING' | 'RESULT';
+type Step = 'NEED' | 'REASON' | 'LOCATION' | 'CONTACT' | 'SCANNING' | 'RESULT';
 
 export function EligibilityChecker() {
     const [step, setStep] = useState<Step>('NEED');
@@ -14,10 +15,17 @@ export function EligibilityChecker() {
     const [lon, setLon] = useState<number | null>(null);
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+    const [reason, setReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [sent, setSent] = useState(false); // To handle results display more cleanly
 
     const handleNeedSelection = (selectedNeed: string) => {
         setNeed(selectedNeed);
+        setStep('REASON');
+    };
+
+    const handleReasonSelection = (selectedReason: string) => {
+        setReason(selectedReason);
         setStep('LOCATION');
     };
 
@@ -33,24 +41,44 @@ export function EligibilityChecker() {
         if (name && phone.length >= 10) {
             setStep('SCANNING');
             
-            // Send to Webhook
+            // 1. Save to Supabase
             try {
+                const { data: leadData } = await supabase.from('leads').insert({
+                    user_name: name,
+                    user_phone: phone,
+                    address: address,
+                    status: 'eligibility_qualified',
+                    needs_details: {
+                        source: 'eligibility_v3',
+                        need,
+                        reason,
+                        lat,
+                        lon,
+                        captured_at: new Date().toISOString()
+                    }
+                }).select('id').single();
+
+                // 2. Secondary notification pipeline
                 await fetch('/api/leads/notify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        source: 'eligibility',
-                        need,
-                        address,
-                        lat,
-                        lon,
-                        name,
-                        phone,
-                        timestamp: new Date().toISOString()
+                        leadId: leadData?.id,
+                        phone: phone,
+                        user_name: name,
+                        city: city,
+                        address: address,
+                        source: 'eligibility_checker',
+                        needs_details: {
+                            reason,
+                            need,
+                            location: { lat, lon },
+                            captured_at: new Date().toISOString()
+                        }
                     })
                 });
             } catch (err) {
-                console.error("Failed to send webhook", err);
+                console.error("Failed to save lead", err);
             }
 
             // Simulate scanning
@@ -65,9 +93,10 @@ export function EligibilityChecker() {
             {/* Progress Bar */}
             {step !== 'SCANNING' && step !== 'RESULT' && (
                 <div className="flex gap-2 mb-8">
-                    <div className={`h-2 flex-1 rounded-full ${step === 'NEED' ? 'bg-blue-600' : 'bg-blue-200 dark:bg-blue-900'}`}></div>
-                    <div className={`h-2 flex-1 rounded-full ${step === 'LOCATION' ? 'bg-blue-600' : (step === 'CONTACT' ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800')}`}></div>
-                    <div className={`h-2 flex-1 rounded-full ${step === 'CONTACT' ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800'}`}></div>
+                    <div className={`h-2 flex-1 rounded-full ${['NEED', 'REASON', 'LOCATION', 'CONTACT'].includes(step) ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800'}`}></div>
+                    <div className={`h-2 flex-1 rounded-full ${['REASON', 'LOCATION', 'CONTACT'].includes(step) ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800'}`}></div>
+                    <div className={`h-2 flex-1 rounded-full ${['LOCATION', 'CONTACT'].includes(step) ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800'}`}></div>
+                    <div className={`h-2 flex-1 rounded-full ${['CONTACT'].includes(step) ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800'}`}></div>
                 </div>
             )}
 
@@ -104,7 +133,7 @@ export function EligibilityChecker() {
 
             {step === 'LOCATION' && (
                 <div className="animate-in fade-in slide-in-from-right-8 duration-500">
-                    <button onClick={() => setStep('NEED')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">← Retour</button>
+                    <button onClick={() => setStep('REASON')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">← Retour</button>
                     <div className="mb-6">
                         <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">Où habitez-vous ?</h3>
                         <p className="text-zinc-500 dark:text-zinc-400 text-sm">Recherchez votre adresse puis glissez le marqueur pour ajuster précisément votre position.</p>
@@ -144,13 +173,13 @@ export function EligibilityChecker() {
                             <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">Prénom & Nom</label>
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                                <input 
-                                    type="text" 
-                                    required 
+                                <input
+                                    type="text"
                                     value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="Amine Benali" 
-                                    className="w-full pl-10 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                                    placeholder="Votre nom complet"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
+                                    required
                                 />
                             </div>
                         </div>
@@ -158,13 +187,13 @@ export function EligibilityChecker() {
                             <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">Numéro de téléphone</label>
                             <div className="relative">
                                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                                <input 
-                                    type="tel" 
-                                    required 
+                                <input
+                                    type="tel"
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    placeholder="06 XX XX XX XX" 
-                                    className="w-full pl-10 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+                                    placeholder="Votre numéro de téléphone"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
+                                    required
                                 />
                             </div>
                         </div>
@@ -197,16 +226,16 @@ export function EligibilityChecker() {
                     <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                         <CheckCircle2 className="w-10 h-10" />
                     </div>
-                    <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-4">Bonne nouvelle !</h3>
+                    <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-4">Analyse Terminée !</h3>
                     <p className="text-zinc-600 dark:text-zinc-400 mb-8 max-w-md mx-auto">
-                        Votre quartier (<span className="font-bold text-zinc-900 dark:text-white">{address}</span>) semble éligible aux offres haut débit. Les techniciens peuvent vous raccorder rapidement.
+                        Votre adresse (<span className="font-bold text-zinc-900 dark:text-white">{address}</span>) est bien située dans une zone couverte par le Très Haut Débit.
                     </p>
-                    <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-900/30 rounded-2xl p-6 mb-8 text-left">
-                        <h4 className="font-bold text-orange-800 dark:text-orange-400 mb-2 flex items-center gap-2">
-                            <ShieldCheck className="w-5 h-5" /> Attention aux arnaques
+                    <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-2xl p-6 mb-8 text-left">
+                        <h4 className="font-bold text-blue-800 dark:text-blue-400 mb-2 flex items-center gap-2">
+                             Un conseiller vous contactera
                         </h4>
-                        <p className="text-sm text-orange-700/80 dark:text-orange-300/80">
-                            Ne souscrivez pas directement en agence ! 92% des personnes paient trop cher car elles n'ont pas accès aux offres "Rétention B2B". Utilisez notre comparateur secret pour voir les vrais prix (jusqu'à -40%).
+                        <p className="text-sm text-blue-700/80 dark:text-blue-300/80 italic">
+                            "Un expert va analyzer les raccordements exacts devant votre porte et vous proposera les offres de rétention exclusives sous 24h."
                         </p>
                     </div>
                     <a href="/?scam=true" className="inline-flex w-full bg-black dark:bg-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white font-black py-4 px-8 rounded-xl items-center justify-center gap-2 transition-transform active:scale-95 shadow-2xl">
