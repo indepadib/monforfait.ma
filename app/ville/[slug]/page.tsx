@@ -17,10 +17,27 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
     const formattedCity = slug.charAt(0).toUpperCase() + slug.slice(1).toLowerCase();
+    const url = `https://monforfait.ma/ville/${slug}`;
 
     return {
         title: `Meilleur Forfait Mobile et Fibre Optique à ${formattedCity} (2026)`,
-        description: `Comparez les offres Fibre et Mobile (Orange, Inwi, IAM) spécifiquement pour la ville de ${formattedCity}. Découvrez les prix cachés et économisez.`,
+        description: `Comparez les offres Fibre et Mobile (Orange, Inwi, IAM) spécifiquement pour la ville de ${formattedCity}. Découvrez les prix cachés et économisez avec MonForfait.ma.`,
+        alternates: {
+            canonical: url,
+        },
+        openGraph: {
+            title: `Meilleur Forfait à ${formattedCity} | MonForfait.ma`,
+            description: `Trouvez la meilleure offre internet et mobile à ${formattedCity}. Comparatif gratuit 2026.`,
+            url: url,
+            siteName: 'MonForfait.ma',
+            locale: 'fr_MA',
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `Meilleur Forfait à ${formattedCity} | MonForfait.ma`,
+            description: `Trouvez la meilleure offre internet et mobile à ${formattedCity}. Comparatif gratuit 2026.`,
+        }
     };
 }
 

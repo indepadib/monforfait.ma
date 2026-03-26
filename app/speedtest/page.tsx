@@ -32,7 +32,8 @@ export default function SpeedTestPage() {
         phone: '',
         city: '',
         address: '',
-        reason: ''
+        reason: '',
+        timing: 'asap'
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [sent, setSent] = useState(false)
@@ -114,8 +115,12 @@ export default function SpeedTestPage() {
                     address: leadForm.address,
                     source: 'speedtest',
                     needs_details: {
+                        source: 'speedtest_v3_premium',
+                        download: result.downloadMbps,
+                        upload: result.uploadMbps,
+                        ping: result.ping, // Using result.ping as result.pingMs is not defined
                         reason: leadForm.reason,
-                        speedtest_results: { download, upload, ping, jitter },
+                        installation_timing: leadForm.timing,
                         captured_at: new Date().toISOString()
                     }
                 })
@@ -318,17 +323,27 @@ export default function SpeedTestPage() {
                                                     <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Adresse / Secteur</label>
                                                     <input required value={leadForm.address} onChange={e => setLeadForm({ ...leadForm, address: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm" placeholder="N° Rue, Quartier..." />
                                                 </div>
+                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Situation actuelle</label>
+                                                    <select required value={leadForm.reason} onChange={e => setLeadForm({ ...leadForm, reason: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm appearance-none cursor-pointer">
+                                                        <option value="" className="text-zinc-900">Motif de ce test...</option>
+                                                        <option value="too_slow" className="text-zinc-900">Connexion trop lente (Switching)</option>
+                                                        <option value="price" className="text-zinc-900">Je paie trop cher pour ce débit</option>
+                                                        <option value="moving" className="text-zinc-900">Déménagement imminent</option>
+                                                        <option value="first_time" className="text-zinc-900">Premier abonnement Fibre</option>
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Délai souhaité</label>
+                                                    <select required value={leadForm.timing} onChange={e => setLeadForm({ ...leadForm, timing: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm appearance-none cursor-pointer">
+                                                        <option value="asap" className="text-zinc-900">Dès que possible (Urgent)</option>
+                                                        <option value="1_month" className="text-zinc-900">D'ici 1 mois</option>
+                                                        <option value="checking" className="text-zinc-900">Simple comparaison</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Situation actuelle</label>
-                                                <select required value={leadForm.reason} onChange={e => setLeadForm({ ...leadForm, reason: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm appearance-none cursor-pointer">
-                                                    <option value="" className="text-zinc-900">Motif de ce test...</option>
-                                                    <option value="too_slow" className="text-zinc-900">Connexion trop lente (Switching)</option>
-                                                    <option value="price" className="text-zinc-900">Je paie trop cher pour ce débit</option>
-                                                    <option value="moving" className="text-zinc-900">Déménagement imminent</option>
-                                                    <option value="first_time" className="text-zinc-900">Premier abonnement Fibre</option>
-                                                </select>
-                                            </div>
+                    </div>
 
                                             <div className="bg-red-500/20 text-red-400 p-4 rounded-2xl text-[10px] font-bold flex items-center gap-3 border border-red-500/30 uppercase tracking-widest italic">
                                                 <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>

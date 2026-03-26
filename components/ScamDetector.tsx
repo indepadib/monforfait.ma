@@ -54,10 +54,17 @@ export function ScamDetector() {
 
             {step === 'input' && (
                 <div className="relative z-10 animate-in fade-in duration-500">
-                    <div className="flex items-center gap-2 mb-6 text-red-500">
-                        <Zap className="w-6 h-6 animate-pulse" />
-                        <h3 className="font-black text-xl uppercase tracking-wider">Détecteur d'Arnaque</h3>
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-2 text-red-500">
+                            <Zap className="w-6 h-6 animate-pulse" />
+                            <h3 className="font-black text-xl uppercase tracking-wider">Détecteur d'Arnaque</h3>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded-lg text-[10px] font-bold text-green-500 uppercase">
+                            <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
+                            Live
+                        </div>
                     </div>
+
                     
                     <form onSubmit={handleScan} className="space-y-4">
                         <div>

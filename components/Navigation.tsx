@@ -34,11 +34,15 @@ export function Navigation() {
                     <a href="/#comparateur" className="hover:text-black dark:hover:text-white transition-colors">Comparateur</a>
                     <Link href="/quiz" className="hover:text-black dark:hover:text-white transition-colors">Quiz</Link>
                     <Link href="/speedtest" className="hover:text-black dark:hover:text-white transition-colors">Speed Test</Link>
-                    <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors text-blue-600 dark:text-blue-400 font-medium">Blog</Link>
+                    <Link href="/blog" className="relative hover:text-black dark:hover:text-white transition-colors text-blue-600 dark:text-blue-400 font-medium group">
+                        Blog
+                        <span className="absolute -top-2 -right-4 bg-red-500 text-[8px] text-white px-1 rounded-full animate-pulse">NEW</span>
+                    </Link>
                     <Link href="/contact" className="hover:text-black dark:hover:text-white transition-colors">Contact</Link>
                     <a href="/#comparateur" onClick={() => {
                         window.dispatchEvent(new CustomEvent('switch-audience-pro'));
-                    }} className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors">
+                    }} className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors group">
+                        <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-ping"></span>
                         Espace Pro
                     </a>
                 </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Wifi, Home, MapPin, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Wifi, Home, MapPin, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { AddressMapPicker } from '@/components/AddressMapPicker';
 
 type Step = 'NEED' | 'REASON' | 'LOCATION' | 'CONTACT' | 'SCANNING' | 'RESULT';
@@ -17,8 +17,11 @@ export function EligibilityChecker() {
     const [phone, setPhone] = useState('');
     const [reason, setReason] = useState('');
     const [city, setCity] = useState('');
+    const [timing, setTiming] = useState('asap');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [sent, setSent] = useState(false);
+    const [comment, setComment] = useState('');
+
 
     const handleNeedSelection = (selectedNeed: string) => {
         setNeed(selectedNeed);
@@ -53,10 +56,13 @@ export function EligibilityChecker() {
                         source: 'eligibility_v3',
                         need,
                         reason,
+                        installation_timing: timing,
+                        comment,
                         lat,
                         lon,
                         captured_at: new Date().toISOString()
                     }
+
                 }).select('id').single();
 
                 // 2. Secondary notification pipeline
@@ -73,9 +79,12 @@ export function EligibilityChecker() {
                         needs_details: {
                             reason,
                             need,
+                            installation_timing: timing,
+                            comment,
                             location: { lat, lon },
                             captured_at: new Date().toISOString()
                         }
+
                     })
                 });
             } catch (err) {
@@ -131,6 +140,35 @@ export function EligibilityChecker() {
                     </div>
                 </div>
             )}
+
+            {step === 'REASON' && (
+                <div className="animate-in fade-in slide-in-from-right-8 duration-500">
+                    <button onClick={() => setStep('NEED')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">← Retour</button>
+                    <div className="text-center mb-8">
+                        <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white mb-2">Quelle est votre situation ?</h3>
+                        <p className="text-zinc-500 dark:text-zinc-400">Cela nous aide à trouver les meilleures offres de bienvenue ou de rétention.</p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                        {[
+                            { id: 'moving', label: 'Je déménage prochainement', icon: Home, color: 'text-blue-500' },
+                            { id: 'better_price', label: 'Je veux payer moins cher', icon: ShieldCheck, color: 'text-green-500' },
+                            { id: 'better_speed', label: 'Mon débit actuel est trop lent', icon: Activity, color: 'text-orange-500' },
+                            { id: 'new_line', label: 'Nouveau raccordement / 1ère box', icon: Zap, color: 'text-yellow-500' }
+                        ].map((item) => (
+                            <button 
+                                key={item.id}
+                                onClick={() => handleReasonSelection(item.label)}
+                                className="flex items-center gap-4 p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left transition-all group"
+                            >
+                                <item.icon className={`w-6 h-6 ${item.color} group-hover:scale-110 transition-transform`} />
+                                <span className="font-bold text-zinc-900 dark:text-white">{item.label}</span>
+                                <ChevronRight className="w-5 h-5 ml-auto text-zinc-300 group-hover:text-blue-500 transition-colors" />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
 
             {step === 'LOCATION' && (
                 <div className="animate-in fade-in slide-in-from-right-8 duration-500">
@@ -196,8 +234,32 @@ export function EligibilityChecker() {
                                     className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
                                     required
                                 />
+
                             </div>
                         </div>
+                        <div>
+
+                            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">Délai souhaité</label>
+                            <select 
+                                value={timing}
+                                onChange={(e) => setTiming(e.target.value)}
+                                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white font-bold"
+                            >
+                                <option value="asap">Dès que possible (Urgent)</option>
+                                <option value="1_month">D'ici 1 mois</option>
+                            <option value="checking">Simple comparaison</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">Commentaire (Optionnel)</label>
+                        <textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            placeholder="Ex: Je cherche la fibre pour du gaming, ou j'ai besoin d'une IP fixe..."
+                            className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white min-h-[80px]"
+                        />
+                    </div>
+
                         <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/30">
                             Lancer le Test de Couverture <ArrowRight className="w-5 h-5" />
                         </button>
@@ -228,7 +290,16 @@ export function EligibilityChecker() {
                         <CheckCircle2 className="w-10 h-10" />
                     </div>
                     <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-4">Analyse Terminée !</h3>
+                    <div className="flex items-center justify-center gap-4 mb-8">
+                        <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-1 rounded-md">
+                            <ShieldCheck className="w-3 h-3 text-green-500" /> Data encrypted
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-1 rounded-md">
+                            <CheckCircle2 className="w-3 h-3 text-blue-500" /> Verified Address
+                        </div>
+                    </div>
                     <p className="text-zinc-600 dark:text-zinc-400 mb-8 max-w-md mx-auto">
+
                         Votre adresse (<span className="font-bold text-zinc-900 dark:text-white">{address}</span>) est bien située dans une zone couverte par le Très Haut Débit.
                     </p>
                     <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-2xl p-6 mb-8 text-left">

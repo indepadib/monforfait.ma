@@ -12,10 +12,11 @@ import { HeroQuickFilter } from '@/components/HeroQuickFilter';
 import { PromoUnlockerForm } from '@/components/PromoUnlockerForm';
 import { LiveFOMOTicker } from '@/components/LiveFOMOTicker';
 import { ScamDetector } from '@/components/ScamDetector';
+import { PartnerLogos } from '@/components/PartnerLogos';
+import { ArrowRight } from 'lucide-react';
+
 
 export default function Home() {
-// ... Skipped lines to the comparison engine ...
-// Let's use multi_replace.
   return (
     <main className="min-h-screen bg-white dark:bg-black font-sans">
       {/* Navigation */}
@@ -98,8 +99,25 @@ export default function Home() {
                     En 60 Secondes
                   </div>
                 </div>
+                </div>
+
+                <div className="flex flex-wrap justify-center lg:justify-start gap-4 mt-8">
+                  <Link 
+                    href="/eligibilite" 
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-xl flex items-center justify-center gap-2 transform transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20"
+                  >
+                    Vérifier mon éligibilité <ArrowRight className="w-5 h-5" />
+                  </Link>
+                  <a 
+                    href="#comparateur" 
+                    className="bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 flex items-center justify-center gap-2 transition-all active:scale-95"
+                  >
+                    Voir les offres
+                  </a>
+                </div>
               </div>
             </div>
+
 
             {/* Right Column: Interactive Hook (Aggressive Trap) */}
             <div className="relative z-20 mx-auto w-full max-w-lg lg:max-w-full lg:pl-10">
@@ -109,6 +127,9 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <PartnerLogos />
+
 
       {/* Value Props - Trust Signals */}
       <section aria-labelledby="features-heading" className="max-w-6xl mx-auto px-4 py-16 border-b border-zinc-100 dark:border-zinc-800">
