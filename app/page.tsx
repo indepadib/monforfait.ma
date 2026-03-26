@@ -116,7 +116,6 @@ export default function Home() {
                   </a>
                 </div>
               </div>
-            </div>
 
 
             {/* Right Column: Interactive Hook (Aggressive Trap) */}
