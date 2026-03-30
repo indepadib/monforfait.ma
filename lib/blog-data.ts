@@ -15,6 +15,27 @@ export interface BlogPost {
 }
 
 export const BLOG_POSTS: BlogPost[] = [
+    {
+    "slug": "fibre-optique-auto-entrepreneur-maroc-2026",
+    "title": "Fibre Optique pour les Auto-Entrepreneurs au Maroc : Le Guide Pro",
+    "excerpt": "Comment profiter du statut auto-entrepreneur pour optimiser sa connexion sans payer le prix fort. Comparatif des offres pro et résidentielles.",
+    "coverImage": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80",
+    "date": "2026-03-30",
+    "author": {
+        "name": "Amine Alaoui",
+        "role": "Expert Telecom",
+        "avatar": "https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff"
+    },
+    "category": "Guide",
+    "tags": [
+        "Auto-Entrepreneur",
+        "Fibre Pro",
+        "IAM",
+        "Orange",
+        "Inwi"
+    ],
+    "content": "<h2>Pourquoi choisir une offre Pro ?</h2><p>Le statut d'auto-entrepreneur au Maroc permet d'accéder à des offres internet spécifiques. Mais est-ce toujours rentable ?</p><h3>Les avantages de la Fibre Pro</h3><ul><li>Une assistance technique prioritaire (souvent sous 24h).</li><li>Une adresse IP fixe (essentiel pour certains serveurs).</li><li>Des débits symétriques garantis.</li></ul><p>Consultez notre <a href='/quiz'>quiz</a> pour voir si votre usage justifie le surcoût d'une offre professionnelle.</p>"
+},
   {
     "slug": "5g-maroc-comparatif-2026",
     "title": "5G au Maroc : Quel opérateur offre le meilleur débit en 2026 ?",
