@@ -16,6 +16,26 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
     {
+    "slug": "cih-vs-bmce-vitesse-paiement-forfait-maroc",
+    "title": "CIH Bank vs BMCE : Quelle App est la Plus Rapide pour vos Forfaits ?",
+    "excerpt": "Comparatif de rapidité et de facilité d'usage des applications bancaires pour la gestion de vos recharges et abonnements telecom.",
+    "coverImage": "https://images.unsplash.com/photo-1563013544-824ae14f4826?auto=format&fit=crop&q=80",
+    "date": "2026-04-02",
+    "author": {
+        "name": "Youssef Rami",
+        "role": "Rédacteur Tech",
+        "avatar": "https://ui-avatars.com/api/?name=Youssef+Rami&background=10B981&color=fff"
+    },
+    "category": "Comparatif",
+    "tags": [
+        "Banque Mobile",
+        "Paiement Forfait",
+        "CIH",
+        "BMCE"
+    ],
+    "content": "<h2>Le match des applications bancaires</h2><p>Payer sa facture IAM, Orange ou Inwi en deux clics est devenu un standard. Nous avons testé le parcours utilisateur sur les deux leaders du marché.</p><h3>Vitesse et UX</h3><p>CIH Mobile reste le favori des jeunes pour son interface intuitive, mais BMCE Direct rattrape son retard avec une intégration native des facturiers télécom très efficace.</p>"
+},
+    {
     "slug": "fibre-optique-auto-entrepreneur-maroc-2026",
     "title": "Fibre Optique pour les Auto-Entrepreneurs au Maroc : Le Guide Pro",
     "excerpt": "Comment profiter du statut auto-entrepreneur pour optimiser sa connexion sans payer le prix fort. Comparatif des offres pro et résidentielles.",
