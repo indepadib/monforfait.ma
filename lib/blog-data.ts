@@ -16,6 +16,26 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
     {
+    "slug": "starlink-maroc-prix-performance-2026",
+    "title": "Starlink au Maroc : L'alternative réelle à la Fibre IAM en zone rurale",
+    "excerpt": "Délais, prix, installation et performances comparées aux offres locales. Starlink est-il enfin une solution viable pour les Marocains ?",
+    "coverImage": "https://images.unsplash.com/photo-1544006659-f0b21f04cb1d?auto=format&fit=crop&q=80",
+    "date": "2026-04-06",
+    "author": {
+        "name": "Amine Alaoui",
+        "role": "Expert Telecom",
+        "avatar": "https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff"
+    },
+    "category": "Comparatif",
+    "tags": [
+        "Starlink",
+        "Satellite",
+        "Internet Rural",
+        "IAM"
+    ],
+    "content": "<h2>Starlink vs Infrastructure Locale</h2><p>Le déploiement de Starlink au Maroc change la donne pour les zones blanches. Là où IAM ou Inwi ne tirent pas de câbles, SpaceX propose une connexion haut débit venue du ciel.</p><h3>Vitesse et Latence</h3><p>Nos tests montrent un débit descendant entre 150 et 250 Mbps, mais un ping légèrement plus instable que la fibre optique (40-60ms). C'est idéal pour le télétravail mais peut être frustrant pour le gaming compétitif.</p>"
+},
+    {
     "slug": "cih-vs-bmce-vitesse-paiement-forfait-maroc",
     "title": "CIH Bank vs BMCE : Quelle App est la Plus Rapide pour vos Forfaits ?",
     "excerpt": "Comparatif de rapidité et de facilité d'usage des applications bancaires pour la gestion de vos recharges et abonnements telecom.",
