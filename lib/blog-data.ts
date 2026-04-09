@@ -16,6 +16,28 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
     {
+    "slug": "promo-ramadan-telecom-maroc-2026",
+    "title": "Pass 4G/5G Spécial Ramadan : Profiter des Promos Data Nocturnes",
+    "excerpt": "Guide des meilleures offres data pour les nuits du Ramadan. Découvrez comment rester connecté jusqu'au Shour sans vous ruiner.",
+    "coverImage": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80",
+    "date": "2026-04-09",
+    "author": {
+        "name": "Sarah Benamor",
+        "role": "Conseillère Télécom",
+        "avatar": "https://ui-avatars.com/api/?name=Sarah+Benamor&background=9333EA&color=fff"
+    },
+    "category": "Astuce",
+    "tags": [
+        "Ramadan",
+        "Promo Telecom",
+        "Data Mobile",
+        "IAM",
+        "Orange",
+        "Inwi"
+    ],
+    "content": "<h2>Les offres nocturnes du Ramadan</h2><p>Comme chaque année, les opérateurs marocains lancent des forfaits 'Nuits illimitées'. Orange et Inwi proposent souvent des pass à 10 DH pour 2 Go valables de minuit à 8h.</p><h3>Notre recommandation</h3><p>Vérifiez toujours la validité du pass. Certains expirent au bout de 24h, d'autres durent toute une semaine. Utilisez notre <a href='/offers'>comparateur d'offres</a> pour suivre les mises à jour en temps réel.</p>"
+},
+    {
     "slug": "starlink-maroc-prix-performance-2026",
     "title": "Starlink au Maroc : L'alternative réelle à la Fibre IAM en zone rurale",
     "excerpt": "Délais, prix, installation et performances comparées aux offres locales. Starlink est-il enfin une solution viable pour les Marocains ?",
