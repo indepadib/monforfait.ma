@@ -16,6 +16,28 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
     {
+    "slug": "forfait-illimite-maroc-realite-bridage",
+    "title": "Forfait Mobile illimité au Maroc : Réalité ou Argument Marketing ?",
+    "excerpt": "Analyse du bridage (fair use) chez les trois opérateurs majeurs. Ce que cachent réellement les offres dites illimitées.",
+    "coverImage": "https://images.unsplash.com/photo-1512428559083-a4979b20944a?auto=format&fit=crop&q=80",
+    "date": "2026-04-13",
+    "author": {
+        "name": "Youssef Rami",
+        "role": "Rédacteur Tech",
+        "avatar": "https://ui-avatars.com/api/?name=Youssef+Rami&background=10B981&color=fff"
+    },
+    "category": "Guide",
+    "tags": [
+        "Forfait illimité",
+        "Bridage",
+        "ANRT",
+        "IAM",
+        "Orange",
+        "Inwi"
+    ],
+    "content": "<h2>Le mythe de l'illimité</h2><p>Au Maroc, un forfait mobile 'illimité' ne l'est jamais techniquement à 100%. Il existe toujours une politique d'usage raisonnable (Fair Use Policy).</p><h3>Les seuils de bridage</h3><p>Généralement, après 50 Go ou 100 Go de consommation, votre vitesse est réduite à un débit dérisoire (128 kbps). Nous avons décortiqué les conditions générales de vente pour vous montrer les chiffres réels.</p>"
+},
+    {
     "slug": "promo-ramadan-telecom-maroc-2026",
     "title": "Pass 4G/5G Spécial Ramadan : Profiter des Promos Data Nocturnes",
     "excerpt": "Guide des meilleures offres data pour les nuits du Ramadan. Découvrez comment rester connecté jusqu'au Shour sans vous ruiner.",
