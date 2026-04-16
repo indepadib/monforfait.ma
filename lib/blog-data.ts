@@ -16,6 +16,26 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
     {
+    "slug": "fibre-optique-zenata-bouskoura-guide",
+    "title": "Fibre Optique à Zenata et Bouskoura : Le Guide des Nouveaux Arrivants",
+    "excerpt": "Quels opérateurs couvrent le mieux les nouveaux pôles urbains de Casablanca ? Tout savoir pour s'équiper avant d'emménager.",
+    "coverImage": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80",
+    "date": "2026-04-16",
+    "author": {
+        "name": "Amine Alaoui",
+        "role": "Expert Telecom",
+        "avatar": "https://ui-avatars.com/api/?name=Amine+Alaoui&background=2563EB&color=fff"
+    },
+    "category": "Guide",
+    "tags": [
+        "Casablanca",
+        "Zenata",
+        "Bouskoura",
+        "Fibre Optique"
+    ],
+    "content": "<h2>S'installer dans les nouveaux pôles de Casablanca</h2><p>Zenata (Ville Eco) et Bouskoura (Ville Verte) ont été conçues dès le départ pour la fibre optique. Contrairement à Casa-Anfa, le réseau est ici 100% souterrain et moderne.</p><h3>Qui choisir ?</h3><p>Inwi et Orange dominent souvent ces nouvelles zones avec des installations plus rapides que l'opérateur historique. Utilisez notre <a href='/eligibilite'>test d'éligibilité par adresse</a> pour confirmer quel boitier est déjà installé dans votre immeuble.</p>"
+},
+    {
     "slug": "forfait-illimite-maroc-realite-bridage",
     "title": "Forfait Mobile illimité au Maroc : Réalité ou Argument Marketing ?",
     "excerpt": "Analyse du bridage (fair use) chez les trois opérateurs majeurs. Ce que cachent réellement les offres dites illimitées.",
