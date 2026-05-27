@@ -1,5 +1,8 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Users, 
@@ -7,89 +10,201 @@ import {
   Settings, 
   LogOut,
   Bell,
-  Briefcase
+  Briefcase,
+  Wallet,
+  Menu,
+  X
 } from 'lucide-react';
-
-export const metadata = {
-  title: 'Dashboard Opérateur | MonForfait.ma',
-  description: 'Gérez vos leads qualifiés et optimisez vos ventes.',
-};
 
 export default function OperatorDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const [walletBalance, setWalletBalance] = useState<number>(5000);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Sync wallet balance
+  useEffect(() => {
+    const updateBalance = () => {
+      const savedBalance = localStorage.getItem('operator_wallet_balance');
+      if (savedBalance) {
+        setWalletBalance(parseFloat(savedBalance));
+      } else {
+        localStorage.setItem('operator_wallet_balance', '5000');
+        setWalletBalance(5000);
+      }
+    };
+
+    updateBalance();
+    
+    // Listen to changes in localStorage from other components
+    window.addEventListener('storage', updateBalance);
+    // Listen to custom local balance update events
+    window.addEventListener('balance_updated', updateBalance);
+
+    return () => {
+      window.removeEventListener('storage', updateBalance);
+      window.removeEventListener('balance_updated', updateBalance);
+    };
+  }, []);
+
+  const navItems = [
+    { href: '/operateurs/dashboard', label: "Vue d'ensemble", icon: LayoutDashboard },
+    { href: '/operateurs/dashboard/leads', label: 'Marketplace Leads', icon: Users },
+    { href: '/operateurs/dashboard/billing', label: 'Facturation & Solde', icon: CreditCard },
+    { href: '/operateurs/dashboard/settings', label: 'Configuration & Alertes', icon: Settings },
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row font-sans text-slate-100">
       
       {/* Sidebar - Desktop */}
-      <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 shadow-xl">
-        <div className="h-16 flex items-center px-6 border-b border-slate-800">
-          <Link href="/operateurs/dashboard" className="flex items-center gap-2 font-bold text-xl text-white">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+      <aside className="w-64 bg-slate-900 border-r border-slate-800/80 flex flex-col shrink-0 shadow-2xl hidden md:flex">
+        <div className="h-20 flex items-center px-6 border-b border-slate-800/80">
+          <Link href="/operateurs/dashboard" className="flex items-center gap-3 font-black text-xl text-white">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
               <Briefcase className="w-5 h-5 text-white" />
             </div>
-            <span>LeadCenter Pro</span>
+            <span className="tracking-tight">LeadCenter <span className="text-blue-500 font-bold">Pro</span></span>
           </Link>
         </div>
 
-        <nav className="flex-1 py-6 px-4 space-y-2">
-          <Link href="/operateurs/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600/10 text-blue-400 font-medium hover:bg-blue-600/20 transition-colors">
-            <LayoutDashboard className="w-5 h-5" />
-            Vue d'ensemble
-          </Link>
-          <Link href="/operateurs/dashboard/leads" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-            <Users className="w-5 h-5" />
-            Marketplace Leads
-          </Link>
-          <Link href="/operateurs/dashboard/billing" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-            <CreditCard className="w-5 h-5" />
-            Facturation
-          </Link>
-          <Link href="/operateurs/dashboard/settings" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-            <Settings className="w-5 h-5" />
-            Paramètres
-          </Link>
+        <nav className="flex-1 py-8 px-4 space-y-1.5">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link 
+                key={item.href}
+                href={item.href} 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
-          <button className="flex items-center gap-3 px-3 py-2 w-full rounded-lg hover:bg-slate-800 hover:text-white transition-colors text-left text-sm">
-            <LogOut className="w-5 h-5" />
-            Déconnexion
+        {/* Back to Site Link */}
+        <div className="p-4 border-t border-slate-800/80 space-y-3">
+          <Link 
+            href="/"
+            className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-300 transition-colors"
+          >
+            ← Retour au site public
+          </Link>
+          <button className="flex items-center gap-3 px-4 py-2.5 w-full rounded-lg hover:bg-slate-800/50 text-left text-xs font-bold text-red-400 hover:text-red-300 transition-colors">
+            <LogOut className="w-4 h-4" />
+            Déconnexion B2B
           </button>
         </div>
       </aside>
 
+      {/* Mobile Drawer Navigation */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+          <aside className="w-64 bg-slate-900 h-full border-r border-slate-800 flex flex-col p-6 space-y-6 animate-in slide-in-from-left duration-300" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <Link href="/operateurs/dashboard" className="flex items-center gap-2 font-black text-lg text-white">
+                <Briefcase className="w-5 h-5 text-blue-500" />
+                <span>LeadCenter Pro</span>
+              </Link>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-1 rounded-lg hover:bg-slate-800">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <nav className="flex-1 space-y-1">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link 
+                    key={item.href}
+                    href={item.href} 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                      isActive 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="pt-4 border-t border-slate-800 space-y-2">
+              <Link href="/" className="block text-xs font-bold text-slate-500 hover:text-slate-300">
+                ← Retour au site public
+              </Link>
+              <button className="flex items-center gap-2 w-full text-left text-xs font-bold text-red-400">
+                <LogOut className="w-4 h-4" /> Déconnexion
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col min-h-screen overflow-hidden bg-slate-950">
+        
         {/* Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 shadow-sm">
+        <header className="h-20 bg-slate-900 border-b border-slate-800/60 flex items-center justify-between px-6 z-20 shadow-lg">
           <div className="flex items-center gap-4 md:hidden">
-            {/* Mobile menu button could go here */}
-            <span className="font-bold text-slate-900">LeadCenter Pro</span>
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 rounded-lg hover:bg-slate-800"
+            >
+              <Menu className="w-6 h-6 text-white" />
+            </button>
+            <span className="font-black text-white text-md">LeadCenter Pro</span>
           </div>
+
           <div className="hidden md:flex"></div>
           
           <div className="flex items-center gap-4">
-            <button className="relative p-2 rounded-full hover:bg-slate-100 transition-colors">
-              <Bell className="w-5 h-5 text-slate-600" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
-            <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-slate-900">Opérateur X</p>
-                <p className="text-xs text-slate-500">Compte Pro</p>
+            
+            {/* Wallet Balance Badge */}
+            <Link 
+              href="/operateurs/dashboard/billing"
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 hover:from-blue-600/20 hover:to-indigo-600/20 border border-blue-500/20 hover:border-blue-500/40 px-4 py-2 rounded-2xl transition-all shadow-lg shadow-blue-500/5"
+            >
+              <Wallet className="w-4 h-4 text-blue-400" />
+              <div className="text-right">
+                <span className="text-[10px] block font-bold text-slate-400 uppercase tracking-widest leading-none">Mon Solde</span>
+                <span className="text-sm font-black text-white">{walletBalance.toLocaleString('fr-FR')} DH</span>
               </div>
-              <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm">
-                OX
+            </Link>
+
+            <button className="relative p-2 rounded-xl hover:bg-slate-800 transition-colors">
+              <Bell className="w-5 h-5 text-slate-400 hover:text-white" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-slate-900 animate-pulse"></span>
+            </button>
+
+            {/* User Account */}
+            <div className="flex items-center gap-3 pl-4 border-l border-slate-800">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-bold text-white">Orange Maroc B2B</p>
+                <p className="text-[10px] font-black text-blue-400 uppercase tracking-wider">Abonné Premium</p>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center font-black text-sm shadow-md">
+                OM
               </div>
             </div>
+
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-auto bg-slate-50/50">
+        <div className="flex-1 overflow-auto bg-slate-950">
           {children}
         </div>
       </main>
