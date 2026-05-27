@@ -83,12 +83,13 @@ export default function OperatorDashboardPage() {
         const combined = [...MOCK_LEADS_SOURCE];
         dbLeads.forEach(dl => {
           if (!combined.some(m => m.id === dl.id)) {
+            const { city, ...dlRest } = dl;
             combined.push({
               first_name: 'Prospect',
               last_name: '',
-              city: dl.city || 'Casablanca',
+              city: city || 'Casablanca',
               budget: dl.needs_details?.budget || 249,
-              ...dl
+              ...dlRest
             } as any);
           }
         });
