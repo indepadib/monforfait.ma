@@ -133,8 +133,8 @@ function LeadsMarketplaceContent() {
             };
           });
 
-          // Merge: Mock Leads first, then DB Leads (filtering duplicate IDs)
-          const merged = [...MOCK_LEADS];
+          // Merge: DB Leads only (no mock leads)
+          const merged: Lead[] = [];
           mapped.forEach(ml => {
             if (!merged.some(el => el.id === ml.id)) {
               merged.push(ml);
@@ -142,11 +142,11 @@ function LeadsMarketplaceContent() {
           });
           setLeads(merged);
         } else {
-          setLeads(MOCK_LEADS);
+          setLeads([]);
         }
       } catch (e) {
         console.warn(e);
-        setLeads(MOCK_LEADS);
+        setLeads([]);
       } finally {
         setLoading(false);
       }

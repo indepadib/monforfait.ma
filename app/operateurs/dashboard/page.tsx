@@ -80,7 +80,7 @@ export default function OperatorDashboardPage() {
         });
 
         // Combine with MOCK_LEADS
-        const combined = [...MOCK_LEADS_SOURCE] as any[];
+        const combined = [] as any[];
         dbLeads.forEach(dl => {
           if (!combined.some(m => m.id === dl.id)) {
             const { city, ...dlRest } = dl;
