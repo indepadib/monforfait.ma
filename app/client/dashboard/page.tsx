@@ -34,23 +34,20 @@ export default function ClientDashboardPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [formSuccess, setFormSuccess] = useState(false);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchPhone) return;
-
+  const performSearch = async (query: string) => {
     setIsLoading(true);
     setSearched(true);
     try {
-      // Find lead by phone or name
       const { data, error } = await supabase
         .from('leads')
         .select('*')
-        .or(`user_phone.eq.${searchPhone},user_name.ilike.%${searchPhone}%`)
+        .or(`user_phone.eq.${query},user_name.ilike.%${query}%`)
         .order('created_at', { ascending: false })
         .limit(1);
 
       if (!error && data && data.length > 0) {
         setFoundLead(data[0] as ClientLead);
+        localStorage.setItem('client_search_phone', query);
       } else {
         setFoundLead(null);
       }
@@ -62,6 +59,27 @@ export default function ClientDashboardPage() {
     }
   };
 
+  useEffect(() => {
+    const savedPhone = localStorage.getItem('client_search_phone');
+    if (savedPhone) {
+      setSearchPhone(savedPhone);
+      performSearch(savedPhone);
+    }
+  }, []);
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchPhone) return;
+    performSearch(searchPhone);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('client_search_phone');
+    setSearchPhone('');
+    setFoundLead(null);
+    setSearched(false);
+  };
+
   const handleCreateLead = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone || !email) {
@@ -69,7 +87,6 @@ export default function ClientDashboardPage() {
       return;
     }
 
-    // Basic Moroccan phone validation
     const cleanPhone = phone.replace(/\s/g, '');
     if (!/^(05|06|07)\d{8}$/.test(cleanPhone)) {
       alert("Numéro de téléphone invalide. Doit commencer par 05, 06 ou 07 suivi de 8 chiffres.");
@@ -98,6 +115,7 @@ export default function ClientDashboardPage() {
       const { data, error } = await supabase.from('leads').insert(payload).select();
       if (!error && data && data.length > 0) {
         setFoundLead(data[0] as ClientLead);
+        localStorage.setItem('client_search_phone', cleanPhone);
         setFormSuccess(true);
       } else {
         alert("Erreur lors de l'enregistrement de votre demande. Réessayez.");
@@ -177,6 +195,12 @@ export default function ClientDashboardPage() {
                   </p>
                 </div>
               </div>
+              <button 
+                onClick={handleLogout}
+                className="whitespace-nowrap px-4 py-2 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:bg-blue-100/50 dark:hover:bg-blue-900/20 rounded-xl text-xs font-bold transition-all self-center md:self-auto"
+              >
+                Déconnexion
+              </button>
             </div>
 
             {/* Visual Stepper */}
