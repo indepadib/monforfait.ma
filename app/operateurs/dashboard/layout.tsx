@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Users, 
@@ -22,8 +22,20 @@ export default function OperatorDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [walletBalance, setWalletBalance] = useState<number>(5000);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+
+  // Auth gate check
+  useEffect(() => {
+    const isLogged = localStorage.getItem('operator_logged_in') === 'true';
+    if (!isLogged) {
+      router.push('/login?tab=operator');
+    } else {
+      setAuthorized(true);
+    }
+  }, [router]);
 
   // Sync wallet balance
   useEffect(() => {
@@ -50,12 +62,26 @@ export default function OperatorDashboardLayout({
     };
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('operator_logged_in');
+    router.push('/login?tab=operator');
+  };
+
   const navItems = [
     { href: '/operateurs/dashboard', label: "Vue d'ensemble", icon: LayoutDashboard },
     { href: '/operateurs/dashboard/leads', label: 'Marketplace Leads', icon: Users },
     { href: '/operateurs/dashboard/billing', label: 'Facturation & Solde', icon: CreditCard },
     { href: '/operateurs/dashboard/settings', label: 'Configuration & Alertes', icon: Settings },
   ];
+
+  if (authorized === null) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-400 font-sans">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-sm font-semibold">Vérification de la session opérateur...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row font-sans text-slate-100">
@@ -99,7 +125,10 @@ export default function OperatorDashboardLayout({
           >
             ← Retour au site public
           </Link>
-          <button className="flex items-center gap-3 px-4 py-2.5 w-full rounded-lg hover:bg-slate-800/50 text-left text-xs font-bold text-red-400 hover:text-red-300 transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-2.5 w-full rounded-lg hover:bg-slate-800/50 text-left text-xs font-bold text-red-400 hover:text-red-300 transition-colors"
+          >
             <LogOut className="w-4 h-4" />
             Déconnexion B2B
           </button>
@@ -145,7 +174,10 @@ export default function OperatorDashboardLayout({
               <Link href="/" className="block text-xs font-bold text-slate-500 hover:text-slate-300">
                 ← Retour au site public
               </Link>
-              <button className="flex items-center gap-2 w-full text-left text-xs font-bold text-red-400">
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-2 w-full text-left text-xs font-bold text-red-400"
+              >
                 <LogOut className="w-4 h-4" /> Déconnexion
               </button>
             </div>

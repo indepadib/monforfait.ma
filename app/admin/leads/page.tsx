@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from "react"
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { supabase } from "@/lib/supabaseClient"
 import { Navigation } from "@/components/Navigation"
 import { 
   Download, Users, Phone, MapPin, Mail, RefreshCcw, 
   Search, Filter, ExternalLink, Calendar, Zap, 
   BarChart3, Clock, AlertCircle, X,
-  TrendingUp, ThumbsUp, AlertTriangle, Star, Crown
+  TrendingUp, ThumbsUp, AlertTriangle, Star, Crown,
+  LogOut
 } from "lucide-react"
 
 interface Plan {
@@ -46,15 +48,32 @@ interface Lead {
 }
 
 export default function AdminLeadsPage() {
+  const router = useRouter()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+  const [authorized, setAuthorized] = useState<boolean | null>(null)
   
   // Filter States
   const [filterCity, setFilterCity] = useState("all")
   const [filterStatus, setFilterStatus] = useState("all")
   const [filterSource, setFilterSource] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
+
+  // Auth gate check
+  useEffect(() => {
+    const isLogged = localStorage.getItem('admin_logged_in') === 'true'
+    if (!isLogged) {
+      router.push('/login?tab=admin')
+    } else {
+      setAuthorized(true)
+    }
+  }, [router])
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_logged_in')
+    router.push('/login?tab=admin')
+  }
 
   async function fetchLeads() {
     setLoading(true)
@@ -90,8 +109,19 @@ export default function AdminLeadsPage() {
   }
 
   useEffect(() => {
-    fetchLeads()
-  }, [])
+    if (authorized) {
+      fetchLeads()
+    }
+  }, [authorized])
+
+  if (authorized === null) {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center text-zinc-600 dark:text-zinc-400 font-sans">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-sm font-semibold">Vérification de la session administrateur...</p>
+      </div>
+    )
+  }
 
   // Filtered Leads
   const filteredLeads = leads.filter((lead: Lead) => {
@@ -190,6 +220,13 @@ export default function AdminLeadsPage() {
             >
               <Download className="w-4 h-4" />
               Exporter CSV
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="px-6 py-3 bg-red-650 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 text-sm"
+            >
+              <LogOut className="w-4 h-4" />
+              Déconnexion
             </button>
           </div>
         </div>

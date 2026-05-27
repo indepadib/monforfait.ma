@@ -38,9 +38,11 @@ export default function AdminPage() {
     })
 
     useEffect(() => {
-        const auth = localStorage.getItem('monforfait_admin_auth')
-        if (auth === 'authenticated') {
+        const auth = localStorage.getItem('admin_logged_in') === 'true' || localStorage.getItem('monforfait_admin_auth') === 'authenticated'
+        if (auth) {
             setIsAuthenticated(true)
+        } else {
+            window.location.href = '/login?tab=admin';
         }
     }, [])
 
@@ -103,7 +105,9 @@ export default function AdminPage() {
 
     function handleLogout() {
         localStorage.removeItem('monforfait_admin_auth')
+        localStorage.removeItem('admin_logged_in')
         setIsAuthenticated(false)
+        window.location.href = '/login?tab=admin';
     }
 
     function exportToCSV() {

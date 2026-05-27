@@ -39,11 +39,8 @@ export function Navigation() {
                     <Link href="/client/dashboard" className="flex items-center gap-1 hover:text-black dark:hover:text-white transition-colors">
                         Espace Client
                     </Link>
-                    <Link href="/operateurs/dashboard" className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors">
-                        Opérateurs
-                    </Link>
-                    <Link href="/admin/leads" className="flex items-center gap-1 font-bold text-red-600 dark:text-red-400 hover:text-red-700 transition-colors">
-                        Admin CRM
+                    <Link href="/login" className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors">
+                        Portail Pro
                     </Link>
                 </div>
 
