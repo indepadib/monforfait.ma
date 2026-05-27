@@ -83,7 +83,6 @@ export default function OperatorDashboardPage() {
         dbLeads.forEach(dl => {
           if (!combined.some(m => m.id === dl.id)) {
             combined.push({
-              id: dl.id,
               first_name: 'Prospect',
               last_name: '',
               city: dl.city || 'Casablanca',
