@@ -29,22 +29,22 @@ export function Navigation() {
                     </div>
                 </Link>
 
-                <div className="hidden md:flex gap-8 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                <div className="hidden md:flex gap-6 text-sm font-medium text-zinc-600 dark:text-zinc-400 items-center">
                     <Link href="/offers" className="hover:text-black dark:hover:text-white transition-colors">Offres</Link>
                     <a href="/#comparateur" className="hover:text-black dark:hover:text-white transition-colors">Comparateur</a>
                     <Link href="/quiz" className="hover:text-black dark:hover:text-white transition-colors">Quiz</Link>
-                    <Link href="/speedtest" className="hover:text-black dark:hover:text-white transition-colors">Speed Test</Link>
-                    <Link href="/blog" className="relative hover:text-black dark:hover:text-white transition-colors text-blue-600 dark:text-blue-400 font-medium group">
-                        Blog
-                        <span className="absolute -top-2 -right-4 bg-red-500 text-[8px] text-white px-1 rounded-full animate-pulse">NEW</span>
+                    
+                    {/* New Hub Links */}
+                    <div className="h-4 w-px bg-zinc-300 dark:bg-zinc-700 mx-2"></div>
+                    <Link href="/client/dashboard" className="flex items-center gap-1 hover:text-black dark:hover:text-white transition-colors">
+                        Espace Client
                     </Link>
-                    <Link href="/contact" className="hover:text-black dark:hover:text-white transition-colors">Contact</Link>
-                    <a href="/#comparateur" onClick={() => {
-                        window.dispatchEvent(new CustomEvent('switch-audience-pro'));
-                    }} className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors group">
-                        <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-ping"></span>
-                        Espace Pro
-                    </a>
+                    <Link href="/operateurs/dashboard" className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors">
+                        Opérateurs
+                    </Link>
+                    <Link href="/admin/leads" className="flex items-center gap-1 font-bold text-red-600 dark:text-red-400 hover:text-red-700 transition-colors">
+                        Admin CRM
+                    </Link>
                 </div>
 
                 <Link href="/quiz" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2 rounded-full text-sm font-bold hover:shadow-lg transition-shadow">

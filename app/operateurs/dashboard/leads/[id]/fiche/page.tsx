@@ -35,7 +35,49 @@ const MOCK_LEADS: Record<string, Lead> = {
 export default function FicheClientPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const leadId = resolvedParams.id;
-  const lead = MOCK_LEADS[leadId];
+  const [lead, setLead] = React.useState<Lead | null>(MOCK_LEADS[leadId] || null);
+  const [isLoading, setIsLoading] = React.useState(!MOCK_LEADS[leadId]);
+
+  React.useEffect(() => {
+    async function fetchRealLead() {
+      if (!MOCK_LEADS[leadId]) {
+        try {
+          const { supabase } = await import('@/lib/supabaseClient');
+          const { data, error } = await supabase.from('leads').select('*').eq('id', leadId).single();
+          if (data) {
+            const realLead: Lead = {
+              id: data.id,
+              created_at: data.created_at,
+              type: data.is_pro ? 'B2B' : 'B2C',
+              first_name: data.first_name || data.user_name || 'Prospect',
+              last_name: data.last_name || '',
+              phone: data.user_phone || '',
+              email: data.user_email || data.email || '',
+              city: data.city || 'Non spécifiée',
+              company_name: data.is_pro ? 'Entreprise Cliente' : undefined,
+              company_size: 'Inconnu',
+              budget: 0,
+              score: 50,
+              temperature: 'warm',
+              status: 'new',
+              is_unlocked: true, // Auto unlocked for Fiche
+              unlock_price: data.is_pro ? 300 : 100,
+            };
+            setLead(realLead);
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    }
+    fetchRealLead();
+  }, [leadId]);
+
+  if (isLoading) {
+    return <div className="p-10 text-center text-slate-500">Génération de la fiche en cours...</div>;
+  }
 
   if (!lead) return notFound();
 

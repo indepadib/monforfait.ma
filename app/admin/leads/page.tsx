@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import Link from 'next/link'
 import { supabase } from "@/lib/supabaseClient"
 import { Navigation } from "@/components/Navigation"
 import { 
@@ -168,7 +169,14 @@ export default function AdminLeadsPage() {
             <p className="text-zinc-500 mt-1">Transformez vos leads en contrats. Données qualifiées en temps réel.</p>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            <Link 
+              href="/operateurs/dashboard"
+              className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 text-sm"
+            >
+              <Users className="w-4 h-4" />
+              Ouvrir Dashboard Opérateurs B2B
+            </Link>
             <button 
               onClick={fetchLeads}
               className="p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:bg-zinc-50 transition-colors"
@@ -497,22 +505,42 @@ export default function AdminLeadsPage() {
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="mt-10 flex gap-4">
-                  <a 
-                    href={`tel:${selectedLead.user_phone}`}
-                    className="flex-1 py-4 bg-green-500 text-white font-black rounded-2xl text-center hover:bg-green-600 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Phone className="w-5 h-5" /> Appeler
-                  </a>
-                  {selectedLead.user_email && (
+                {/* Actions & Monetization */}
+                <div className="mt-10 space-y-4">
+                  <div className="flex gap-4">
                     <a 
-                      href={`mailto:${selectedLead.user_email}`}
-                      className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl text-center hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+                      href={`tel:${selectedLead.user_phone}`}
+                      className="flex-1 py-4 bg-green-500 text-white font-black rounded-2xl text-center hover:bg-green-600 transition-all flex items-center justify-center gap-2"
                     >
-                      <Mail className="w-5 h-5" /> Email
+                      <Phone className="w-5 h-5" /> Appeler
                     </a>
-                  )}
+                    {selectedLead.user_email && (
+                      <a 
+                        href={`mailto:${selectedLead.user_email}`}
+                        className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl text-center hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Mail className="w-5 h-5" /> Email
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                    <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Actions de Vente (B2B)</h4>
+                    <div className="flex gap-4">
+                      <Link 
+                        href={`/operateurs/dashboard/leads/${selectedLead.id}`}
+                        className="flex-1 py-3 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-bold rounded-xl text-center hover:opacity-90 transition-all flex items-center justify-center gap-2 text-sm"
+                      >
+                        <ExternalLink className="w-4 h-4" /> Voir sur la Marketplace
+                      </Link>
+                      <Link 
+                        href={`/operateurs/dashboard/leads/${selectedLead.id}/fiche`}
+                        className="flex-1 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold rounded-xl text-center hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all flex items-center justify-center gap-2 text-sm"
+                      >
+                        <Download className="w-4 h-4" /> Générer Fiche Prospect
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
