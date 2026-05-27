@@ -7,11 +7,11 @@ export interface Lead {
   created_at: string;
   type: LeadType;
   
-  // Client Info (hidden if not unlocked)
+  // Client Info (strict validation)
   first_name: string;
   last_name: string;
   phone: string;
-  email?: string;
+  email: string; // Made mandatory for better quality
   city: string;
   address?: string;
   

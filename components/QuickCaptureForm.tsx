@@ -14,6 +14,9 @@ export function QuickCaptureForm() {
 
   const [formData, setFormData] = useState({
     need: 'fibre',
+    first_name: '',
+    last_name: '',
+    email: '',
     phone: '',
   })
 
@@ -23,15 +26,33 @@ export function QuickCaptureForm() {
     setError('')
 
     try {
-      if (!formData.phone || formData.phone.length < 9) {
-        throw new Error('Veuillez entrer un numéro de téléphone valide')
+      // Strict Validation
+      if (!formData.first_name || formData.first_name.length < 2) {
+        throw new Error('Le prénom doit contenir au moins 2 caractères.')
+      }
+      if (!formData.last_name || formData.last_name.length < 2) {
+        throw new Error('Le nom doit contenir au moins 2 caractères.')
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(formData.email)) {
+        throw new Error('Veuillez entrer une adresse email valide.')
+      }
+
+      const phoneRegex = /^(06|07)[0-9]{8}$/
+      const cleanPhone = formData.phone.replace(/[\s-]/g, '')
+      if (!phoneRegex.test(cleanPhone)) {
+        throw new Error('Le numéro de téléphone doit être un numéro marocain valide (ex: 0612345678).')
       }
 
       const { error: submitError } = await supabase
         .from('leads')
         .insert([
           {
-            user_phone: formData.phone,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            user_phone: cleanPhone,
             status: 'new',
             needs_details: {
               interest: formData.need,
@@ -47,7 +68,10 @@ export function QuickCaptureForm() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-              phone: formData.phone,
+              phone: cleanPhone,
+              first_name: formData.first_name,
+              last_name: formData.last_name,
+              email: formData.email,
               needs_details: { interest: formData.need },
               source: 'hero_quick_capture'
           })
@@ -94,6 +118,34 @@ export function QuickCaptureForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            type="text"
+            placeholder="Prénom"
+            value={formData.first_name}
+            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+            className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900 dark:text-white"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Nom"
+            value={formData.last_name}
+            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+            className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900 dark:text-white"
+            required
+          />
+        </div>
+
+        <input
+          type="email"
+          placeholder="Adresse email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900 dark:text-white"
+          required
+        />
+
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             <label htmlFor="need" className="sr-only">Ce que vous cherchez</label>
