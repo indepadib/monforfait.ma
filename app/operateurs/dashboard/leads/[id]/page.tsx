@@ -164,7 +164,8 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
   const neighborhoodName = lead.city === 'Casablanca' ? 'El Maârif' : lead.city === 'Rabat' ? 'Agdal' : 'Centre Ville';
   
   // Custom AI Pitch generator
-  const generatedPitch = `Bonjour ${lead.first_name}, je suis conseiller commercial chez Orange. Je vous appelle suite à votre diagnostic réseau sur MonForfait.ma à ${lead.city} (${neighborhoodName}). J'ai vu que vous cherchez une éligibilité Fibre pour un budget de ${lead.budget} DH/mois avec un délai ${lead.intent_timeline?.replace(/_/g, ' ')}. Nos voisins dans votre quartier de ${neighborhoodName} profitent de notre Fibre 100 Mbps stable. Nous pouvons vous raccorder dès cette semaine pour seulement ${lead.budget - 50} DH/mois. Ça vous intéresse ?`;
+  const leadBudget = lead.budget ?? 249;
+  const generatedPitch = `Bonjour ${lead.first_name}, je suis conseiller commercial chez Orange. Je vous appelle suite à votre diagnostic réseau sur MonForfait.ma à ${lead.city} (${neighborhoodName}). J'ai vu que vous cherchez une éligibilité Fibre pour un budget de ${leadBudget} DH/mois avec un délai ${lead.intent_timeline?.replace(/_/g, ' ') || 'immédiat'}. Nos voisins dans votre quartier de ${neighborhoodName} profitent de notre Fibre 100 Mbps stable. Nous pouvons vous raccorder dès cette semaine pour seulement ${leadBudget - 50} DH/mois. Ça vous intéresse ?`;
 
   const copyPitch = () => {
     navigator.clipboard.writeText(generatedPitch);
