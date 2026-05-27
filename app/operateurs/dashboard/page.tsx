@@ -27,9 +27,9 @@ interface KanbanLead {
 }
 
 const MOCK_LEADS_SOURCE = [
-  { id: 'L-1001', first_name: 'Ahmed', last_name: 'B.', company_name: 'Tech Solutions SARL', city: 'Casablanca', budget: 600 },
-  { id: 'L-1002', first_name: 'Sara', last_name: 'M.', city: 'Rabat', budget: 249 },
-  { id: 'L-1003', first_name: 'Youssef', last_name: 'K.', city: 'Marrakech', budget: 199 }
+  { id: 'L-1001', type: 'B2B', first_name: 'Ahmed', last_name: 'B.', company_name: 'Tech Solutions SARL', city: 'Casablanca', budget: 600, score: 85, status: 'new' },
+  { id: 'L-1002', type: 'B2C', first_name: 'Sara', last_name: 'M.', city: 'Rabat', budget: 249, score: 65, status: 'new' },
+  { id: 'L-1003', type: 'B2C', first_name: 'Youssef', last_name: 'K.', city: 'Marrakech', budget: 199, score: 35, status: 'contacted' }
 ];
 
 export default function OperatorDashboardPage() {
