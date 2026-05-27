@@ -74,7 +74,8 @@ export default function OperatorDashboardPage() {
             is_pro: l.is_pro,
             needs_details: l.needs_details,
             status: l.status || 'new',
-            score
+            score,
+            city: l.city || 'Casablanca'
           };
         });
 
