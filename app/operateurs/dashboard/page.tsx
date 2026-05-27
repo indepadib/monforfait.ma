@@ -10,12 +10,12 @@ import { LeadVolumeChart, LeadTypeChart } from '@/components/operateurs/Dashboar
 import { supabase } from '@/lib/supabaseClient';
 
 const MAP_CITIES = [
-  { name: 'Casablanca', x: 260, y: 180, leads: 48, active: true },
-  { name: 'Rabat', x: 290, y: 140, leads: 32, active: true },
-  { name: 'Marrakech', x: 190, y: 280, leads: 24, active: true },
-  { name: 'Tanger', x: 320, y: 40, leads: 15, active: true },
-  { name: 'Agadir', x: 130, y: 360, leads: 11, active: true },
-  { name: 'Fès', x: 360, y: 150, leads: 9, active: false }
+  { name: 'Casablanca', x: 250, y: 155, leads: 48, active: true },
+  { name: 'Rabat', x: 280, y: 130, leads: 32, active: true },
+  { name: 'Marrakech', x: 210, y: 240, leads: 24, active: true },
+  { name: 'Tanger', x: 340, y: 65, leads: 15, active: true },
+  { name: 'Agadir', x: 145, y: 290, leads: 11, active: true },
+  { name: 'Fès', x: 330, y: 120, leads: 9, active: false }
 ];
 
 interface KanbanLead {
@@ -229,7 +229,7 @@ export default function OperatorDashboardPage() {
             {/* SVG Map of Morocco */}
             <div className="w-full max-w-[360px] h-[400px] bg-slate-950/60 rounded-2xl border border-slate-800/60 p-4 relative flex items-center justify-center">
               <svg className="w-full h-full text-slate-800" viewBox="0 0 500 500" fill="currentColor">
-                <path d="M220,100 L300,50 L350,20 L380,50 L420,120 L400,180 L350,200 L300,240 L280,280 L230,320 L180,360 L140,420 L100,480 L60,490 L80,420 L120,340 L160,260 L200,180 Z" fill="#1e293b" opacity="0.5" stroke="#334155" strokeWidth="2" />
+                <path d="M 350,50 L 370,52 L 390,58 L 410,68 L 430,72 L 425,100 L 420,140 L 435,170 L 420,200 L 390,220 L 380,240 L 340,260 L 320,290 L 290,310 L 270,335 L 230,350 L 180,380 L 140,420 L 100,460 L 60,490 L 50,500 L 35,500 L 38,480 L 42,450 L 50,410 L 68,380 L 90,350 L 115,330 L 130,310 L 145,290 L 160,255 L 190,220 L 220,185 L 250,155 L 280,130 L 310,95 L 340,65 Z" fill="#1e293b" opacity="0.5" stroke="#334155" strokeWidth="2" />
                 
                 {MAP_CITIES.map((c) => {
                   const isHovered = selectedCity === c.name;
