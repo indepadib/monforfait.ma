@@ -141,7 +141,7 @@ function ResultsContent() {
     }
 
     async function handleClaim(offer: Offer) {
-        setClaiming(offer.id)
+        setClaiming(offer.id ?? null)
 
         try {
             // Update lead with selected offer
