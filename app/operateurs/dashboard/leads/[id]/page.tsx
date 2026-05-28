@@ -9,7 +9,8 @@ import { UnlockLeadModal } from '@/components/operateurs/UnlockLeadModal';
 import { 
   ArrowLeft, Building, User, MapPin, Calendar, Lock, Unlock, 
   Phone, Mail, CheckCircle2, ShieldAlert, CreditCard, Play, Pause,
-  Sparkles, FileText, Share2, Copy, Check, Info, Award
+  Sparkles, FileText, Share2, Copy, Check, Info, Award,
+  PhoneOff, Mic, MicOff, Volume2, RefreshCw
 } from 'lucide-react';
 
 const MOCK_LEADS: Record<string, Lead> = {
@@ -54,6 +55,74 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
   const [walletBalance, setWalletBalance] = useState<number>(5000);
   const [isCopied, setIsCopied] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Call Simulator States
+  const [isDialerOpen, setIsDialerOpen] = useState(false);
+  const [callState, setCallState] = useState<'idle' | 'dialing' | 'connected' | 'ended'>('idle');
+  const [callDuration, setCallDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [whatsappTone, setWhatsappTone] = useState<'professional' | 'direct' | 'urgent'>('professional');
+
+  // Call simulator timers
+  useEffect(() => {
+    let timer: any;
+    if (callState === 'dialing') {
+      timer = setTimeout(() => {
+        setCallState('connected');
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [callState]);
+
+  useEffect(() => {
+    let timer: any;
+    if (callState === 'connected') {
+      timer = setInterval(() => {
+        setCallDuration((prev) => {
+          if (prev >= 15) {
+            setCallState('ended');
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [callState]);
+
+  const b2bTranscript = [
+    { time: 0, speaker: lead?.first_name || 'Ahmed', text: "Allô, bonjour ? Société Tech Solutions." },
+    { time: 3, speaker: 'Yassine (Copilote)', text: "Bonjour, Yassine à l'appareil de LeadCenter. Je vous appelle suite à votre diagnostic fibre." },
+    { time: 6, speaker: lead?.first_name || 'Ahmed', text: "Ah oui, super ! On a déménagé nos bureaux et notre connexion ADSL rame trop à Casablanca pour nos 15 collaborateurs." },
+    { time: 9, speaker: 'Yassine (Copilote)', text: "Je vois tout à fait. J'ai analysé votre raccordement : vous êtes 100% éligible Fibre Pro chez Orange avec 124 Mbps constatés dans votre rue." },
+    { time: 12, speaker: lead?.first_name || 'Ahmed', text: "Génial. Envoyez-moi les détails de l'offre et l'estimation budgétaire par WhatsApp pour signature immédiate !" },
+    { time: 15, speaker: 'Yassine (Copilote)', text: "C'est noté, je vous envoie le récapitulatif WhatsApp pré-configuré immédiatement. Merci pour votre temps !" }
+  ];
+
+  const b2cTranscript = [
+    { time: 0, speaker: lead?.first_name || 'Prospect', text: "Allô, bonjour ?" },
+    { time: 3, speaker: 'Yassine (Copilote)', text: "Bonjour, c'est Yassine de MonForfait.ma. Je vous contacte suite à votre speedtest et demande de forfait fibre." },
+    { time: 6, speaker: lead?.first_name || 'Prospect', text: "Ah oui ! Je paye trop cher chez Maroc Telecom ADSL actuellement et la connexion se coupe tout le temps." },
+    { time: 9, speaker: 'Yassine (Copilote)', text: "Je comprends. Nous avons une offre exclusive Orange Fibre à 249 DH/mois avec installation gratuite et 2 mois offerts. Ça vous convient ?" },
+    { time: 12, speaker: lead?.first_name || 'Prospect', text: "C'est parfait ! Envoyez-moi le lien de souscription sur WhatsApp s'il vous plaît, je m'abonne aujourd'hui." },
+    { time: 15, speaker: 'Yassine (Copilote)', text: "C'est en cours d'envoi. Un installateur passera sous 48h. Excellente journée !" }
+  ];
+
+  const getWhatsappMessage = () => {
+    if (!lead) return '';
+    const name = lead.first_name || 'Client';
+    const company = lead.company_name ? ` pour ${lead.company_name}` : '';
+    const city = lead.city || 'votre secteur';
+    const budgetVal = lead.budget ?? 249;
+    
+    if (whatsappTone === 'professional') {
+      return `Cher M. ${name},\n\nSuite à notre échange téléphonique concernant votre projet de raccordement Fibre Optique${company} à ${city}, veuillez trouver ci-joint notre proposition commerciale :\n\n- Offre Fibre Pro Débit Max stable\n- Tarif : ${budgetVal} DH / mois\n- Raccordement prioritaire sous 48h\n\nNous restons à votre entière disposition pour finaliser la commande.\n\nCordialement,\nService Commercial B2B`;
+    } else if (whatsappTone === 'direct') {
+      return `Salut ${name} ! 🙌 Voici le récap de l'offre Fibre Telecom${company} dont nous venons de parler :\n\n⚡ Débit stable Fibre Optique à ${city}\n💸 Budget : ${budgetVal} DH/mois\n🛠️ Installation gratuite sous 48h\n\nCliquez ici pour finaliser votre dossier en 1-clic : https://monforfait.ma/client/validation\n\nA tout de suite !`;
+    } else { // urgent
+      return `⚠️ OFFRE FLASH - RACCORDEMENT FIBRE ${city.toUpperCase()} ⚠️\n\nBonjour M. ${name},\nVotre secteur est actuellement éligible à notre raccordement express sous 24 heures.\n\n👉 Offre exclusive validée : Forfait Fibre à ${budgetVal} DH/mois avec 2 MOIS OFFERTS !\n🔥 Attention, le créneau d'installation gratuite expire sous 48 heures.\n\nRépondez "OK" pour valider le rendez-vous technicien.`;
+    }
+  };
 
   // Load local storage keys
   useEffect(() => {
@@ -425,12 +494,24 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
                 <div className="flex-1">
                   <span className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block">Numéro de Téléphone</span>
                   {isActuallyUnlocked ? (
-                    <a 
-                      href={`tel:${lead.phone.replace(/\s/g, '')}`} 
-                      className="text-sm font-black text-blue-400 hover:underline block mt-0.5"
-                    >
-                      {lead.phone}
-                    </a>
+                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                      <a 
+                        href={`tel:${lead.phone.replace(/\s/g, '')}`} 
+                        className="text-sm font-black text-blue-400 hover:underline block"
+                      >
+                        {lead.phone}
+                      </a>
+                      <button 
+                        onClick={() => {
+                          setIsDialerOpen(true);
+                          setCallState('dialing');
+                          setCallDuration(0);
+                        }}
+                        className="px-2.5 py-1 bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-500 hover:to-indigo-600 text-white rounded-lg text-[9px] font-black uppercase tracking-tight flex items-center gap-1 shadow transition-all active:scale-95 animate-pulse"
+                      >
+                        <Phone className="w-2.5 h-2.5" /> Appeler (IA)
+                      </button>
+                    </div>
                   ) : (
                     <span className="text-sm font-mono font-bold text-slate-300 block mt-0.5 tracking-wider">
                       {lead.phone.substring(0, 5)} ** ** **
@@ -509,6 +590,214 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleUnlock}
       />
+
+      {/* Floating Glassmorphic Call Dialer Simulator */}
+      {isDialerOpen && (
+        <div className="fixed bottom-6 right-6 z-[200] w-[360px] bg-slate-900/95 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl animate-in slide-in-from-bottom-8 duration-300 flex flex-col max-h-[500px]">
+          {/* Dialer Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-650 p-4 flex items-center justify-between shadow-md shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white relative">
+                <Phone className={`w-5 h-5 ${callState === 'connected' ? 'animate-bounce' : ''}`} />
+                {callState === 'connected' && (
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-blue-600 rounded-full animate-ping"></span>
+                )}
+              </div>
+              <div>
+                <h4 className="font-bold text-xs leading-none text-white uppercase tracking-wider">Dialer Commercial</h4>
+                <span className="text-[10px] text-blue-200 mt-1 block">
+                  {callState === 'dialing' && 'Appel en cours...'}
+                  {callState === 'connected' && `En communication • 00:${callDuration < 10 ? '0' + callDuration : callDuration}`}
+                  {callState === 'ended' && 'Appel terminé'}
+                </span>
+              </div>
+            </div>
+            <button 
+              onClick={() => {
+                setIsDialerOpen(false);
+                setCallState('idle');
+              }}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-white/80 hover:text-white"
+            >
+              <Check className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Dialer Content */}
+          <div className="flex-grow p-4 overflow-y-auto space-y-4 bg-slate-950/60 max-h-[380px] text-slate-100">
+            {/* 1. DIALING STATE */}
+            {callState === 'dialing' && (
+              <div className="py-8 flex flex-col items-center justify-center space-y-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-ping"></div>
+                  <div className="w-20 h-20 bg-slate-900 border border-slate-800 rounded-full flex items-center justify-center text-blue-400 relative z-10">
+                    <Phone className="w-8 h-8 animate-pulse" />
+                  </div>
+                </div>
+                <div className="text-center space-y-1">
+                  <div className="text-sm font-bold text-white">Connexion avec {lead.first_name} {lead.last_name}...</div>
+                  <div className="text-xs text-slate-500">{lead.phone}</div>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-900 border border-slate-800 rounded-full">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></span>
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                </div>
+              </div>
+            )}
+
+            {/* 2. CONNECTED STATE */}
+            {callState === 'connected' && (
+              <div className="space-y-4 flex flex-col h-full">
+                {/* Audio wave simulation */}
+                <div className="flex justify-center items-center gap-1.5 py-2">
+                  {[...Array(12)].map((_, i) => (
+                    <span 
+                      key={i} 
+                      style={{ height: `${Math.max(4, Math.sin(callDuration * 1.5 + i) * 15 + 20)}px` }}
+                      className="w-1 bg-gradient-to-t from-blue-500 to-indigo-400 rounded-full transition-all duration-300"
+                    />
+                  ))}
+                </div>
+
+                {/* Transcription screen */}
+                <div className="bg-slate-950/90 border border-slate-850 p-3.5 rounded-2xl h-[160px] flex flex-col justify-end">
+                  <div className="text-[9px] uppercase font-black tracking-widest text-slate-500 border-b border-slate-850 pb-1.5 mb-1.5">Transcription qualification en direct</div>
+                  <div className="space-y-2.5 overflow-y-auto max-h-[120px] pr-1">
+                    {(lead.type === 'B2B' ? b2bTranscript : b2cTranscript)
+                      .filter(item => callDuration >= item.time)
+                      .map((item, idx) => (
+                        <div key={idx} className="text-[10px] leading-relaxed">
+                          <span className={`font-black ${item.speaker.startsWith('Yassine') ? 'text-blue-400' : 'text-purple-400'}`}>
+                            {item.speaker} :
+                          </span>{' '}
+                          <span className="text-slate-300">{item.text}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Call Options Bar */}
+                <div className="flex justify-center gap-4">
+                  <button 
+                    onClick={() => setIsMuted(!isMuted)}
+                    className={`p-3 rounded-full border transition-all ${
+                      isMuted 
+                        ? 'bg-red-500/20 border-red-500/40 text-red-400' 
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                    title={isMuted ? 'Activer le micro' : 'Couper le micro'}
+                  >
+                    {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  </button>
+                  <button 
+                    onClick={() => setCallState('ended')}
+                    className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg shadow-red-500/20 transition-all hover:scale-105 active:scale-95"
+                    title="Raccrocher"
+                  >
+                    <PhoneOff className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 3. ENDED STATE */}
+            {callState === 'ended' && (
+              <div className="space-y-4">
+                {/* AI Review Header */}
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                      Rapport Commercial IA
+                      <span className="px-1.5 py-0.5 bg-emerald-500 text-white text-[8px] font-black uppercase rounded">Chaud 🔥</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">Sentiment : Très Positif (92% d'intention de commande).</p>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
+                  <div className="text-[9px] uppercase font-black text-slate-500 tracking-wider">Résumé de l'appel</div>
+                  <p className="text-[10px] text-slate-300 leading-relaxed">
+                    {lead.type === 'B2B' 
+                      ? "Le prospect Ahmed confirme le besoin urgent de Fibre pour sa structure (15 postes). Il souhaite recevoir la proposition par WhatsApp immédiatement."
+                      : "Le client est insatisfait de son ADSL Maroc Telecom et valide le forfait Orange Fibre 249 DH/m. Il attend le devis WhatsApp."
+                    }
+                  </p>
+                </div>
+
+                {/* WhatsApp tone message copy-generator */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] uppercase font-black text-slate-500 tracking-wider">Rédiger Proposition</span>
+                    <div className="flex bg-slate-900 p-0.5 rounded-lg border border-slate-800">
+                      {[
+                        { val: 'professional', label: 'Pro 💼' },
+                        { val: 'direct', label: 'Direct 🚀' },
+                        { val: 'urgent', label: 'Urgent ⚠️' }
+                      ].map((t) => (
+                        <button
+                          key={t.val}
+                          type="button"
+                          onClick={() => setWhatsappTone(t.val as any)}
+                          className={`px-2 py-1 rounded text-[8px] font-black transition-all ${
+                            whatsappTone === t.val 
+                              ? 'bg-blue-600 text-white' 
+                              : 'text-slate-500 hover:text-slate-355'
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <textarea
+                      readOnly
+                      value={getWhatsappMessage()}
+                      className="w-full h-32 p-3 bg-slate-950 border border-slate-850 rounded-2xl text-[10px] leading-relaxed text-slate-300 focus:outline-none select-all"
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(getWhatsappMessage());
+                        alert('Proposition copiée ! Prêt à être collée sur WhatsApp.');
+                      }}
+                      className="absolute bottom-2.5 right-2.5 px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[9px] font-black uppercase tracking-tight flex items-center gap-1 shadow-md transition-all active:scale-95"
+                    >
+                      <Copy className="w-3 h-3" /> Copier
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => {
+                      setCallState('dialing');
+                      setCallDuration(0);
+                    }}
+                    className="flex-1 py-2.5 border border-slate-800 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" /> Recomposer
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setIsDialerOpen(false);
+                      setCallState('idle');
+                    }}
+                    className="flex-grow py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    Fermer
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

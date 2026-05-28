@@ -26,6 +26,15 @@ interface KanbanLead {
   stage: 'contact' | 'meeting' | 'negotiation' | 'won' | 'lost';
 }
 
+const COVERAGE_DATA: Record<string, { isp: string, speed: number, ping: number, rating: string, color: string, glow: string }> = {
+  'Casablanca': { isp: 'Orange Fibre', speed: 124, ping: 12, rating: 'Excellent', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', glow: 'fill-emerald-400' },
+  'Rabat': { isp: 'Maroc Telecom Fibre', speed: 95, ping: 15, rating: 'Bon', color: 'text-teal-400 bg-teal-500/10 border-teal-500/20', glow: 'fill-teal-400' },
+  'Marrakech': { isp: 'Inwi Fibre', speed: 84, ping: 19, rating: 'Bon', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20', glow: 'fill-purple-400' },
+  'Tanger': { isp: 'Orange Fibre', speed: 90, ping: 14, rating: 'Excellent', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', glow: 'fill-emerald-400' },
+  'Agadir': { isp: 'Maroc Telecom Fibre', speed: 76, ping: 22, rating: 'Moyen', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', glow: 'fill-amber-400' },
+  'Fès': { isp: 'Inwi 4G', speed: 45, ping: 28, rating: 'Moyen', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', glow: 'fill-amber-400' }
+};
+
 const MOCK_LEADS_SOURCE = [
   { id: 'L-1001', type: 'B2B', first_name: 'Ahmed', last_name: 'B.', company_name: 'Tech Solutions SARL', city: 'Casablanca', budget: 600, score: 85, status: 'new' },
   { id: 'L-1002', type: 'B2C', first_name: 'Sara', last_name: 'M.', city: 'Rabat', budget: 249, score: 65, status: 'new' },
@@ -49,6 +58,7 @@ export default function OperatorDashboardPage() {
   ]);
   const [loading, setLoading] = useState(false);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [mapMode, setMapMode] = useState<'opportunities' | 'coverage'>('opportunities');
 
   // ROI Calculator States
   const [roiLeads, setRoiLeads] = useState(20);
@@ -265,22 +275,54 @@ export default function OperatorDashboardPage() {
         
         {/* Map Column */}
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800/80 rounded-3xl p-6 shadow-2xl relative">
-          <div className="mb-6 flex justify-between items-center">
+          <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-blue-500" />
-                Zones de Demandes Actives
+                {mapMode === 'opportunities' ? "Zones de Demandes Actives" : "Qualité & Couverture Réseau"}
               </h2>
-              <p className="text-xs text-slate-400 mt-1">Sélectionnez une ville pour filtrer les opportunités du CRM et du Ticker.</p>
+              <p className="text-xs text-slate-400 mt-1">
+                {mapMode === 'opportunities' 
+                  ? "Sélectionnez une ville pour filtrer les opportunités du CRM et du Ticker." 
+                  : "Cartographie des débits moyens (speedtest) constatés par ville."
+                }
+              </p>
             </div>
-            {selectedCity && (
-              <button 
-                onClick={() => setSelectedCity(null)}
-                className="text-xs font-bold text-blue-500 hover:underline"
-              >
-                Réinitialiser la carte
-              </button>
-            )}
+            
+            <div className="flex gap-2">
+              <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setMapMode('opportunities')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    mapMode === 'opportunities'
+                      ? 'bg-blue-600 text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Opportunités Leads
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMapMode('coverage')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    mapMode === 'coverage'
+                      ? 'bg-blue-600 text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Qualité Réseau
+                </button>
+              </div>
+              {selectedCity && (
+                <button 
+                  onClick={() => setSelectedCity(null)}
+                  className="text-xs font-bold text-slate-500 hover:text-white self-center px-2 py-1 bg-slate-900 rounded-lg"
+                >
+                  Annuler filtre
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col md:flex-row items-center gap-6">
@@ -307,14 +349,19 @@ export default function OperatorDashboardPage() {
                 
                 {cities.map((c) => {
                   const isHovered = selectedCity === c.name;
+                  const cov = COVERAGE_DATA[c.name] || { isp: '', speed: 0, ping: 0, rating: '', color: '', glow: 'fill-blue-500' };
                   return (
                     <g 
                       key={c.name} 
                       className="cursor-pointer group"
                       onClick={() => setSelectedCity(c.name)}
                     >
-                      {c.active && (
-                        <circle cx={c.x} cy={c.y} r="10" className="fill-blue-500/25 animate-ping" />
+                      {mapMode === 'opportunities' ? (
+                        c.active && <circle cx={c.x} cy={c.y} r="10" className="fill-blue-500/25 animate-ping" />
+                      ) : (
+                        <circle cx={c.x} cy={c.y} r="10" className={`opacity-25 animate-ping ${
+                          cov.rating === 'Excellent' ? 'fill-emerald-500' : cov.rating === 'Bon' ? 'fill-teal-500' : 'fill-amber-500'
+                        }`} />
                       )}
                       <circle 
                         cx={c.x} 
@@ -323,7 +370,9 @@ export default function OperatorDashboardPage() {
                         className={`transition-all ${
                           isHovered 
                             ? 'fill-cyan-400 stroke-white stroke-2 shadow-lg shadow-cyan-500/50' 
-                            : 'fill-blue-500 group-hover:fill-cyan-400 group-hover:scale-125'
+                            : mapMode === 'opportunities'
+                              ? 'fill-blue-500 group-hover:fill-cyan-400 group-hover:scale-125'
+                              : `${cov.glow} group-hover:scale-125`
                         }`} 
                       />
                       <text 
@@ -331,7 +380,7 @@ export default function OperatorDashboardPage() {
                         y={c.y + 4} 
                         className="text-[9px] font-black fill-slate-300 group-hover:fill-white select-none transition-colors"
                       >
-                        {c.name} {c.leads > 0 && `(${c.leads})`}
+                        {c.name} {mapMode === 'opportunities' ? (c.leads > 0 && `(${c.leads})`) : `(${cov.speed}M)`}
                       </text>
                     </g>
                   );
@@ -341,36 +390,65 @@ export default function OperatorDashboardPage() {
 
             {/* City details */}
             <div className="flex-1 space-y-4 w-full">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Performances par Région</h4>
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                {mapMode === 'opportunities' ? "Performances par Région" : "Qualité Réseau par Ville"}
+              </h4>
               
               <div className="space-y-2">
-                {cities.map((c) => (
-                  <button 
-                    key={c.name}
-                    onClick={() => setSelectedCity(c.name)}
-                    className={`w-full p-3 rounded-xl border flex justify-between items-center transition-all text-left text-xs ${
-                      selectedCity === c.name 
-                        ? 'bg-blue-600 border-blue-500 text-white font-bold' 
-                        : 'bg-slate-950/40 border-slate-800/80 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${c.active ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`}></span>
-                      {c.name}
-                    </span>
-                    <span className="font-bold">{c.leads} leads qualifiés</span>
-                  </button>
-                ))}
+                {cities.map((c) => {
+                  const cov = COVERAGE_DATA[c.name] || { isp: '', speed: 0, ping: 0, rating: '', color: '' };
+                  return (
+                    <button 
+                      key={c.name}
+                      onClick={() => setSelectedCity(c.name)}
+                      className={`w-full p-3 rounded-xl border flex justify-between items-center transition-all text-left text-xs ${
+                        selectedCity === c.name 
+                          ? 'bg-blue-600 border-blue-500 text-white font-bold' 
+                          : 'bg-slate-950/40 border-slate-800/80 text-slate-400 hover:border-slate-700'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {mapMode === 'opportunities' ? (
+                          <span className={`w-2 h-2 rounded-full ${c.active ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`}></span>
+                        ) : (
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tight text-white ${
+                            cov.rating === 'Excellent' ? 'bg-emerald-600' : cov.rating === 'Bon' ? 'bg-teal-600' : 'bg-amber-600'
+                          }`}>
+                            {cov.rating}
+                          </span>
+                        )}
+                        {c.name}
+                      </span>
+                      <span className="font-bold">
+                        {mapMode === 'opportunities' 
+                          ? `${c.leads} leads qualifiés` 
+                          : `${cov.speed} Mbps`
+                        }
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
               {selectedCity && (
-                <div className="p-3.5 bg-blue-600/10 border border-blue-500/20 rounded-xl">
-                  <p className="text-xs text-blue-300 font-semibold leading-relaxed">
-                    💡 <strong>Filtre Actif : {selectedCity}</strong>. Nous affichons uniquement les leads de cette région.
-                    <Link href={`/operateurs/dashboard/leads?city=${selectedCity}`} className="underline font-bold ml-1.5 inline-block text-white">
-                      Voir la marketplace ({selectedCity}) →
-                    </Link>
-                  </p>
+                <div className="p-3.5 bg-blue-600/10 border border-blue-500/20 rounded-xl space-y-1.5">
+                  {mapMode === 'opportunities' ? (
+                    <p className="text-xs text-blue-300 font-semibold leading-relaxed">
+                      💡 <strong>Filtre Actif : {selectedCity}</strong>. Nous affichons uniquement les leads de cette région.
+                      <Link href={`/operateurs/dashboard/leads?city=${selectedCity}`} className="underline font-bold ml-1.5 inline-block text-white">
+                        Voir la marketplace ({selectedCity}) →
+                      </Link>
+                    </p>
+                  ) : (
+                    <div>
+                      <p className="text-xs text-blue-300 font-semibold">
+                        📶 <strong>{selectedCity}</strong> dominé par <strong className="text-white">{(COVERAGE_DATA[selectedCity] as any)?.isp}</strong>.
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        Débit download moyen mesuré de {(COVERAGE_DATA[selectedCity] as any)?.speed} Mbps. Les clients B2B dans ce secteur privilégient cet opérateur pour la stabilité réseau.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -558,6 +636,46 @@ export default function OperatorDashboardPage() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Competitive Operator Performance Leaderboard */}
+      <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-8 shadow-2xl space-y-6">
+        <div>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Award className="w-5 h-5 text-blue-500" />
+            Classement de Performance des Opérateurs Marocains
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">Indicateurs de conversion commerciale et d'activation B2B.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { name: 'Orange Maroc B2B', marketShare: 42, satisfaction: '4.8/5', timeToActive: '24h', reward: 'Or 🏆', bg: 'from-amber-600/10 to-amber-700/5 border-amber-500/20 text-amber-400' },
+            { name: 'Maroc Telecom Pro', marketShare: 35, satisfaction: '4.5/5', timeToActive: '48h', reward: 'Argent 🥈', bg: 'from-slate-400/10 to-slate-500/5 border-slate-450/20 text-slate-300' },
+            { name: 'Inwi Business', marketShare: 23, satisfaction: '4.2/5', timeToActive: '36h', reward: 'Bronze 🥉', bg: 'from-amber-800/10 to-amber-900/5 border-amber-700/20 text-amber-600' }
+          ].map((op, i) => (
+            <div key={i} className={`p-6 bg-gradient-to-br border rounded-2xl space-y-4 hover:-translate-y-1 transition-all duration-200 ${op.bg}`}>
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-400">{op.reward}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rang #{i+1}</span>
+              </div>
+              <div>
+                <h4 className="text-lg font-black text-white">{op.name}</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Part de marché leads : <span className="text-white font-bold">{op.marketShare}%</span></p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800/80 text-xs">
+                <div>
+                  <span className="block text-[9px] uppercase font-bold text-slate-500">Satisfaction</span>
+                  <span className="font-bold text-white">{op.satisfaction}</span>
+                </div>
+                <div>
+                  <span className="block text-[9px] uppercase font-bold text-slate-500">Activation</span>
+                  <span className="font-bold text-white">{op.timeToActive}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
