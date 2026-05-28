@@ -3,11 +3,24 @@
 import React, { useState } from 'react'
 import { ArrowDown, Sparkles } from 'lucide-react'
 
-export function HeroQuickFilter() {
+interface HeroQuickFilterProps {
+  onFilter?: (filters: { category?: string; maxPrice?: number }) => void;
+}
+
+export function HeroQuickFilter({ onFilter }: HeroQuickFilterProps) {
   const [need, setNeed] = useState('fibre')
   const [budget, setBudget] = useState('200')
 
   const handleCompareClick = () => {
+    if (onFilter) {
+      let cat = 'all';
+      if (need === 'mobile') cat = 'mobile';
+      else if (need === 'fibre' || need === 'adsl' || need === 'box') cat = 'internet';
+      
+      onFilter({ category: cat, maxPrice: parseInt(budget) || undefined });
+      return;
+    }
+
     // Scroll smoothly to the comparison section
     const element = document.getElementById('comparateur')
     if (element) {
