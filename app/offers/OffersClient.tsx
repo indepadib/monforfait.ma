@@ -3,25 +3,13 @@
 import { useState, useEffect, Suspense } from 'react'
 import { Navigation } from '@/components/Navigation'
 import { HeroQuickFilter } from '@/components/HeroQuickFilter'
-import { OfferCard } from '@/components/OfferCard'
+import { OfferCard, OfferProps } from '@/components/OfferCard'
 import { supabase } from '@/lib/supabaseClient'
 import { Filter, Search, ArrowUpDown, ChevronDown } from 'lucide-react'
 import { event as trackEvent } from '@/lib/analytics'
 import { useTranslation } from '@/lib/LocaleContext'
 import { useSearchParams, useRouter } from 'next/navigation'
 
-type Offer = {
-    id: string
-    operator_name: string
-    title: string
-    category: string
-    price_dh: number
-    download_speed_mbps?: number
-    mobile_data_gb?: number
-    voice_minutes?: number
-    technology?: string
-    highlight_badge?: string
-}
 
 function OffersContent() {
     const { locale, t, isRtl } = useTranslation()
@@ -31,7 +19,7 @@ function OffersContent() {
     const initialCategory = searchParams.get('category') || 'all'
     const initialSort = searchParams.get('sort') || 'recommended'
 
-    const [offers, setOffers] = useState<Offer[]>([])
+    const [offers, setOffers] = useState<OfferProps[]>([])
     const [loading, setLoading] = useState(true)
     const [category, setCategory] = useState(initialCategory)
     const [sort, setSort] = useState(initialSort)
@@ -64,6 +52,7 @@ function OffersContent() {
         voice_minutes,
         technology,
         highlight_badge,
+        target_audience,
         operators (name)
       `)
             .eq('is_active', true)
@@ -75,13 +64,14 @@ function OffersContent() {
                 id: offer.id,
                 operator_name: offer.operators?.name || 'Unknown',
                 title: offer.title,
-                category: offer.category,
+                category: offer.category as 'internet' | 'mobile',
                 price_dh: offer.price_dh,
-                download_speed_mbps: offer.download_speed_mbps,
+                download_speed: offer.download_speed_mbps,
                 mobile_data_gb: offer.mobile_data_gb,
                 voice_minutes: offer.voice_minutes,
                 technology: offer.technology,
                 highlight_badge: offer.highlight_badge,
+                target_audience: offer.target_audience || 'individual',
             }))
             setOffers(formatted)
         }
