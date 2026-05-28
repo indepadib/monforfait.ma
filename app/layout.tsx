@@ -71,6 +71,8 @@ export const metadata: Metadata = {
   }
 };
 
+import { LocaleProvider } from '@/lib/LocaleContext';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -129,14 +131,16 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        {children}
-        <SocialProofToast />
-        <AgentChatbot />
-        <ExitIntentPopup />
-        <Footer />
-        <CookieConsent />
-        <CompareBar />
-        <StickyMobileFooter />
+        <LocaleProvider>
+          {children}
+          <SocialProofToast />
+          <AgentChatbot />
+          <ExitIntentPopup />
+          <Footer />
+          <CookieConsent />
+          <CompareBar />
+          <StickyMobileFooter />
+        </LocaleProvider>
       </body>
     </html>
   );

@@ -1,3 +1,5 @@
+"use client";
+
 import { ComparisonSection } from '@/components/ComparisonSection';
 import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { FAQ } from '@/components/FAQ';
@@ -14,9 +16,11 @@ import { LiveFOMOTicker } from '@/components/LiveFOMOTicker';
 import { ScamDetector } from '@/components/ScamDetector';
 import { PartnerLogos } from '@/components/PartnerLogos';
 import { ArrowRight } from 'lucide-react';
-
+import { useTranslation } from '@/lib/LocaleContext';
 
 export default function Home() {
+  const { t, isRtl } = useTranslation();
+
   return (
     <main className="min-h-screen bg-white dark:bg-black font-sans">
       {/* Navigation */}
@@ -33,35 +37,34 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             
             {/* Left Column: Text & Hook */}
-            <div className="text-center lg:text-left">
-              <div className="mb-6 lg:mb-8 h-10 flex items-center justify-center lg:justify-start overflow-hidden">
+            <div className={`text-center ${isRtl ? 'lg:text-right' : 'lg:text-left'}`}>
+              <div className={`mb-6 lg:mb-8 h-10 flex items-center justify-center ${isRtl ? 'lg:justify-end' : 'lg:justify-start'} overflow-hidden`}>
                  <LiveFOMOTicker />
               </div>
 
               {/* SEO Surtitle */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-blue-300 mb-6 uppercase tracking-wider">
+              <div className={`inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-blue-300 mb-6 uppercase tracking-wider ${isRtl ? 'flex-row-reverse' : ''}`}>
                 <Target className="w-3 h-3" />
-                Comparateur Télécom N°1 au Maroc
+                {t('hero_surtitle')}
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.15]">
-                Ne vous faites plus <br className="hidden sm:block" />
+                {t('hero_title_normal')} <br className="hidden sm:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">
-                  arnaquer par votre opérateur.
+                  {t('hero_title_highlight')}
                 </span>
               </h1>
 
               <p className="text-lg md:text-xl text-zinc-300 max-w-2xl mx-auto lg:mx-0 mb-8 leading-relaxed font-normal">
-                Trouvez la <strong>meilleure fibre optique</strong> et le <strong>forfait mobile le moins cher au Maroc</strong>. Ne payez plus le prix fort chez IAM, Inwi ou Orange. <br className="hidden sm:block"/>
-                Passez notre détecteur d'arnaque et débloquez les offres privées B2B.
+                {t('hero_desc')}
               </p>
 
               {/* Social Proof & Trust Badges */}
               <div className="flex flex-col gap-6 mt-8">
                 {/* User Avatars Row */}
-                <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 text-sm text-zinc-400">
-                  <div className="flex items-center gap-3">
-                    <div className="flex -space-x-2">
+                <div className={`flex flex-col sm:flex-row items-center ${isRtl ? 'lg:items-end justify-center lg:justify-end' : 'lg:items-start justify-center lg:justify-start'} gap-4 text-sm text-zinc-400`}>
+                  <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex ${isRtl ? 'space-x-reverse -space-x-2' : '-space-x-2'}`}>
                       <img src="https://i.pravatar.cc/100?img=11" alt="User" width="40" height="40" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
                       <img src="https://i.pravatar.cc/100?img=12" alt="User" width="40" height="40" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
                       <img src="https://i.pravatar.cc/100?img=13" alt="User" width="40" height="40" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
@@ -69,7 +72,7 @@ export default function Home() {
                         +5k
                       </div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className={`flex flex-col ${isRtl ? 'items-end' : 'items-start'}`}>
                       <div className="flex gap-0.5">
                         {[...Array(5)].map((_, i) => (
                           <svg key={i} className="w-4 h-4 fill-yellow-500" viewBox="0 0 20 20">
@@ -77,49 +80,49 @@ export default function Home() {
                           </svg>
                         ))}
                       </div>
-                      <span className="font-medium text-zinc-300 mt-0.5">Approuvé pour trouver le meilleur forfait</span>
+                      <span className="font-medium text-zinc-300 mt-0.5">{t('hero_approved')}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Trust Icons Row */}
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                  <div className="flex items-center gap-2">
+                <div className={`flex flex-wrap items-center justify-center ${isRtl ? 'lg:justify-end flex-row-reverse' : 'lg:justify-start'} gap-4 sm:gap-6 text-xs font-bold text-zinc-400 uppercase tracking-wider`}>
+                  <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
                     <Shield className="w-4 h-4 text-green-400" />
-                    100% Gratuit
+                    {t('hero_free')}
                   </div>
                   <div className="hidden sm:block w-1 h-1 rounded-full bg-zinc-700"></div>
-                  <div className="flex items-center gap-2">
+                  <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
                     <Sparkles className="w-4 h-4 text-purple-400" />
-                    Sans Engagement
+                    {t('hero_no_commitment')}
                   </div>
                   <div className="hidden sm:block w-1 h-1 rounded-full bg-zinc-700"></div>
-                  <div className="flex items-center gap-2">
+                  <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
                     <Clock className="w-4 h-4 text-blue-400" />
-                    En 60 Secondes
+                    {t('hero_speed')}
                   </div>
-                </div>
-                </div>
-
-                <div className="flex flex-wrap justify-center lg:justify-start gap-4 mt-8">
-                  <Link 
-                    href="/eligibilite" 
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-xl flex items-center justify-center gap-2 transform transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20"
-                  >
-                    Vérifier mon éligibilité <ArrowRight className="w-5 h-5" />
-                  </Link>
-                  <a 
-                    href="#comparateur" 
-                    className="bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 flex items-center justify-center gap-2 transition-all active:scale-95"
-                  >
-                    Voir les offres
-                  </a>
                 </div>
               </div>
 
+              <div className={`flex flex-wrap justify-center ${isRtl ? 'lg:justify-end flex-row-reverse' : 'lg:justify-start'} gap-4 mt-8`}>
+                <Link 
+                  href="/eligibilite" 
+                  className={`bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-xl flex items-center justify-center gap-2 transform transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20 ${isRtl ? 'flex-row-reverse' : ''}`}
+                >
+                  {t('hero_btn_check')} <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
+                </Link>
+                <a 
+                  href="#comparateur" 
+                  className="bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 flex items-center justify-center gap-2 transition-all active:scale-95"
+                >
+                  {t('hero_btn_offers')}
+                </a>
+              </div>
+            </div>
+
 
             {/* Right Column: Interactive Hook (Aggressive Trap) */}
-            <div className="relative z-20 mx-auto w-full max-w-lg lg:max-w-full lg:pl-10">
+            <div className={`relative z-20 mx-auto w-full max-w-lg lg:max-w-full ${isRtl ? 'lg:pr-10' : 'lg:pl-10'}`}>
                <ScamDetector />
             </div>
 
@@ -223,17 +226,17 @@ export default function Home() {
       <section aria-labelledby="cta-heading" className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 id="cta-heading" className="text-3xl md:text-4xl font-black mb-4">
-            Prêt à économiser sur votre facture ?
+            {t('cta_ready')}
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Répondez à 3 questions et découvrez vos offres personnalisées
+            {t('cta_ready_desc')}
           </p>
           <Link
             href="/quiz"
-            className="inline-flex items-center gap-2 px-10 py-5 bg-white text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-all shadow-2xl transform hover:-translate-y-1 text-lg"
+            className={`inline-flex items-center gap-2 px-10 py-5 bg-white text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-all shadow-2xl transform hover:-translate-y-1 text-lg ${isRtl ? 'flex-row-reverse' : ''}`}
           >
             <Sparkles className="w-6 h-6" />
-            Commencer maintenant (60 sec)
+            {t('cta_btn')}
           </Link>
         </div>
       </section>

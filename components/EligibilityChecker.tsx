@@ -4,10 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Wifi, Home, MapPin, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { AddressMapPicker } from '@/components/AddressMapPicker';
+import { useTranslation } from '@/lib/LocaleContext';
 
 type Step = 'NEED' | 'REASON' | 'LOCATION' | 'CONTACT' | 'SCANNING' | 'RESULT';
 
 export function EligibilityChecker() {
+    const { locale, t, isRtl } = useTranslation();
     const [step, setStep] = useState<Step>('NEED');
     const [need, setNeed] = useState('');
     const [address, setAddress] = useState('');
@@ -99,10 +101,10 @@ export function EligibilityChecker() {
     };
 
     return (
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 md:p-8 shadow-2xl border border-zinc-200 dark:border-zinc-800 max-w-2xl mx-auto relative overflow-hidden">
+        <div className={`bg-white dark:bg-zinc-900 rounded-3xl p-6 md:p-8 shadow-2xl border border-zinc-200 dark:border-zinc-800 max-w-2xl mx-auto relative overflow-hidden ${isRtl ? 'text-right' : 'text-left'}`}>
             {/* Progress Bar */}
             {step !== 'SCANNING' && step !== 'RESULT' && (
-                <div className="flex gap-2 mb-8">
+                <div className={`flex gap-2 mb-8 ${isRtl ? 'flex-row-reverse' : ''}`}>
                     <div className={`h-2 flex-1 rounded-full ${['NEED', 'REASON', 'LOCATION', 'CONTACT'].includes(step) ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800'}`}></div>
                     <div className={`h-2 flex-1 rounded-full ${['REASON', 'LOCATION', 'CONTACT'].includes(step) ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800'}`}></div>
                     <div className={`h-2 flex-1 rounded-full ${['LOCATION', 'CONTACT'].includes(step) ? 'bg-blue-600' : 'bg-zinc-100 dark:bg-zinc-800'}`}></div>
@@ -113,29 +115,29 @@ export function EligibilityChecker() {
             {step === 'NEED' && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="text-center mb-8">
-                        <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white mb-2">Test d'Éligibilité National</h3>
-                        <p className="text-zinc-500 dark:text-zinc-400">Quel est votre besoin principal à domicile ?</p>
+                        <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white mb-2">{t('elig_title')}</h3>
+                        <p className="text-zinc-500 dark:text-zinc-400">{t('elig_subtitle')}</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button onClick={() => handleNeedSelection('Fibre Optique')} className="p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left transition-all group">
+                        <button onClick={() => handleNeedSelection('Fibre Optique')} className={`p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group ${isRtl ? 'text-right' : 'text-left'}`}>
                             <Wifi className="w-8 h-8 text-blue-600 mb-3 group-hover:scale-110 transition-transform" />
-                            <div className="font-bold text-zinc-900 dark:text-white">Fibre Optique (Très Haut Débit)</div>
-                            <div className="text-sm text-zinc-500">Idéal pour le streaming et télétravail</div>
+                            <div className="font-bold text-zinc-900 dark:text-white">{t('elig_need_fibre_title')}</div>
+                            <div className="text-sm text-zinc-500">{t('elig_need_fibre_desc')}</div>
                         </button>
-                        <button onClick={() => handleNeedSelection('ADSL')} className="p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left transition-all group">
+                        <button onClick={() => handleNeedSelection('ADSL')} className={`p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group ${isRtl ? 'text-right' : 'text-left'}`}>
                             <Home className="w-8 h-8 text-orange-500 mb-3 group-hover:scale-110 transition-transform" />
-                            <div className="font-bold text-zinc-900 dark:text-white">ADSL / Box standard</div>
-                            <div className="text-sm text-zinc-500">Couverture nationale maximale</div>
+                            <div className="font-bold text-zinc-900 dark:text-white">{t('elig_need_adsl_title')}</div>
+                            <div className="text-sm text-zinc-500">{t('elig_need_adsl_desc')}</div>
                         </button>
-                        <button onClick={() => handleNeedSelection('Box 4G/5G')} className="p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left transition-all group">
+                        <button onClick={() => handleNeedSelection('Box 4G/5G')} className={`p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group ${isRtl ? 'text-right' : 'text-left'}`}>
                             <Activity className="w-8 h-8 text-purple-500 mb-3 group-hover:scale-110 transition-transform" />
-                            <div className="font-bold text-zinc-900 dark:text-white">Box 4G / 5G (Sans fil)</div>
-                            <div className="text-sm text-zinc-500">Là où la fibre ne passe pas</div>
+                            <div className="font-bold text-zinc-900 dark:text-white">{t('elig_need_box_title')}</div>
+                            <div className="text-sm text-zinc-500">{t('elig_need_box_desc')}</div>
                         </button>
-                        <button onClick={() => handleNeedSelection('Forfait Mobile')} className="p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left transition-all group">
+                        <button onClick={() => handleNeedSelection('Forfait Mobile')} className={`p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group ${isRtl ? 'text-right' : 'text-left'}`}>
                             <Phone className="w-8 h-8 text-green-500 mb-3 group-hover:scale-110 transition-transform" />
-                            <div className="font-bold text-zinc-900 dark:text-white">Forfait Mobile seul</div>
-                            <div className="text-sm text-zinc-500">Meilleure couverture réseau</div>
+                            <div className="font-bold text-zinc-900 dark:text-white">{t('elig_need_mobile_title')}</div>
+                            <div className="text-sm text-zinc-500">{t('elig_need_mobile_desc')}</div>
                         </button>
                     </div>
                 </div>
@@ -143,26 +145,28 @@ export function EligibilityChecker() {
 
             {step === 'REASON' && (
                 <div className="animate-in fade-in slide-in-from-right-8 duration-500">
-                    <button onClick={() => setStep('NEED')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">← Retour</button>
+                    <button onClick={() => setStep('NEED')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">
+                        {isRtl ? 'رجوع ←' : '← Retour'}
+                    </button>
                     <div className="text-center mb-8">
-                        <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white mb-2">Quelle est votre situation ?</h3>
-                        <p className="text-zinc-500 dark:text-zinc-400">Cela nous aide à trouver les meilleures offres de bienvenue ou de rétention.</p>
+                        <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white mb-2">{t('elig_reason_title')}</h3>
+                        <p className="text-zinc-500 dark:text-zinc-400">{t('elig_reason_desc')}</p>
                     </div>
                     <div className="grid grid-cols-1 gap-3">
                         {[
-                            { id: 'moving', label: 'Je déménage prochainement', icon: Home, color: 'text-blue-500' },
-                            { id: 'better_price', label: 'Je veux payer moins cher', icon: ShieldCheck, color: 'text-green-500' },
-                            { id: 'better_speed', label: 'Mon débit actuel est trop lent', icon: Activity, color: 'text-orange-500' },
-                            { id: 'new_line', label: 'Nouveau raccordement / 1ère box', icon: Zap, color: 'text-yellow-500' }
+                            { id: 'moving', label: t('elig_reason_moving'), icon: Home, color: 'text-blue-500' },
+                            { id: 'better_price', label: t('elig_reason_cheaper'), icon: ShieldCheck, color: 'text-green-500' },
+                            { id: 'better_speed', label: t('elig_reason_faster'), icon: Activity, color: 'text-orange-500' },
+                            { id: 'new_line', label: t('elig_reason_new'), icon: Zap, color: 'text-yellow-500' }
                         ].map((item) => (
                             <button 
                                 key={item.id}
                                 onClick={() => handleReasonSelection(item.label)}
-                                className="flex items-center gap-4 p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left transition-all group"
+                                className={`flex items-center gap-4 p-4 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}
                             >
                                 <item.icon className={`w-6 h-6 ${item.color} group-hover:scale-110 transition-transform`} />
                                 <span className="font-bold text-zinc-900 dark:text-white">{item.label}</span>
-                                <ChevronRight className="w-5 h-5 ml-auto text-zinc-300 group-hover:text-blue-500 transition-colors" />
+                                <ChevronRight className={`w-5 h-5 ${isRtl ? 'mr-auto rotate-180' : 'ml-auto'} text-zinc-300 group-hover:text-blue-500 transition-colors`} />
                             </button>
                         ))}
                     </div>
@@ -172,10 +176,12 @@ export function EligibilityChecker() {
 
             {step === 'LOCATION' && (
                 <div className="animate-in fade-in slide-in-from-right-8 duration-500">
-                    <button onClick={() => setStep('REASON')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">← Retour</button>
+                    <button onClick={() => setStep('REASON')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">
+                        {isRtl ? 'رجوع ←' : '← Retour'}
+                    </button>
                     <div className="mb-6">
-                        <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">Où habitez-vous ?</h3>
-                        <p className="text-zinc-500 dark:text-zinc-400 text-sm">Recherchez votre adresse puis glissez le marqueur pour ajuster précisément votre position.</p>
+                        <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">{t('elig_loc_title')}</h3>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('elig_loc_desc')}</p>
                     </div>
                     <form onSubmit={handleLocationSubmit} className="space-y-4">
                         <AddressMapPicker
@@ -188,9 +194,9 @@ export function EligibilityChecker() {
                         <button
                             type="submit"
                             disabled={!address}
-                            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95"
+                            className={`w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 ${isRtl ? 'flex-row-reverse' : ''}`}
                         >
-                            Confirmer l'adresse <ChevronRight className="w-5 h-5" />
+                            {t('elig_loc_btn')} <ChevronRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
                         </button>
                     </form>
                 </div>
@@ -198,70 +204,70 @@ export function EligibilityChecker() {
 
             {step === 'CONTACT' && (
                 <div className="animate-in fade-in slide-in-from-right-8 duration-500">
-                    <button onClick={() => setStep('LOCATION')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">← Retour</button>
+                    <button onClick={() => setStep('LOCATION')} className="text-sm text-zinc-500 mb-4 hover:text-zinc-900 dark:hover:text-white">
+                        {isRtl ? 'رجوع ←' : '← Retour'}
+                    </button>
                     <div className="mb-6">
-                        <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">Dernière étape</h3>
-                        <p className="text-zinc-500 dark:text-zinc-400">Où devons-nous vous envoyer le résultat de la couverture réseau ?</p>
+                        <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">{t('elig_contact_title')}</h3>
+                        <p className="text-zinc-500 dark:text-zinc-400">{t('elig_contact_desc')}</p>
                     </div>
-                    <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-3 rounded-lg text-sm mb-6 flex gap-2 items-start">
+                    <div className={`bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-3 rounded-lg text-sm mb-6 flex gap-2 items-start ${isRtl ? 'flex-row-reverse text-right' : ''}`}>
                         <ShieldCheck className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                        <p>Vos données sont sécurisées et serviront uniquement à vous informer sur la disponibilité de la fibre.</p>
+                        <p>{t('elig_contact_secure')}</p>
                     </div>
                     <form onSubmit={handleContactSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">Prénom & Nom</label>
+                            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('promo_step2_name')}</label>
                             <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                                <User className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400`} />
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-                                    placeholder="Votre nom complet"
-                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
+                                    placeholder={t('elig_contact_name_placeholder')}
+                                    className={`w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 ${isRtl ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4 text-left'} focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white`}
                                     required
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">Numéro de téléphone</label>
+                            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('promo_step2_phone')}</label>
                             <div className="relative">
-                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                                <Phone className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400`} />
                                 <input
                                     type="tel"
                                     value={phone}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
-                                    placeholder="Votre numéro de téléphone"
-                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white"
+                                    placeholder={t('elig_contact_phone_placeholder')}
+                                    className={`w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 ${isRtl ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4 text-left'} focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white`}
                                     required
                                 />
-
                             </div>
                         </div>
                         <div>
-
-                            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">Délai souhaité</label>
+                            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('elig_contact_delay')}</label>
                             <select 
                                 value={timing}
                                 onChange={(e) => setTiming(e.target.value)}
-                                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white font-bold"
+                                className={`w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white font-bold ${isRtl ? 'text-right' : ''}`}
                             >
-                                <option value="asap">Dès que possible (Urgent)</option>
-                                <option value="1_month">D'ici 1 mois</option>
-                            <option value="checking">Simple comparaison</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">Commentaire (Optionnel)</label>
-                        <textarea
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            placeholder="Ex: Je cherche la fibre pour du gaming, ou j'ai besoin d'une IP fixe..."
-                            className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white min-h-[80px]"
-                        />
-                    </div>
+                                <option value="asap">{t('elig_delay_asap')}</option>
+                                <option value="1_month">{t('elig_delay_1month')}</option>
+                                <option value="checking">{t('elig_delay_checking')}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('elig_contact_comment')}</label>
+                            <textarea
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                placeholder={t('elig_contact_comment_placeholder')}
+                                className={`w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white min-h-[80px] ${isRtl ? 'text-right' : ''}`}
+                            />
+                        </div>
 
-                        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/30">
-                            Lancer le Test de Couverture <ArrowRight className="w-5 h-5" />
+                        <button type="submit" className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/30 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            {t('elig_contact_btn')} <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
                         </button>
                     </form>
                 </div>
@@ -276,10 +282,10 @@ export function EligibilityChecker() {
                         {/* Radar ping effect */}
                         <div className="absolute inset-0 bg-blue-400/20 rounded-full animate-ping"></div>
                     </div>
-                    <h3 className="text-2xl font-black mb-2 animate-pulse">Analyse des bornes...</h3>
-                    <p className="text-zinc-500">Vérification de l'adresse : {address}</p>
+                    <h3 className="text-2xl font-black mb-2 animate-pulse">{t('elig_scan_title')}</h3>
+                    <p className="text-zinc-500">{t('elig_scan_desc').replace('{address}', address)}</p>
                     <div className="mt-6 flex justify-center gap-1 text-sm text-zinc-400">
-                        <span className="animate-bounce" style={{ animationDelay: '0ms' }}>Connexion aux bases opérateurs...</span>
+                        <span className="animate-bounce" style={{ animationDelay: '0ms' }}>{t('elig_scan_connecting')}</span>
                     </div>
                 </div>
             )}
@@ -289,29 +295,28 @@ export function EligibilityChecker() {
                     <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                         <CheckCircle2 className="w-10 h-10" />
                     </div>
-                    <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-4">Analyse Terminée !</h3>
-                    <div className="flex items-center justify-center gap-4 mb-8">
-                        <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-1 rounded-md">
-                            <ShieldCheck className="w-3 h-3 text-green-500" /> Data encrypted
+                    <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-4">{t('elig_res_title')}</h3>
+                    <div className={`flex items-center justify-center gap-4 mb-8 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        <div className={`flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-1 rounded-md ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            <ShieldCheck className="w-3 h-3 text-green-500" /> {t('elig_res_encrypted')}
                         </div>
-                        <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-1 rounded-md">
-                            <CheckCircle2 className="w-3 h-3 text-blue-500" /> Verified Address
+                        <div className={`flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-1 rounded-md ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            <CheckCircle2 className="w-3 h-3 text-blue-500" /> {t('elig_res_verified')}
                         </div>
                     </div>
                     <p className="text-zinc-600 dark:text-zinc-400 mb-8 max-w-md mx-auto">
-
-                        Votre adresse (<span className="font-bold text-zinc-900 dark:text-white">{address}</span>) est bien située dans une zone couverte par le Très Haut Débit.
+                        {t('elig_res_desc').replace('{address}', address)}
                     </p>
                     <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-2xl p-6 mb-8 text-left">
-                        <h4 className="font-bold text-blue-800 dark:text-blue-400 mb-2 flex items-center gap-2">
-                             Un conseiller vous contactera
+                        <h4 className={`font-bold text-blue-800 dark:text-blue-400 mb-2 flex items-center gap-2 ${isRtl ? 'flex-row-reverse text-right' : ''}`}>
+                             {t('elig_res_advisor_title')}
                         </h4>
-                        <p className="text-sm text-blue-700/80 dark:text-blue-300/80 italic">
-                            "Un expert va analyzer les raccordements exacts devant votre porte et vous proposera les offres de rétention exclusives sous 24h."
+                        <p className={`text-sm text-blue-700/80 dark:text-blue-300/80 italic ${isRtl ? 'text-right' : 'text-left'}`}>
+                            {t('elig_res_advisor_desc')}
                         </p>
                     </div>
-                    <a href="/?scam=true" className="inline-flex w-full bg-black dark:bg-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white font-black py-4 px-8 rounded-xl items-center justify-center gap-2 transition-transform active:scale-95 shadow-2xl">
-                        Débloquer les prix secrets
+                    <a href="/?scam=true" className={`inline-flex w-full bg-black dark:bg-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white font-black py-4 px-8 rounded-xl items-center justify-center gap-2 transition-transform active:scale-95 shadow-2xl ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        {t('elig_res_btn')}
                     </a>
                 </div>
             )}
