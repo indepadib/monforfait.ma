@@ -197,18 +197,20 @@ export function QuickCaptureForm() {
         )}
 
         <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors flex items-center justify-center gap-2 group disabled:opacity-70"
-        >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <>
-              Voir les offres <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </>
-          )}
-        <VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
+  type="submit"
+  disabled={isLoading}
+  className="w-full py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors flex items-center justify-center gap-2 group disabled:opacity-70"
+>
+  {isLoading ? (
+    <Loader2 className="w-5 h-5 animate-spin" />
+  ) : (
+    <>
+      Voir les offres <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+    </>
+  )}
+</button>
+
+<VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
       </form>
     </div>
   )
