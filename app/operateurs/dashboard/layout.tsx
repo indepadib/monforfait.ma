@@ -18,7 +18,8 @@ import {
   Sparkles,
   MessageSquare,
   Send,
-  RefreshCw
+  RefreshCw,
+  Zap
 } from 'lucide-react';
 
 export default function OperatorDashboardLayout({
