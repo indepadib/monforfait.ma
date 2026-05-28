@@ -49,6 +49,9 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
   // Audio Player states
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(5); // default 5s fallback
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
   // Unlocked state (cross-check localStorage)
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
@@ -176,22 +179,89 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
     fetchRealLead();
   }, [leadId]);
 
-  // Audio Playback simulation
+  const audioUrl = lead?.needs_details?.verification_audio_url || '';
+
+  // Initialize and handle HTML5 Audio element if url is present
   useEffect(() => {
+    if (typeof window !== 'undefined' && audioUrl) {
+      const audio = new Audio(audioUrl);
+      setAudioElement(audio);
+
+      const handleTimeUpdate = () => {
+        setCurrentTime(audio.currentTime);
+        if (audio.duration) {
+          setAudioDuration(audio.duration);
+          setAudioProgress((audio.currentTime / audio.duration) * 100);
+        }
+      };
+
+      const handleEnded = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+        setAudioProgress(0);
+      };
+
+      const handleLoadedMetadata = () => {
+        if (audio.duration) setAudioDuration(audio.duration);
+      };
+
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+      return () => {
+        audio.pause();
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      };
+    }
+  }, [audioUrl]);
+
+  // Audio Playback action controller (Supports real sound or fallback simulation)
+  useEffect(() => {
+    if (audioElement) {
+      if (isPlaying) {
+        audioElement.play().catch(e => {
+          console.warn("Real audio autoplay blocked or failed, falling back to simulated playback:", e);
+          runSimulation();
+        });
+      } else {
+        audioElement.pause();
+      }
+      return;
+    }
+
     let interval: any;
     if (isPlaying) {
+      runSimulation();
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+
+    function runSimulation() {
+      setAudioDuration(5); // mock 5s
       interval = setInterval(() => {
         setAudioProgress((prev) => {
           if (prev >= 100) {
             setIsPlaying(false);
+            setCurrentTime(0);
             return 0;
           }
-          return prev + 2;
+          const nextProgress = prev + 2;
+          setCurrentTime((nextProgress / 100) * 5);
+          return nextProgress;
         });
       }, 100);
     }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [isPlaying, audioElement]);
+
+  const formatAudioTime = (timeInSeconds: number) => {
+    const mins = Math.floor(timeInSeconds / 60);
+    const secs = Math.floor(timeInSeconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   if (isLoading) {
     return <div className="p-10 text-center text-slate-500 bg-slate-950 min-h-screen">Chargement du prospect...</div>;
@@ -347,9 +417,11 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
               <div>
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Award className="w-4 h-4 text-blue-500" />
-                  Vérification Téléphonique
+                  Vérification Téléphonique {audioUrl ? '🔊' : '⚡'}
                 </h3>
-                <p className="text-[10px] text-slate-500">Enregistrement audio du conseiller MonForfait.ma</p>
+                <p className="text-[10px] text-slate-500">
+                  {audioUrl ? "Enregistrement vocal réel de la qualification client" : "Enregistrement simulé du conseiller MonForfait.ma"}
+                </p>
               </div>
               <span className="text-[9px] font-black uppercase text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
                 Vérifié le {new Date(lead.created_at).toLocaleDateString('fr-FR')}
@@ -366,7 +438,7 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
               </button>
               
               <div className="flex-1 space-y-1">
-                {/* Fake audio waveform */}
+                {/* Visual Audio Waveform */}
                 <div className="h-8 flex items-end gap-1 px-2">
                   {[12, 28, 16, 42, 32, 20, 48, 12, 24, 38, 28, 16, 42, 35, 12, 26, 49, 12, 32, 24].map((h, i) => {
                     const isActive = audioProgress > (i * 5);
@@ -384,8 +456,8 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
                   })}
                 </div>
                 <div className="flex justify-between text-[9px] font-bold text-slate-500">
-                  <span>0:0{Math.round(audioProgress / 20)}</span>
-                  <span>0:05</span>
+                  <span>{formatAudioTime(currentTime)}</span>
+                  <span>{formatAudioTime(audioDuration)}</span>
                 </div>
               </div>
             </div>
