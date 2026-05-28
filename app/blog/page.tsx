@@ -1,4 +1,5 @@
-import { Metadata } from 'next';
+export const dynamic = 'force-dynamic';
+
 import BlogIndexClient from './BlogIndexClient';
 
 export const metadata: Metadata = {
