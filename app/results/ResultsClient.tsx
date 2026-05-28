@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { Navigation } from '@/components/Navigation'
-import { OfferCard } from '@/components/OfferCard'
+import { OfferCard, OfferProps } from '@/components/OfferCard'
 import { supabase } from '@/lib/supabaseClient'
 import { Sparkles, ArrowRight, PhoneCall, Gift, CheckCircle, Flame, Shield, Clock } from 'lucide-react'
 import Link from 'next/link'
@@ -11,18 +11,8 @@ import { CONFIG } from '@/lib/config'
 import { event as trackEvent } from '@/lib/analytics'
 import { useTranslation } from '@/lib/LocaleContext'
 
-type Offer = {
-    id: string
-    operator_name: string
-    title: string
-    category: string
-    price_dh: number
-    download_speed_mbps?: number
-    upload_speed_mbps?: number
-    mobile_data_gb?: number
-    voice_minutes?: number
-    technology?: string
-    highlight_badge?: string
+
+type Offer = OfferProps & {
     setup_fee_dh?: number
     commitment_months?: number
 }
@@ -77,6 +67,7 @@ function ResultsContent() {
                 setup_fee_dh,
                 commitment_months,
                 highlight_badge,
+                target_audience,
                 operators (name)
             `).eq('is_active', true)
 
@@ -94,9 +85,21 @@ function ResultsContent() {
 
             if (data) {
                 // Transform data
-                let formatted = data.map((offer: any) => ({
-                    ...offer,
-                    operator_name: offer.operators?.name || 'Unknown'
+                let formatted: Offer[] = data.map((offer: any) => ({
+                    id: offer.id,
+                    operator_name: offer.operators?.name || 'Unknown',
+                    title: offer.title,
+                    category: offer.category as 'internet' | 'mobile',
+                    price_dh: offer.price_dh,
+                    download_speed: offer.download_speed_mbps,
+                    upload_speed: offer.upload_speed_mbps,
+                    mobile_data_gb: offer.mobile_data_gb,
+                    voice_minutes: offer.voice_minutes,
+                    technology: offer.technology,
+                    setup_fee_dh: offer.setup_fee_dh,
+                    commitment_months: offer.commitment_months,
+                    highlight_badge: offer.highlight_badge,
+                    target_audience: offer.target_audience || 'individual',
                 }))
 
                 // Score and sort based on quiz answers
@@ -108,12 +111,12 @@ function ResultsContent() {
                         scoreA -= a.price_dh
                         scoreB -= b.price_dh
                     } else if (ctx.priority === 'fastest') {
-                        scoreA += (a.download_speed_mbps || 0) + (a.mobile_data_gb || 0) * 10
-                        scoreB += (b.download_speed_mbps || 0) + (b.mobile_data_gb || 0) * 10
+                        scoreA += (a.download_speed || 0) + (a.mobile_data_gb || 0) * 10
+                        scoreB += (b.download_speed || 0) + (b.mobile_data_gb || 0) * 10
                     } else {
                         // best_value: value = features / price
-                        const valA = ((a.download_speed_mbps || 0) + (a.mobile_data_gb || 0) * 10) / (a.price_dh || 1)
-                        const valB = ((b.download_speed_mbps || 0) + (b.mobile_data_gb || 0) * 10) / (b.price_dh || 1)
+                        const valA = ((a.download_speed || 0) + (a.mobile_data_gb || 0) * 10) / (a.price_dh || 1)
+                        const valB = ((b.download_speed || 0) + (b.mobile_data_gb || 0) * 10) / (b.price_dh || 1)
                         scoreA += valA
                         scoreB += valB
                     }
