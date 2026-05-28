@@ -39,6 +39,14 @@ export default function OperatorDashboardPage() {
     hotCount: 45,
     pendingCount: 18
   });
+  const [cities, setCities] = useState([
+    { name: 'Casablanca', x: 255, y: 125, leads: 48, active: true },
+    { name: 'Rabat', x: 280, y: 90, leads: 32, active: true },
+    { name: 'Marrakech', x: 225, y: 175, leads: 24, active: true },
+    { name: 'Tanger', x: 345, y: 40, leads: 15, active: true },
+    { name: 'Agadir', x: 175, y: 225, leads: 11, active: true },
+    { name: 'Fès', x: 335, y: 100, leads: 9, active: false }
+  ]);
   const [loading, setLoading] = useState(false);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
@@ -106,6 +114,23 @@ export default function OperatorDashboardPage() {
           hotCount: hot,
           pendingCount: pending
         });
+
+        // Update cities state dynamically with real counts
+        const updatedCities = [
+          { name: 'Casablanca', x: 255, y: 125, leads: 0, active: true },
+          { name: 'Rabat', x: 280, y: 90, leads: 0, active: true },
+          { name: 'Marrakech', x: 225, y: 175, leads: 0, active: true },
+          { name: 'Tanger', x: 345, y: 40, leads: 0, active: true },
+          { name: 'Agadir', x: 175, y: 225, leads: 0, active: true },
+          { name: 'Fès', x: 335, y: 100, leads: 0, active: false }
+        ].map(c => {
+          const matchingLeads = combined.filter(l => l.city && l.city.trim().toLowerCase() === c.name.toLowerCase()).length;
+          return {
+            ...c,
+            leads: matchingLeads
+          };
+        });
+        setCities(updatedCities);
       }
     } catch (e) {
       console.warn("Supabase fetch failed", e);
@@ -260,11 +285,27 @@ export default function OperatorDashboardPage() {
 
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* SVG Map of Morocco */}
-            <div className="w-full max-w-[360px] h-[400px] bg-slate-950/60 rounded-2xl border border-slate-800/60 p-4 relative flex items-center justify-center">
+            <div className="w-full max-w-[360px] h-[400px] bg-slate-950/60 rounded-2xl border border-slate-800/60 p-4 relative flex items-center justify-center overflow-hidden">
               <svg className="w-full h-full text-slate-800" viewBox="0 0 500 500" fill="currentColor">
-                <path d="M 340,50 L 370,52 L 390,58 L 410,68 L 430,72 L 425,100 L 420,140 L 435,170 L 410,200 L 390,220 L 370,240 L 340,260 L 300,290 L 260,310 L 240,330 L 240,430 L 100,430 L 100,500 L 35,500 L 38,480 L 42,450 L 50,410 L 68,380 L 90,350 L 115,330 L 130,310 L 145,290 L 160,255 L 190,220 L 220,185 L 250,155 L 280,130 L 310,95 Z" fill="#1e293b" opacity="0.5" stroke="#334155" strokeWidth="2" />
+                <defs>
+                  <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#1e293b" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#0f172a" stopOpacity="0.4" />
+                  </linearGradient>
+                </defs>
                 
-                {MAP_CITIES.map((c) => {
+                {/* Refined boundary representation for a unified Morocco */}
+                <path 
+                  d="M 335,35 L 348,30 L 358,35 L 362,45 L 375,48 L 388,52 L 405,58 L 425,58 L 440,62 L 435,78 L 420,95 L 415,115 L 425,135 L 410,165 L 395,190 L 380,215 L 375,245 L 355,270 L 335,295 L 315,320 L 300,340 L 150,340 L 150,480 L 40,480 L 45,460 L 52,430 L 60,400 L 70,370 L 85,340 L 105,310 L 120,285 L 140,260 L 165,230 L 190,200 L 215,170 L 240,140 L 265,110 L 290,80 L 315,55 Z" 
+                  fill="url(#mapGradient)" 
+                  stroke="#3b82f6" 
+                  strokeWidth="1.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  opacity="0.85"
+                />
+                
+                {cities.map((c) => {
                   const isHovered = selectedCity === c.name;
                   return (
                     <g 
@@ -273,22 +314,22 @@ export default function OperatorDashboardPage() {
                       onClick={() => setSelectedCity(c.name)}
                     >
                       {c.active && (
-                        <circle cx={c.x} cy={c.y} r="12" className="fill-blue-500/20 animate-ping" />
+                        <circle cx={c.x} cy={c.y} r="10" className="fill-blue-500/25 animate-ping" />
                       )}
                       <circle 
                         cx={c.x} 
                         cy={c.y} 
-                        r={isHovered ? 8 : 6} 
+                        r={isHovered ? 7 : 5} 
                         className={`transition-all ${
                           isHovered 
-                            ? 'fill-blue-400 stroke-white stroke-2 shadow-2xl' 
-                            : 'fill-blue-600 group-hover:fill-blue-400'
+                            ? 'fill-cyan-400 stroke-white stroke-2 shadow-lg shadow-cyan-500/50' 
+                            : 'fill-blue-500 group-hover:fill-cyan-400 group-hover:scale-125'
                         }`} 
                       />
                       <text 
-                        x={c.x + 10} 
+                        x={c.x + 8} 
                         y={c.y + 4} 
-                        className="text-[10px] font-black fill-slate-300 group-hover:fill-white select-none transition-colors"
+                        className="text-[9px] font-black fill-slate-300 group-hover:fill-white select-none transition-colors"
                       >
                         {c.name} {c.leads > 0 && `(${c.leads})`}
                       </text>
@@ -303,7 +344,7 @@ export default function OperatorDashboardPage() {
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Performances par Région</h4>
               
               <div className="space-y-2">
-                {MAP_CITIES.map((c) => (
+                {cities.map((c) => (
                   <button 
                     key={c.name}
                     onClick={() => setSelectedCity(c.name)}
