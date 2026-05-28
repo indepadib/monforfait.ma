@@ -6,6 +6,7 @@ import { X, Loader2, CheckCircle, Flame, ShieldCheck, Zap } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { OfferProps } from './OfferCard'
 import { event as trackEvent } from '@/lib/analytics'
+import { CONFIG } from '@/lib/config'
 
 export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () => void }) {
     const [name, setName] = useState('')
@@ -93,7 +94,7 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
         })
 
         setTimeout(() => {
-            const whatsappUrl = `https://wa.me/212600000000?text=${encodeURIComponent(message)}`
+            const whatsappUrl = `https://wa.me/${CONFIG.SUPPORT_WHATSAPP}?text=${encodeURIComponent(message)}`
             window.open(whatsappUrl, '_blank')
             setLoading(false)
             setSent(true)

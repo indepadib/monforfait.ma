@@ -16,11 +16,27 @@ export type LeadData = {
     }
     city?: string
     is_pro?: boolean
+    phone?: string
 }
 
 export type ScoredLead = {
     score: number
     thermal_status: 'HOT' | 'WARM' | 'COLD'
+}
+
+function isDummyPhone(phone?: string): boolean {
+    if (!phone) return false
+    const cleanPhone = phone.replace(/[^0-9]/g, '')
+    
+    // Obvious sequential or too short numbers
+    if (cleanPhone.length < 9) return true
+    if (/^(.)\1+$/.test(cleanPhone)) return true // e.g. "0666666666" or repeating digits
+    if (cleanPhone.includes('12345678') || cleanPhone.includes('87654321')) return true
+    
+    // Common Morocco test placeholders
+    if (cleanPhone === '0600000000' || cleanPhone === '212600000000' || cleanPhone === '0600000001') return true
+    
+    return false
 }
 
 export function calculateLeadScore(data: LeadData): ScoredLead {
@@ -47,6 +63,11 @@ export function calculateLeadScore(data: LeadData): ScoredLead {
 
     // Cap score at 100
     score = Math.min(score, 100)
+
+    // 5. Suspect Phone check - Force COLD status
+    if (isDummyPhone(data.phone)) {
+        score = Math.min(score, 15) // Max 15 points if suspect
+    }
 
     // Determine Thermal Status
     let thermal_status: 'HOT' | 'WARM' | 'COLD' = 'COLD'

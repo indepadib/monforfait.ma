@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { Navigation } from '@/components/Navigation'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { ShieldCheck, Scale, Leaf, HeartHandshake, Eye } from 'lucide-react'
+import { CONFIG } from '@/lib/config'
 
 export const metadata: Metadata = {
     title: 'Pourquoi nous faire confiance ? | MonForfait.ma',
@@ -86,7 +87,7 @@ export default function ConfiancePage() {
                             Un problème avec un opérateur ? Un doute sur vos frais de résiliation ? Nos experts surveillent le marché quotidiennement pour dénoncer les abus.
                         </p>
                         <a 
-                            href="https://wa.me/212600000000" 
+                            href={`https://wa.me/${CONFIG.SUPPORT_WHATSAPP}`} 
                             className="inline-flex items-center px-8 py-4 bg-green-500 text-white font-bold rounded-2xl hover:scale-105 transition-transform"
                         >
                             Besoin d'aide ? Contactez un expert sur WhatsApp

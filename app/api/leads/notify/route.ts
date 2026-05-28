@@ -22,7 +22,8 @@ export async function POST(req: Request) {
             timing: needs_details?.installation_timing,
             speedtest_results: needs_details?.speedtest_results,
             city,
-            is_pro
+            is_pro,
+            phone
         })
 
         // 2. Update Lead in Database with Score/Status (if leadId provided)

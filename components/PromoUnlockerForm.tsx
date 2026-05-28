@@ -324,41 +324,43 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
                   </div>
                 )}
 
-                <div className="flex items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={() => setStep(1)}
-                        className="p-4 bg-white/5 hover:bg-white/10 text-zinc-400 rounded-xl transition-all border border-white/10"
-                    >
-                        Retour
-                    </button>
-            <div className="pt-2 relative overflow-hidden rounded-xl">
-              {/* Button Shine Effect */}
-              <div className="absolute top-0 -inset-full h-full w-1/2 z-20 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 animate-[shine_2s_infinite]"></div>
-              
-              <button
-                type="submit"
-                disabled={isLoading || !formData.firstName || !formData.phone}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-blue-500/50 transform rounded-xl active:scale-95 disabled:opacity-50 disabled:pointer-events-none relative z-10"
-              >
-                {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Vérification en cours...
-                </>
-              ) : (
-                <>
-                  {mode === 'b2b' ? "Demander le devis gratuit" : "Débloquer le comparatif"}
-                  <ChevronRight className="w-5 h-5" />
-                </>
-              )}
-            </button>
-          </div>
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3 w-full">
+                        <button
+                            type="button"
+                            onClick={() => setStep(1)}
+                            className="px-5 py-4 bg-white/5 hover:bg-white/10 text-zinc-400 rounded-xl transition-all border border-white/10 text-sm font-medium"
+                        >
+                            Retour
+                        </button>
+                        <div className="flex-1 relative overflow-hidden rounded-xl">
+                            {/* Button Shine Effect */}
+                            <div className="absolute top-0 -inset-full h-full w-1/2 z-20 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 animate-[shine_2s_infinite]"></div>
+                            
+                            <button
+                                type="submit"
+                                disabled={isLoading || !formData.firstName || !formData.phone}
+                                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-blue-500/50 transform rounded-xl active:scale-95 disabled:opacity-50 disabled:pointer-events-none relative z-10 text-sm"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Vérification...
+                                    </>
+                                ) : (
+                                    <>
+                                        {mode === 'b2b' ? "Demander le devis gratuit" : "Débloquer le comparatif"}
+                                        <ChevronRight className="w-5 h-5" />
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
 
-          <p className="text-xs text-center text-zinc-500 mt-4 flex items-center justify-center gap-1 font-medium">
-            <Shield className="w-3 h-3" />
-            Vos données sont 100% sécurisées.
-          </p>
+                    <p className="text-xs text-center text-zinc-500 mt-2 flex items-center justify-center gap-1 font-medium">
+                        <Shield className="w-3.5 h-3.5 text-blue-500" />
+                        Vos données sont 100% sécurisées.
+                    </p>
                 </div>
             </div>
         )}

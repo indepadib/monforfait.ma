@@ -6,6 +6,7 @@ import { Navigation } from '@/components/Navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { ArrowLeft, Check, X, Zap, Download, Upload, DollarSign, Calendar, Award } from 'lucide-react'
 import Link from 'next/link'
+import { CONFIG } from '@/lib/config'
 
 // Force dynamic rendering - this page uses URL params
 export const dynamic = 'force-dynamic'
@@ -313,7 +314,7 @@ function CompareContent() {
                                     {offers.map((offer) => (
                                         <td key={offer.id} className="px-6 py-6">
                                             <a
-                                                href={`https://wa.me/212600000000?text=Je suis intéressé par ${offer.title}`}
+                                                href={`https://wa.me/${CONFIG.SUPPORT_WHATSAPP}?text=${encodeURIComponent(`Je suis intéressé par l'offre ${offer.operator_name} ${offer.title}`)}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl text-center hover:shadow-lg transition-all hover:scale-[1.02]"
