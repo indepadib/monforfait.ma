@@ -27,6 +27,8 @@ export default function OperatorSettingsPage() {
     alertWhatsApp: false
   });
 
+  const [companyName, setCompanyName] = useState('Orange Maroc B2B');
+  const [email, setEmail] = useState('orange@telecom.ma');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -35,12 +37,26 @@ export default function OperatorSettingsPage() {
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings));
     }
+    const savedName = localStorage.getItem('operator_company_name');
+    if (savedName) {
+      setCompanyName(savedName);
+    }
+    const savedEmail = localStorage.getItem('operator_contact_email');
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
   }, []);
 
   const handleSave = () => {
     setIsSaving(true);
     setTimeout(() => {
       localStorage.setItem('operator_campaign_settings', JSON.stringify(settings));
+      localStorage.setItem('operator_company_name', companyName);
+      localStorage.setItem('operator_contact_email', email);
+      
+      // Dispatch storage event to update layout header instantly
+      window.dispatchEvent(new Event('storage'));
+      
       setIsSaving(false);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);
@@ -88,6 +104,34 @@ export default function OperatorSettingsPage() {
         {/* Left 2 Cols: Auto-pilot Campaign settings */}
         <div className="lg:col-span-2 space-y-8">
           
+          {/* Operator Profile Info */}
+          <div className="bg-white dark:bg-zinc-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <Building className="w-5 h-5 text-slate-400" /> Profil de l'opérateur
+            </h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Nom de l'opérateur / Entreprise</label>
+                <input 
+                  type="text" 
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-zinc-50 dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm font-semibold"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Email professionnel de contact</label>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-zinc-50 dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm font-semibold"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Autopilot Banner */}
           <div className={`p-6 rounded-3xl border transition-all ${
             settings.autoPilotEnabled 

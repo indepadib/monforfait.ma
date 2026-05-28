@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, ShieldCheck, Download, Plus, 
-  ArrowUpRight, History, HelpCircle, Check, AlertCircle 
+  ArrowUpRight, History, HelpCircle, Check, AlertCircle,
+  X, RefreshCw 
 } from 'lucide-react';
 
 interface Invoice {
@@ -21,6 +22,13 @@ export default function OperatorBillingPage() {
   const [reloadAmount, setReloadAmount] = useState<number>(1000);
   const [isReloading, setIsReloading] = useState(false);
   const [reloadSuccess, setReloadSuccess] = useState(false);
+
+  // Secure payment form states
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+  const [cardName, setCardName] = useState('');
 
   useEffect(() => {
     // Load wallet balance from localStorage
@@ -71,7 +79,8 @@ export default function OperatorBillingPage() {
     setInvoices(initialInvoices.reverse());
   }, []);
 
-  const handleReload = () => {
+  const handleConfirmPayment = (e: React.FormEvent) => {
+    e.preventDefault();
     setIsReloading(true);
     setTimeout(() => {
       const currentBalance = parseFloat(localStorage.getItem('operator_wallet_balance') || '5000');
@@ -82,7 +91,7 @@ export default function OperatorBillingPage() {
       const newInvoice: Invoice = {
         id: `FAC-2026-R0${invoices.length + 1}`,
         date: new Date().toLocaleDateString('fr-FR'),
-        description: `Rechargement de compte - Manuel`,
+        description: `Rechargement de compte - Carte Bancaire (Visa ${cardNumber.slice(-4) ? '•••• ' + cardNumber.slice(-4) : '•••• 8492'})`,
         type: 'reload',
         amount: reloadAmount,
         status: 'paid'
@@ -94,9 +103,17 @@ export default function OperatorBillingPage() {
       window.dispatchEvent(new Event('storage'));
       
       setIsReloading(false);
+      setIsPaymentModalOpen(false);
       setReloadSuccess(true);
+      
+      // Clear payment form details
+      setCardNumber('');
+      setCardExpiry('');
+      setCardCvc('');
+      setCardName('');
+
       setTimeout(() => setReloadSuccess(false), 3000);
-    }, 1200);
+    }, 1500);
   };
 
   return (
@@ -189,18 +206,11 @@ export default function OperatorBillingPage() {
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">DH</span>
               </div>
               <button 
-                onClick={handleReload}
-                disabled={isReloading}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50"
+                onClick={() => setIsPaymentModalOpen(true)}
+                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98]"
               >
-                {isReloading ? (
-                  <>Rechargement...</>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4" />
-                    Recharger
-                  </>
-                )}
+                <Plus className="w-4 h-4" />
+                Alimenter le Solde
               </button>
             </div>
 
@@ -319,6 +329,110 @@ export default function OperatorBillingPage() {
           </table>
         </div>
       </div>
+
+      {/* Secure Payment Modal */}
+      {isPaymentModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl p-6 relative animate-in slide-in-from-bottom-8 duration-300">
+            <button 
+              onClick={() => setIsPaymentModalOpen(false)}
+              className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-zinc-800 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-500 dark:text-slate-400"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-blue-600/10 rounded-2xl flex items-center justify-center mx-auto mb-3 text-blue-600">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Paiement Sécurisé</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Alimentation de votre solde B2B par Carte Bancaire</p>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-zinc-950 rounded-2xl mb-6 flex justify-between items-center border border-slate-100 dark:border-zinc-800/80">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Montant de la transaction</span>
+              <span className="text-xl font-black text-slate-900 dark:text-white">{reloadAmount.toLocaleString('fr-FR')} DH</span>
+            </div>
+
+            <form onSubmit={handleConfirmPayment} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Nom complet sur la carte</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="EX: M. AHMED ALAMI"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-zinc-50 dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-600 text-xs font-semibold text-white placeholder-slate-650"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Numéro de carte bancaire</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="EX: 4123 4567 8901 2345"
+                  maxLength={19}
+                  value={cardNumber}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim();
+                    setCardNumber(val);
+                  }}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-zinc-50 dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-600 text-xs font-semibold text-white placeholder-slate-655"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Expiration (MM/AA)</label>
+                  <input 
+                    type="text" 
+                    required
+                    placeholder="EX: 12/28"
+                    maxLength={5}
+                    value={cardExpiry}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\//g, '').replace(/(\d{2})/g, '$1/').trim();
+                      setCardExpiry(val.endsWith('/') ? val.slice(0, -1) : val);
+                    }}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-zinc-50 dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-600 text-xs font-semibold text-center text-white placeholder-slate-655"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Code CVC</label>
+                  <input 
+                    type="text" 
+                    required
+                    placeholder="EX: 382"
+                    maxLength={3}
+                    value={cardCvc}
+                    onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, ''))}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-zinc-50 dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-600 text-xs font-semibold text-center text-white placeholder-slate-655"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center pt-2 text-[10px] text-slate-400 font-bold">
+                <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Connexion SSL 256 bits</span>
+                <span>PCI-DSS Compliant</span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isReloading}
+                className="w-full py-4 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-lg disabled:opacity-50"
+              >
+                {isReloading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  `Confirmer le Paiement de ${reloadAmount} DH`
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

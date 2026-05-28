@@ -24,6 +24,7 @@ export default function OperatorDashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [walletBalance, setWalletBalance] = useState<number>(5000);
+  const [companyName, setCompanyName] = useState<string>('Orange Maroc B2B');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
 
@@ -37,7 +38,7 @@ export default function OperatorDashboardLayout({
     }
   }, [router]);
 
-  // Sync wallet balance
+  // Sync wallet balance & company name
   useEffect(() => {
     const updateBalance = () => {
       const savedBalance = localStorage.getItem('operator_wallet_balance');
@@ -46,6 +47,11 @@ export default function OperatorDashboardLayout({
       } else {
         localStorage.setItem('operator_wallet_balance', '5000');
         setWalletBalance(5000);
+      }
+
+      const savedName = localStorage.getItem('operator_company_name');
+      if (savedName) {
+        setCompanyName(savedName);
       }
     };
 
@@ -224,11 +230,11 @@ export default function OperatorDashboardLayout({
             {/* User Account */}
             <div className="flex items-center gap-3 pl-4 border-l border-slate-800">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-white">Orange Maroc B2B</p>
+                <p className="text-sm font-bold text-white">{companyName}</p>
                 <p className="text-[10px] font-black text-blue-400 uppercase tracking-wider">Abonné Premium</p>
               </div>
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center font-black text-sm shadow-md">
-                OM
+                {companyName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
               </div>
             </div>
 
