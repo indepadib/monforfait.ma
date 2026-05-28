@@ -93,7 +93,7 @@ function OffersContent() {
             if (sort === 'price_asc') return a.price_dh - b.price_dh
             if (sort === 'price_desc') return b.price_dh - a.price_dh
             if (sort === 'data_desc') return (b.mobile_data_gb || 0) - (a.mobile_data_gb || 0)
-            if (sort === 'speed_desc') return (b.download_speed_mbps || 0) - (a.download_speed_mbps || 0)
+            if (sort === 'speed_desc') return (b.download_speed || 0) - (a.download_speed || 0)
             return 0 // Recommended (default DB order or custom score logic)
         })
 
