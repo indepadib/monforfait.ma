@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>monforfait.ma — Voice Leads Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+  body { background: #f5f5f5; color: #1a1a1a; }
+  .header { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 16px; font-weight: 600; }
+  .header .badge { font-size: 11px; background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 9999px; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .kpi { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 16px; }
+  .kpi-val { font-size: 28px; font-weight: 600; line-height: 1.2; }
+  .kpi-label { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .kpi-sub { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+  .filters { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 16px; margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .filters select, .filters input { padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #fff; }
+  .filters button { padding: 7px 16px; background: #111; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+  .table-wrap { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f9fafb; text-align: left; padding: 10px 14px; font-weight: 500; color: #6b7280; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #e5e5e5; }
+  td { padding: 10px 14px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f9fafb; }
+  .status { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 9999px; }
+  .s-confirmed { background: #dcfce7; color: #166534; }
+  .s-invalid { background: #fee2e2; color: #991b1b; }
+  .s-voicemail { background: #fef9c3; color: #854d0e; }
+  .s-callback { background: #dbeafe; color: #1e40af; }
+  .s-declined { background: #f3f4f6; color: #374151; }
+  .op { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 4px; font-weight: 500; }
+  .op-iam { background: #ede9fe; color: #5b21b6; }
+  .op-orange { background: #fff7ed; color: #c2410c; }
+  .op-inwi { background: #ecfdf5; color: #065f46; }
+  .op-autre { background: #f3f4f6; color: #374151; }
+  .svc { font-size: 11px; color: #6b7280; }
+  .audio-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #2563eb; cursor: pointer; background: none; border: none; padding: 0; }
+  .audio-btn:hover { text-decoration: underline; }
+  .target { font-size: 12px; font-weight: 500; color: #059669; }
+  .val-premium { color: #7c3aed; font-weight: 500; font-size: 12px; }
+  .val-elevee { color: #d97706; font-weight: 500; font-size: 12px; }
+  .val-standard { color: #6b7280; font-size: 12px; }
+  .pagination { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-top: 1px solid #e5e5e5; font-size: 13px; color: #6b7280; }
+  .pagination button { padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; }
+  .audio-player { display: none; margin-top: 6px; }
+  .loading { text-align: center; padding: 40px; color: #9ca3af; }
+  .export-btn { padding: 7px 14px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>monforfait.ma — Voice Leads <span class="badge">Live</span></h1>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <span id="last-update" style="font-size:12px;color:#9ca3af;">—</span>
+    <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPIs -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi"><div class="kpi-val" id="kpi-total">—</div><div class="kpi-label">Total appels</div><div class="kpi-sub" id="kpi-period">30 derniers jours</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#166534" id="kpi-confirmed">—</div><div class="kpi-label">Confirmed</div><div class="kpi-sub" id="kpi-rate">—% taux</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#854d0e" id="kpi-voicemail">—</div><div class="kpi-label">Voicemail</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#1e40af" id="kpi-callbacks">—</div><div class="kpi-label">Callbacks</div></div>
+    <div class="kpi"><div class="kpi-val" id="kpi-avg-dur">—</div><div class="kpi-label">Durée moyenne</div><div class="kpi-sub">secondes</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#7c3aed" id="kpi-premium">—</div><div class="kpi-label">Leads premium</div><div class="kpi-sub">Bundle recherché</div></div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters">
+    <select id="f-status" onchange="loadLeads()">
+      <option value="">Tous statuts</option>
+      <option value="CONFIRMED">✅ Confirmed</option>
+      <option value="VOICEMAIL">📵 Voicemail</option>
+      <option value="CALLBACK_REQUESTED">🔄 Callback</option>
+      <option value="INVALID">❌ Invalid</option>
+      <option value="DECLINED">🚫 Declined</option>
+    </select>
+    <select id="f-operator" onchange="loadLeads()">
+      <option value="">Tous opérateurs</option>
+      <option value="IAM">IAM / Maroc Telecom</option>
+      <option value="Orange">Orange</option>
+      <option value="Inwi">Inwi</option>
+      <option value="Aucun">Sans opérateur</option>
+    </select>
+    <select id="f-service" onchange="loadLeads()">
+      <option value="">Tous services</option>
+      <option value="mobile">Mobile</option>
+      <option value="box">Box internet</option>
+      <option value="bundle">Bundle (premium)</option>
+    </select>
+    <input type="date" id="f-date-from" onchange="loadLeads()">
+    <button onclick="loadLeads()">Actualiser</button>
+    <span id="result-count" style="font-size:12px;color:#6b7280;margin-left:auto;"></span>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Prospect</th>
+          <th>Téléphone</th>
+          <th>Statut</th>
+          <th>Opérateur actuel</th>
+          <th>Service</th>
+          <th>Vendre à</th>
+          <th>Valeur</th>
+          <th>Durée</th>
+          <th>Enregistrement</th>
+          <th>Appelé le</th>
+        </tr>
+      </thead>
+      <tbody id="leads-tbody">
+        <tr><td colspan="10" class="loading">Chargement...</td></tr>
+      </tbody>
+    </table>
+    <div class="pagination">
+      <span id="pag-info">—</span>
+      <div style="display:flex;gap:8px;">
+        <button onclick="changePage(-1)" id="btn-prev">← Précédent</button>
+        <button onclick="changePage(1)"  id="btn-next">Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────
+const API_BASE = '/api/voice'; // Adapter si sous-domaine différent
+let currentPage = 1;
+let totalPages  = 1;
+let allData     = [];
+
+// ─── CHARGEMENT DES STATS ────────────────────────────────────
+async function loadStats() {
+  try {
+    const dateFrom = document.getElementById('f-date-from').value ||
+      new Date(Date.now() - 30*86400000).toISOString().slice(0,10);
+    const r = await fetch(`${API_BASE}/stats?date_from=${dateFrom}`);
+    const d = await r.json();
+    const s = d.stats;
+
+    document.getElementById('kpi-total').textContent    = Number(s.total_calls).toLocaleString();
+    document.getElementById('kpi-confirmed').textContent= Number(s.confirmed).toLocaleString();
+    document.getElementById('kpi-rate').textContent     = Math.round(s.confirmed_rate) + '% taux';
+    document.getElementById('kpi-voicemail').textContent= Number(s.voicemail).toLocaleString();
+    document.getElementById('kpi-callbacks').textContent= Number(s.callbacks).toLocaleString();
+    document.getElementById('kpi-avg-dur').textContent  = Math.round(s.avg_duration || 0) + 's';
+    document.getElementById('kpi-premium').textContent  = Number(s.premium_leads).toLocaleString();
+    document.getElementById('last-update').textContent  = 'Mis à jour ' + new Date().toLocaleTimeString('fr-MA');
+  } catch(e) { console.error('Stats error:', e); }
+}
+
+// ─── CHARGEMENT DES LEADS ────────────────────────────────────
+async function loadLeads() {
+  const status   = document.getElementById('f-status').value;
+  const operator = document.getElementById('f-operator').value;
+  const service  = document.getElementById('f-service').value;
+  const dateFrom = document.getElementById('f-date-from').value;
+
+  let url = `${API_BASE}/leads?page=${currentPage}`;
+  if (status)   url += `&status=${status}`;
+  if (operator) url += `&operator=${encodeURIComponent(operator)}`;
+  if (service)  url += `&service=${service}`;
+  if (dateFrom) url += `&date_from=${dateFrom}`;
+
+  document.getElementById('leads-tbody').innerHTML =
+    '<tr><td colspan="10" class="loading">Chargement...</td></tr>';
+
+  try {
+    const r = await fetch(url);
+    const d = await r.json();
+    allData     = d.data;
+    totalPages  = d.pages;
+
+    document.getElementById('result-count').textContent =
+      `${d.total.toLocaleString()} résultat${d.total > 1 ? 's' : ''}`;
+    document.getElementById('pag-info').textContent =
+      `Page ${d.page} / ${d.pages} (${d.total} au total)`;
+    document.getElementById('btn-prev').disabled = d.page <= 1;
+    document.getElementById('btn-next').disabled = d.page >= d.pages;
+
+    renderTable(d.data);
+    loadStats();
+  } catch(e) {
+    document.getElementById('leads-tbody').innerHTML =
+      '<tr><td colspan="10" class="loading">Erreur de chargement — vérifier l\'API</td></tr>';
+  }
+}
+
+// ─── RENDU DU TABLEAU ────────────────────────────────────────
+function renderTable(rows) {
+  if (!rows.length) {
+    document.getElementById('leads-tbody').innerHTML =
+      '<tr><td colspan="10" class="loading">Aucun résultat</td></tr>';
+    return;
+  }
+
+  const opClass = { IAM:'op-iam', Orange:'op-orange', Inwi:'op-inwi' };
+  const valClass = { 'premium':'val-premium', 'élevée':'val-elevee', 'standard':'val-standard' };
+  const svcLabel = { mobile:'📱 Mobile', box:'🏠 Box', bundle:'📦 Bundle', non_précisé:'—' };
+  const statusClass = {
+    CONFIRMED:'s-confirmed', INVALID:'s-invalid', VOICEMAIL:'s-voicemail',
+    CALLBACK_REQUESTED:'s-callback', DECLINED:'s-declined'
+  };
+
+  const html = rows.map(r => `
+    <tr>
+      <td><strong>${esc(r.prenom)}</strong></td>
+      <td style="font-family:monospace;font-size:12px;">${esc(r.telephone)}</td>
+      <td><span class="status ${statusClass[r.call_status]||''}">${r.call_status||'—'}</span></td>
+      <td>${r.q1_operator_norm ? `<span class="op ${opClass[r.q1_operator_norm]||'op-autre'}">${esc(r.q1_operator_norm)}</span>` : '—'}</td>
+      <td class="svc">${svcLabel[r.q2_service]||'—'}</td>
+      <td class="target">${esc(r.target_operator_1)||'—'}</td>
+      <td class="${valClass[r.lead_value]||'val-standard'}">${r.lead_value||'—'}</td>
+      <td style="font-size:12px;color:#6b7280;">${r.duration_seconds ? r.duration_seconds+'s' : '—'}</td>
+      <td>${r.recording_url
+        ? `<button class="audio-btn" onclick="playAudio('${esc(r.recording_url)}', this)">▶ Écouter</button>
+           <div class="audio-player"><audio controls style="width:180px;height:28px;"></audio></div>`
+        : '<span style="font-size:11px;color:#d1d5db;">Aucun</span>'}</td>
+      <td style="font-size:11px;color:#6b7280;">${r.called_at ? new Date(r.called_at).toLocaleString('fr-MA') : '—'}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('leads-tbody').innerHTML = html;
+}
+
+function esc(s) { return s ? String(s).replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])) : ''; }
+
+function playAudio(url, btn) {
+  const wrap  = btn.nextElementSibling;
+  const audio = wrap.querySelector('audio');
+  wrap.style.display = wrap.style.display === 'block' ? 'none' : 'block';
+  if (wrap.style.display === 'block') { audio.src = url; audio.play(); }
+  else { audio.pause(); }
+}
+
+function changePage(dir) {
+  currentPage = Math.max(1, Math.min(totalPages, currentPage + dir));
+  loadLeads();
+}
+
+function exportCSV() {
+  if (!allData.length) return;
+  const headers = ['Prenom','Telephone','Statut','Operateur','Service','Vendre_a','Valeur','Duree_sec','Enregistrement','Date'];
+  const rows = allData.map(r => [
+    r.prenom, r.telephone, r.call_status, r.q1_operator_norm,
+    r.q2_service, r.target_operator_1, r.lead_value,
+    r.duration_seconds, r.recording_url, r.called_at
+  ].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv  = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a'); a.href=url;
+  a.download = `monforfait_leads_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+document.getElementById('f-date-from').value =
+  new Date(Date.now() - 30*86400000).toISOString().slice(0,10);
+
+loadLeads();
+// Actualiser automatiquement toutes les 2 minutes
+setInterval(loadLeads, 120000);
+</script>
+</body>
+</html>

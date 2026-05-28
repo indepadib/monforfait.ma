@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowDown, ArrowUp, Wifi, Smartphone, Phone, MessageSquare, Briefcase, User, Star, GitCompare, Check } from 'lucide-react';
 import { event } from '@/lib/analytics';
+import { useTranslation } from '@/lib/LocaleContext';
 
 export interface OfferProps {
     id?: string;
@@ -27,6 +28,7 @@ export interface OfferProps {
 }
 
 export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: () => void }) {
+    const { locale, t, isRtl } = useTranslation();
     const [isInComparison, setIsInComparison] = useState(false)
 
     useEffect(() => {
@@ -67,7 +69,7 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
         } else {
             // Add to comparison
             if (current.length >= 3) {
-                alert('Maximum 3 offres pour la comparaison')
+                alert(t('card_max_compare_alert'))
                 return
             }
             const updated = [...current, offer.id]
@@ -121,35 +123,35 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
     const isPro = offer.target_audience === 'professional';
 
     return (
-        <div className={`group border-2 border-transparent ${borderColor} rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 bg-white dark:bg-zinc-950 relative overflow-hidden`}>
+        <div className={`group border-2 border-transparent ${borderColor} rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 bg-white dark:bg-zinc-950 relative overflow-hidden ${isRtl ? 'text-right' : 'text-left'}`}>
             {/* Badges */}
-            <div className="absolute top-0 right-0 flex flex-col items-end">
-                <div className={`text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider
+            <div className={`absolute top-0 ${isRtl ? 'left-0' : 'right-0'} flex flex-col items-end`}>
+                <div className={`text-white text-[10px] font-bold px-3 py-1 ${isRtl ? 'rounded-br-lg' : 'rounded-bl-lg'} uppercase tracking-wider
                 ${isOrange ? 'bg-orange-500' : ''}
                 ${isInwi ? 'bg-purple-600' : ''}
                 ${isIam ? 'bg-blue-600' : ''}
                 ${!isOrange && !isInwi && !isIam ? 'bg-zinc-800' : ''}
             `}>
-                    {offer.operator_name}
+                    {locale === 'ar' ? (isOrange ? 'أورنج' : isInwi ? 'إنوي' : isIam ? 'اتصالات المغرب' : offer.operator_name) : offer.operator_name}
                 </div>
                 {offer.highlight_badge && (
-                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-md uppercase tracking-wider flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-white" /> {offer.highlight_badge}
+                    <div className={`bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-[10px] font-bold px-3 py-1 ${isRtl ? 'rounded-br-lg' : 'rounded-bl-lg'} shadow-md uppercase tracking-wider flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        <Star className="w-3 h-3 fill-white" /> {locale === 'ar' ? 'أفضل خيار' : offer.highlight_badge}
                     </div>
                 )}
                 {isPro && (
-                    <div className="bg-zinc-800 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider flex items-center gap-1">
+                    <div className={`bg-zinc-800 text-white text-[10px] font-bold px-3 py-1 ${isRtl ? 'rounded-br-lg' : 'rounded-bl-lg'} uppercase tracking-wider flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}>
                         <Briefcase className="w-3 h-3" /> PRO
                     </div>
                 )}
             </div>
 
             <div className="flex flex-col h-full mt-4">
-                <h3 className="text-lg font-bold mb-2 text-zinc-800 dark:text-zinc-100 pr-8 line-clamp-2 min-h-[3.5rem]">{offer.title}</h3>
+                <h3 className={`text-lg font-bold mb-2 text-zinc-800 dark:text-zinc-100 line-clamp-2 min-h-[3.5rem] ${isRtl ? 'pl-8 pr-2' : 'pr-8 pl-2'}`}>{offer.title}</h3>
 
-                <div className="flex items-baseline mb-6">
+                <div className={`flex items-baseline mb-6 ${isRtl ? 'flex-row-reverse' : ''}`}>
                     <span className="text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">{offer.price_dh}</span>
-                    <span className="text-sm font-medium text-zinc-500 ml-2">DH {isPro ? 'HT' : ''} / mois</span>
+                    <span className={`text-sm font-medium text-zinc-500 ${isRtl ? 'mr-2' : 'ml-2'}`}>DH {isPro ? 'HT' : ''} / {t('card_per_month')}</span>
                 </div>
 
                 {/* Dynamic Specs Grid based on Category */}
@@ -158,16 +160,16 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                     {offer.category === 'internet' && (
                         <>
                             <div className="flex flex-col items-center justify-center text-center">
-                                <div className="flex items-center text-green-600 mb-1 gap-1">
+                                <div className={`flex items-center text-green-600 mb-1 gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                     <ArrowDown className="w-3 h-3" />
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Download</span>
                                 </div>
                                 <span className="font-bold text-lg leading-none">{offer.download_speed} <span className="text-xs font-normal text-zinc-400">Mbps</span></span>
                             </div>
-                            <div className="flex flex-col items-center justify-center text-center border-l border-zinc-200 dark:border-zinc-800">
-                                <div className="flex items-center text-blue-600 mb-1 gap-1">
+                            <div className="flex flex-col items-center justify-center text-center border-s border-zinc-200 dark:border-zinc-800 ps-3">
+                                <div className={`flex items-center text-blue-600 mb-1 gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                     <Wifi className="w-3 h-3" />
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Techno</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{t('card_techno')}</span>
                                 </div>
                                 <span className="font-bold text-lg leading-none">{offer.technology}</span>
                             </div>
@@ -177,19 +179,19 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                     {offer.category === 'mobile' && (
                         <>
                             <div className="flex flex-col items-center justify-center text-center">
-                                <div className="flex items-center text-green-600 mb-1 gap-1">
+                                <div className={`flex items-center text-green-600 mb-1 gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                     <Smartphone className="w-3 h-3" />
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Data</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{t('card_data')}</span>
                                 </div>
-                                <span className="font-bold text-lg leading-none">{offer.mobile_data_gb} <span className="text-xs font-normal text-zinc-400">Go</span></span>
+                                <span className="font-bold text-lg leading-none">{offer.mobile_data_gb} <span className="text-xs font-normal text-zinc-400">{locale === 'ar' ? 'جيجا' : 'Go'}</span></span>
                             </div>
-                            <div className="flex flex-col items-center justify-center text-center border-l border-zinc-200 dark:border-zinc-800">
-                                <div className="flex items-center text-blue-600 mb-1 gap-1">
+                            <div className="flex flex-col items-center justify-center text-center border-s border-zinc-200 dark:border-zinc-800 ps-3">
+                                <div className={`flex items-center text-blue-600 mb-1 gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                     <Phone className="w-3 h-3" />
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Appels</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{t('card_calls')}</span>
                                 </div>
                                 <span className="font-bold text-lg leading-none">
-                                    {offer.voice_minutes === -1 ? 'Illimité' : `${offer.voice_minutes}h`}
+                                    {offer.voice_minutes === -1 ? t('card_unlimited') : `${offer.voice_minutes}${locale === 'ar' ? ' س' : 'h'}`}
                                 </span>
                             </div>
                         </>
@@ -209,7 +211,7 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                                 ${!isOrange && !isInwi && !isIam ? 'bg-zinc-900 hover:bg-zinc-800' : ''}
                             `}
                         >
-                            {isPro ? 'Demander un devis' : 'Voir l\'offre'}
+                            {isPro ? t('card_pro_quote') : t('card_view_offer')}
                         </a>
                     ) : (
                         <button
@@ -221,7 +223,7 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                                 ${!isOrange && !isInwi && !isIam ? 'bg-zinc-900 hover:bg-zinc-800' : ''}
                             `}
                         >
-                            {isPro ? 'Demander un devis' : 'Commander'}
+                            {isPro ? t('card_pro_quote') : t('card_order')}
                         </button>
                     )}
 
@@ -229,7 +231,7 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                     {offer.id && (
                         <button
                             onClick={toggleComparison}
-                            className={`w-full py-2.5 px-4 rounded-xl font-medium transition-all border-2 flex items-center justify-center gap-2
+                            className={`w-full py-2.5 px-4 rounded-xl font-medium transition-all border-2 flex items-center justify-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}
                                 ${isInComparison
                                     ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-600 dark:text-blue-400'
                                     : 'bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-blue-600 hover:text-blue-600'
@@ -239,12 +241,12 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                             {isInComparison ? (
                                 <>
                                     <Check className="w-4 h-4" />
-                                    <span>Ajouté à la comparaison</span>
+                                    <span>{t('card_added_compare')}</span>
                                 </>
                             ) : (
                                 <>
                                     <GitCompare className="w-4 h-4" />
-                                    <span>Comparer</span>
+                                    <span>{t('card_compare')}</span>
                                 </>
                             )}
                         </button>
@@ -252,5 +254,5 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                 </div>
             </div>
         </div>
-    )
+    );
 }

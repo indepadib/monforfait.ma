@@ -11,6 +11,7 @@ import { RecentlyViewed } from '@/components/RecentlyViewed'
 import { useSearchParams } from 'next/navigation'
 import { PromoUnlockerForm } from '@/components/PromoUnlockerForm'
 import { Sparkles, CheckCircle, ArrowDown } from 'lucide-react'
+import { useTranslation } from '@/lib/LocaleContext'
 
 type Offer = {
     id: string
@@ -33,6 +34,7 @@ export default function AllOffersPage() {
 }
 
 function AllOffersContent() {
+    const { locale, t, isRtl } = useTranslation()
     const [offers, setOffers] = useState<Offer[]>([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState<'all' | 'internet' | 'mobile'>('all')
@@ -133,76 +135,76 @@ function AllOffersContent() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black">
+        <div className={`min-h-screen bg-white dark:bg-black ${isRtl ? 'text-right' : 'text-left'}`}>
             <Navigation />
 
             <div className="max-w-7xl mx-auto px-4 py-12">
-                <Breadcrumbs items={[{ label: 'Offres', href: '/offers' }]} />
+                <Breadcrumbs items={[{ label: t('nav_offers'), href: '/offers' }]} />
 
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-black mb-4 text-zinc-900 dark:text-white">
-                        Toutes les offres au Maroc
+                        {t('offers_title')}
                     </h1>
                     <p className="text-xl text-zinc-600 dark:text-zinc-400">
-                        {offers.length} forfaits disponibles • Prix mis à jour quotidiennement
+                        {t('offers_subtitle').replace('{count}', offers.length.toString())}
                     </p>
                 </div>
 
                 {/* Filters */}
                 <div className="bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-6 mb-8 border border-zinc-200 dark:border-zinc-800">
-                    <div className="flex items-center gap-2 mb-4">
+                    <div className={`flex items-center gap-2 mb-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
                         <SlidersHorizontal className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-                        <h3 className="font-bold text-zinc-900 dark:text-white">Filtres</h3>
+                        <h3 className="font-bold text-zinc-900 dark:text-white">{t('offers_filters')}</h3>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${isRtl ? 'text-right' : 'text-left'}`}>
                         {/* Category Filter */}
                         <div>
                             <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
-                                Catégorie
+                                {t('offers_category')}
                             </label>
                             <select
                                 value={filter}
                                 onChange={(e) => setFilter(e.target.value as any)}
-                                className="w-full px-4 py-2 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 font-medium focus:ring-2 focus:ring-blue-500"
+                                className={`w-full px-4 py-2 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 font-medium focus:ring-2 focus:ring-blue-500 ${isRtl ? 'text-right' : ''}`}
                             >
-                                <option value="all">Toutes</option>
-                                <option value="internet">Internet uniquement</option>
-                                <option value="mobile">Mobile uniquement</option>
+                                <option value="all">{t('offers_all')}</option>
+                                <option value="internet">{t('offers_internet_only')}</option>
+                                <option value="mobile">{t('offers_mobile_only')}</option>
                             </select>
                         </div>
 
                         {/* Operator Filter */}
                         <div>
                             <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
-                                Opérateur
+                                {t('offers_operator')}
                             </label>
                             <select
                                 value={operator}
                                 onChange={(e) => setOperator(e.target.value as any)}
-                                className="w-full px-4 py-2 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 font-medium focus:ring-2 focus:ring-blue-500"
+                                className={`w-full px-4 py-2 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 font-medium focus:ring-2 focus:ring-blue-500 ${isRtl ? 'text-right' : ''}`}
                             >
-                                <option value="all">Tous</option>
-                                <option value="Orange Morocco">Orange</option>
-                                <option value="Inwi">Inwi</option>
-                                <option value="Maroc Telecom">Maroc Telecom</option>
+                                <option value="all">{t('offers_all_ops')}</option>
+                                <option value="Orange Morocco">{locale === 'ar' ? 'أورنج' : 'Orange'}</option>
+                                <option value="Inwi">{locale === 'ar' ? 'إنوي' : 'Inwi'}</option>
+                                <option value="Maroc Telecom">{locale === 'ar' ? 'اتصالات المغرب' : 'Maroc Telecom'}</option>
                             </select>
                         </div>
 
                         {/* Sort */}
                         <div>
                             <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
-                                Trier par
+                                {t('offers_sort_by')}
                             </label>
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value as any)}
-                                className="w-full px-4 py-2 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 font-medium focus:ring-2 focus:ring-blue-500"
+                                className={`w-full px-4 py-2 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 font-medium focus:ring-2 focus:ring-blue-500 ${isRtl ? 'text-right' : ''}`}
                             >
-                                <option value="price_asc">Prix croissant</option>
-                                <option value="price_desc">Prix décroissant</option>
-                                <option value="speed_desc">Vitesse/Data décroissant</option>
+                                <option value="price_asc">{t('offers_sort_price_asc')}</option>
+                                <option value="price_desc">{t('offers_sort_price_desc')}</option>
+                                <option value="speed_desc">{t('offers_sort_speed_desc')}</option>
                             </select>
                         </div>
                     </div>
@@ -221,10 +223,10 @@ function AllOffersContent() {
                             <div className="text-center py-20">
                                 <Filter className="w-16 h-16 text-zinc-300 dark:text-zinc-700 mx-auto mb-4" />
                                 <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
-                                    Aucune offre trouvée
+                                    {t('offers_none_found')}
                                 </h3>
                                 <p className="text-zinc-600 dark:text-zinc-400">
-                                    Essayez de modifier vos filtres
+                                    {t('offers_none_found_desc')}
                                 </p>
                             </div>
                         ) : (
@@ -236,7 +238,7 @@ function AllOffersContent() {
                                             {/* AI Banner for top offer */}
                                             {idx === 0 && (
                                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-orange-500/30 z-20 whitespace-nowrap">
-                                                    ✨ Meilleur Choix
+                                                    ✨ {t('offers_best_choice')}
                                                 </div>
                                             )}
                                             <OfferCard offer={offer as any} />
@@ -258,29 +260,29 @@ function AllOffersContent() {
                                         <div className="absolute top-[-50%] left-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
                                         <div className="absolute bottom-[-50%] right-[-10%] w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-                                        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 w-full max-w-5xl items-center relative z-10">
+                                        <div className={`flex flex-col lg:flex-row gap-8 lg:gap-16 w-full max-w-5xl items-center relative z-10 ${isRtl ? 'lg:flex-row-reverse' : ''}`}>
                                             {/* Left Side: Value Prop */}
-                                            <div className="flex-1 text-center lg:text-left">
-                                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded-full text-sm font-bold mb-6 border border-blue-200 dark:border-blue-500/30">
+                                            <div className={`flex-1 text-center ${isRtl ? 'lg:text-right' : 'lg:text-left'}`}>
+                                                <div className={`inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded-full text-sm font-bold mb-6 border border-blue-200 dark:border-blue-500/30 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                                     <Sparkles className="w-4 h-4" />
-                                                    Accès Réservé
+                                                    {t('offers_locked_badge')}
                                                 </div>
                                                 
                                                 <h3 className="text-3xl md:text-4xl font-black mb-4 dark:text-white leading-tight">
-                                                    Débloquez le reste du classement (jusqu'à -50%).
+                                                    {t('offers_locked_title')}
                                                 </h3>
                                                 <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-6 leading-relaxed">
-                                                    Certaines offres de rétention sont trop incroyables pour être affichées publiquement. Vérifiez votre éligibilité en 10 secondes.
+                                                    {t('offers_locked_desc')}
                                                 </p>
                                                 
                                                 <div className="flex flex-col gap-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                                                    <div className="flex items-center gap-2 justify-center lg:justify-start">
+                                                    <div className={`flex items-center gap-2 justify-center ${isRtl ? 'lg:justify-start flex-row-reverse' : 'lg:justify-start'}`}>
                                                         <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
-                                                        Gratuit et 100% Sans Engagement
+                                                        {t('offers_locked_check_1')}
                                                     </div>
-                                                    <div className="flex items-center gap-2 justify-center lg:justify-start">
+                                                    <div className={`flex items-center gap-2 justify-center ${isRtl ? 'lg:justify-start flex-row-reverse' : 'lg:justify-start'}`}>
                                                         <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
-                                                        Offres Exclusives Non Disponibles en Boutique
+                                                        {t('offers_locked_check_2')}
                                                     </div>
                                                 </div>
                                             </div>

@@ -15,6 +15,7 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
   const [timeLeft, setTimeLeft] = useState(899) // 14 mins 59 seconds
+  const [consentVoice, setConsentVoice] = useState(false)
 
   React.useEffect(() => {
      if (timeLeft <= 0) return;
@@ -55,8 +56,15 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
         throw new Error(t('phone_error_invalid'))
       }
 
+      // Capture UTM fields and lead source
+      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+      const utm_source = params.get('utm_source') || (typeof document !== 'undefined' && document.referrer) || 'direct';
+      const utm_medium = params.get('utm_medium') || '';
+      const utm_campaign = params.get('utm_campaign') || '';
+      const lead_source = params.get('utm_source') ? 'paid' : (typeof document !== 'undefined' && document.referrer.includes('google') ? 'google_organic' : 'direct');
+
       // Attempt to save to Supabase (might fail due to RLS)
-      const { error: submitError } = await supabase
+      const { data: insertedData, error: submitError } = await supabase
         .from('leads')
         .insert([
           {
@@ -64,18 +72,28 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
             user_phone: formData.phone,
             city: formData.city,
             status: 'new',
+            consent_voice: consentVoice,
+            consent_at: consentVoice ? new Date().toISOString() : null,
             needs_details: {
               interest: formData.need,
               current_bill: formData.currentBill,
-              source: `hero_promo_${mode}`
+              source: `hero_promo_${mode}`,
+              utm_source,
+              utm_medium,
+              utm_campaign,
+              lead_source
             }
           }
         ])
+        .select('id')
+        .single()
 
       if (submitError) {
           console.warn("Supabase insert warning (likely RLS):", submitError.message);
           // We don't throw here to ensure the webhook gets triggered and the user is not blocked!
       }
+
+      const leadId = insertedData?.id || null;
 
       // Trigger B2B Notification Pipeline (This is the critical part for business)
       try {
@@ -83,15 +101,36 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                  leadId,
                   first_name: formData.firstName,
                   phone: formData.phone,
                   city: formData.city,
-                  needs_details: { interest: formData.need, current_bill: formData.currentBill },
+                  needs_details: { 
+                    interest: formData.need, 
+                    current_bill: formData.currentBill,
+                    utm_source,
+                    utm_medium,
+                    utm_campaign,
+                    lead_source
+                  },
                   source: `hero_promo_${mode}`
               })
           })
       } catch(err) {
           console.error("Webhook trigger failed", err)
+      }
+
+      // Trigger Vapi Voice Queue
+      if (consentVoice && leadId) {
+          try {
+              await fetch('/api/voice/queue', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ leadId })
+              })
+          } catch(err) {
+              console.error("[voice] Queue trigger failed", err)
+          }
       }
 
       trackEvent('promo_lead_submitted', { interest: formData.need, bill: formData.currentBill, mode: mode })
@@ -319,14 +358,31 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
                     )}
                 </div>
 
-                {error && (
-                  <div className={`p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm font-medium flex items-center gap-2 ${isRtl ? 'flex-row-reverse text-right' : ''}`}>
-                    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {error}
-                  </div>
-                )}
+            {/* Consent checkbox for voice qualification */}
+            <div className="voice-consent-block p-4 bg-zinc-900/50 border border-white/10 rounded-xl mt-4 text-xs">
+                <label className={`flex items-start gap-2.5 cursor-pointer text-zinc-400 font-medium ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                    <input
+                        type="checkbox"
+                        checked={consentVoice}
+                        onChange={(e) => setConsentVoice(e.target.checked)}
+                        required
+                        className="mt-1 w-4 h-4 shrink-0 rounded border-zinc-700 bg-zinc-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-zinc-900 focus:ring-2"
+                    />
+                    <span className="leading-relaxed">
+                        {t('consent_checkbox_label')}
+                        <span className="text-red-500 ml-1">*</span>
+                    </span>
+                </label>
+            </div>
 
-                <div className="space-y-4">
+            {error && (
+              <div className={`p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm font-medium flex items-center gap-2 ${isRtl ? 'flex-row-reverse text-right' : ''}`}>
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-4">
                     <div className={`flex items-center gap-3 w-full ${isRtl ? 'flex-row-reverse' : ''}`}>
                         <button
                             type="button"

@@ -31,6 +31,7 @@ export interface Lead {
   score: number;
   temperature: LeadTemperature;
   status: LeadStatus;
+  needs_details?: Record<string, any>; // Additional details such as voice consent
   is_unlocked: boolean;
   unlock_price: number; // in DH
 }

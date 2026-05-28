@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2, Phone } from 'lucide-react'
+import VoiceConsentCheckbox from '@/components/VoiceConsentCheckbox'
 import { supabase } from '@/lib/supabaseClient'
 import { trackEvent } from '@/lib/analytics'
 
@@ -11,6 +12,7 @@ export function QuickCaptureForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [consentVoice, setConsentVoice] = useState(false)
 
   const [formData, setFormData] = useState({
     need: 'fibre',
@@ -45,7 +47,7 @@ export function QuickCaptureForm() {
         throw new Error('Le numéro de téléphone doit être un numéro marocain valide (ex: 0612345678).')
       }
 
-      const { error: submitError } = await supabase
+      const { data: leadData, error: submitError } = await supabase
         .from('leads')
         .insert([
           {
@@ -60,8 +62,19 @@ export function QuickCaptureForm() {
             }
           }
         ])
+        .select()
+        .single()
 
       if (submitError) throw submitError
+
+      // Queue voice verification if consented
+      if (consentVoice && leadData?.id) {
+        await fetch('/api/voice/queue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ leadId: leadData.id, phone: cleanPhone })
+        })
+      }
 
       // Trigger B2B Notification Pipeline
       fetch('/api/leads/notify', {
@@ -195,7 +208,7 @@ export function QuickCaptureForm() {
               Voir les offres <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </>
           )}
-        </button>
+        <VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
       </form>
     </div>
   )

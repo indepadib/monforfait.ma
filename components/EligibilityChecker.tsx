@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Wifi, Home, MapPin, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import VoiceConsentCheckbox from '@/components/VoiceConsentCheckbox';
 import { AddressMapPicker } from '@/components/AddressMapPicker';
 import { useTranslation } from '@/lib/LocaleContext';
 
@@ -22,6 +23,7 @@ export function EligibilityChecker() {
     const [timing, setTiming] = useState('asap');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [sent, setSent] = useState(false);
+  const [consentVoice, setConsentVoice] = useState(false);
     const [comment, setComment] = useState('');
 
 
@@ -66,6 +68,14 @@ export function EligibilityChecker() {
                     }
 
                 }).select('id').single();
+                // Queue voice verification if consented
+                if (consentVoice && leadData) {
+                  await fetch('/api/voice/queue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ leadId: leadData.id, phone })
+                  });
+                }
 
                 // 2. Secondary notification pipeline
                 await fetch('/api/leads/notify', {
@@ -269,7 +279,9 @@ export function EligibilityChecker() {
                         <button type="submit" className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/30 ${isRtl ? 'flex-row-reverse' : ''}`}>
                             {t('elig_contact_btn')} <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
                         </button>
-                    </form>
+                    
+<VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
+</form>
                 </div>
             )}
 

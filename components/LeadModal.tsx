@@ -18,7 +18,8 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
     const [timing, setTiming] = useState('asap')
     const [preferredOperator, setPreferredOperator] = useState(offer.operator_name || '')
     const [loading, setLoading] = useState(false)
-    const [sent, setSent] = useState(false)
+    const [sent, setSent] = useState(false);
+  const [consentVoice, setConsentVoice] = useState(false)
 
     const isPro = offer.target_audience === 'professional'
 
@@ -68,8 +69,15 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                             preferred_operator: preferredOperator
                         }
                     })
-                })
-            }
+                }
+        // If user consented to voice verification, queue a call
+        if (consentVoice && leadData) {
+          await fetch('/api/voice/queue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ leadId: leadData.id, phone })
+          });
+        }
         } catch (err) {
             console.error("Lead save failed", err)
         }
@@ -263,6 +271,18 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                         </div>
 
                         <div className="pt-6 relative">
+                <div className="flex items-center mt-4">
+                  <input
+                    type="checkbox"
+                    id="voiceConsent"
+                    checked={consentVoice}
+                    onChange={(e) => setConsentVoice(e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="voiceConsent" className="text-sm text-zinc-400">
+                    J'accepte la validation téléphonique automatisée (appel vocal)
+                  </label>
+                </div>
                             <button 
                                 type="submit"
                                 disabled={loading} 

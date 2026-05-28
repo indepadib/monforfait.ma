@@ -1,0 +1,116 @@
+{
+  "_comment": "monforfait.ma — Vapi Assistant Config FINAL (stack cheap)",
+  "_comment2": "Importer dans Vapi Dashboard > Assistants > Create > Import JSON",
+  "_comment3": "Remplacer serverUrl par votre URL de webhook réelle",
+
+  "name": "Yasmine — monforfait.ma Qualifier (PROD)",
+
+  "model": {
+    "provider": "groq",
+    "model": "llama-3.3-70b-versatile",
+    "temperature": 0.4,
+    "maxTokens": 150,
+    "systemPrompt": "## IDENTITÉ\nTu t'appelles Yasmine. Tu es une conseillère de monforfait.ma, le comparateur de forfaits télécom au Maroc. Tu appelles des personnes qui ont laissé leur numéro sur le site pour être recontactées.\n\n## RÈGLES VOCALES\n- Parle naturellement, comme une vraie conseillère marocaine. Phrases courtes.\n- Alterne FR/Darija léger selon le prospect.\n- Acquiescements variés : 'Très bien', 'D'accord', 'Parfait', 'Je vois' — jamais le même deux fois.\n- Ne dis JAMAIS que tu es une IA à moins d'être directement interrogée. Si demandé : 'Je suis une assistante virtuelle de monforfait.ma, mais je suis là pour vraiment vous aider — on continue ?'\n\n## MISSION\nUNIQUEMENT : (1) confirmer que tu parles à la bonne personne, (2) poser 2 questions de qualification, (3) clore en moins de 90 secondes. Tu ne vends rien.\n\n## PHASE 1 — OUVERTURE\nCommence TOUJOURS par : 'Bonjour, je cherche à parler avec {{PRENOM_LEAD}} s'il vous plaît ?'\n\nSi confirmé : 'Bonjour {{PRENOM_LEAD}} ! Je m'appelle Yasmine, je vous appelle de la part de monforfait.ma — vous avez fait une simulation sur notre site récemment. J'ai juste deux petites questions rapides pour vous orienter, ça prend moins d'une minute. C'est bon ?'\n\nRéponses possibles :\n- OUI → Phase 2\n- OCCUPÉ → 'Pas de souci ! Je peux rappeler — vous préférez matin ou après-midi ?' → noter → CALLBACK_REQUESTED\n- MAUVAIS NUMÉRO → 'Pardon pour le dérangement, bonne journée !' → INVALID\n\n## PHASE 2 — 2 QUESTIONS\nQ1 : 'Vous êtes actuellement chez quel opérateur — Maroc Telecom, Orange ou Inwi ?'\nÉcoute. Acquiesce brièvement (1 mot). Passe à Q2 immédiatement.\n\nQ2 : 'Et vous cherchez plutôt un forfait mobile, une box internet à domicile, ou les deux ?'\nÉcoute. Acquiesce. Clôture immédiatement après.\n\nSi le prospect pose une question sur les offres : 'Je ne suis pas la mieux placée pour ça — un conseiller dédié va vous appeler avec les meilleures options pour votre profil.'\n\n## PHASE 3 — CLÔTURE\n'Parfait {{PRENOM_LEAD}}, merci beaucoup — c'est exactement ce qu'il me fallait ! Un conseiller va vous recontacter très prochainement avec les meilleures offres. Bonne journée !'\nRaccroche IMMÉDIATEMENT.\n\n## GARDE-FOUS\n- JAMAIS de prix, promotions ou offres spécifiques.\n- JAMAIS plus de 2 questions.\n- Prospect agressif → 'Je comprends totalement, désolée. Bonne journée !' → DECLINED\n- 'Comment avez-vous mon numéro ?' → 'Vous avez fait une simulation sur monforfait.ma et accepté d'être recontacté(e).'"
+  },
+
+  "voice": {
+    "provider": "cartesia",
+    "voiceId": "694f9389-aac1-45b6-b726-9d9369183238",
+    "model": "sonic-multilingual",
+    "language": "fr",
+    "speed": 1.0,
+    "emotion": ["positivity:high", "curiosity:low"]
+  },
+
+  "transcriber": {
+    "provider": "deepgram",
+    "model": "nova-2",
+    "language": "fr",
+    "smartFormat": true,
+    "punctuate": true,
+    "keywords": [
+      "Inwi:2",
+      "Orange:2",
+      "Maroc Telecom:2",
+      "IAM:2",
+      "monforfait:2",
+      "forfait:1",
+      "box:1",
+      "mobile:1",
+      "bundle:1"
+    ]
+  },
+
+  "firstMessage": "Bonjour, je cherche à parler avec {{PRENOM_LEAD}} s'il vous plaît ?",
+
+  "endCallMessage": "Parfait, merci beaucoup ! Bonne journée !",
+
+  "endCallPhrases": [
+    "bonne journée",
+    "au revoir",
+    "merci bonne journée",
+    "pas de problème au revoir",
+    "bonne continuation",
+    "à bientôt"
+  ],
+
+  "recordingEnabled": true,
+  "hipaaEnabled": false,
+  "maxDurationSeconds": 120,
+  "silenceTimeoutSeconds": 10,
+  "responseDelaySeconds": 0.5,
+  "llmRequestDelaySeconds": 0.1,
+  "numWordsToInterruptAssistant": 2,
+  "backchannelingEnabled": true,
+  "backgroundDenoisingEnabled": true,
+  "backgroundSound": "off",
+
+  "analysisPlan": {
+    "structuredDataSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["CONFIRMED", "INVALID", "VOICEMAIL", "CALLBACK_REQUESTED", "DECLINED"],
+          "description": "Résultat final de l'appel"
+        },
+        "first_name_confirmed": {
+          "type": "boolean",
+          "description": "La personne a-t-elle confirmé être le bon contact ?"
+        },
+        "q1_operateur_actuel": {
+          "type": "string",
+          "description": "Mots exacts utilisés par le prospect pour nommer son opérateur"
+        },
+        "q2_service_recherche": {
+          "type": "string",
+          "enum": ["mobile", "box", "bundle", "non_précisé"],
+          "description": "Type de service recherché"
+        },
+        "callback_preference": {
+          "type": "string",
+          "enum": ["matin", "après-midi"],
+          "nullable": true,
+          "description": "Préférence horaire si CALLBACK_REQUESTED"
+        }
+      },
+      "required": ["status", "first_name_confirmed"]
+    },
+
+    "summaryPrompt": "Résume l'appel en 1-2 phrases: opérateur actuel du prospect, type de service recherché, et tout élément notable (insatisfaction, urgence, contexte particulier). Sois concis.",
+
+    "successEvaluationPrompt": "L'appel est un succès si ET SEULEMENT SI: (1) la bonne personne a confirmé son identité ET (2) au moins une des deux questions de qualification a reçu une réponse complète. Réponds uniquement: true ou false.",
+    "successEvaluationRubric": "DescriptiveScale"
+  },
+
+  "serverUrl": "https://VOTRE_DOMAINE.com/api/voice/webhook",
+  "serverUrlSecret": "VOTRE_WEBHOOK_SECRET_ICI",
+
+  "metadata": {
+    "project": "monforfait.ma",
+    "version": "2.0-cheap-stack",
+    "llm": "groq-llama3.3",
+    "tts": "cartesia-sonic",
+    "stt": "deepgram-nova2"
+  }
+}

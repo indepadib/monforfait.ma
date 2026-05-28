@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import { Clock } from 'lucide-react'
 import { OfferCard, OfferProps } from '@/components/OfferCard'
+import { useTranslation } from '@/lib/LocaleContext'
 
 export function RecentlyViewed() {
+    const { t, isRtl } = useTranslation()
     const [offers, setOffers] = useState<OfferProps[]>([])
 
     useEffect(() => {
@@ -27,18 +29,18 @@ export function RecentlyViewed() {
     if (offers.length === 0) return null
 
     return (
-        <div className="py-12 border-t border-zinc-100 dark:border-zinc-800">
+        <div className="py-12 border-t border-zinc-100 dark:border-zinc-800" dir={isRtl ? 'rtl' : 'ltr'}>
             <div className="max-w-7xl mx-auto px-4">
-                <div className="flex items-center gap-2 mb-6 text-zinc-500">
+                <div className={`flex items-center gap-2 mb-6 text-zinc-500 ${isRtl ? 'flex-row-reverse justify-start' : ''}`}>
                     <Clock className="w-5 h-5" />
                     <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
-                        Vu récemment
+                        {t('recent_title')}
                     </h2>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {offers.map(offer => (
-                        <div key={offer.id} className="transform scale-90 origin-top-left opacity-80 hover:scale-100 hover:opacity-100 transition-all">
+                        <div key={offer.id} className={`transform scale-90 ${isRtl ? 'origin-top-right' : 'origin-top-left'} opacity-80 hover:scale-100 hover:opacity-100 transition-all`}>
                             <OfferCard offer={offer} />
                         </div>
                     ))}

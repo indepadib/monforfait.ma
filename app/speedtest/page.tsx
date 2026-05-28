@@ -9,10 +9,11 @@ import {
     Activity, TrendingUp, TrendingDown, 
     CheckCircle2, Loader2, Gauge,
     BrainCircuit, Sparkles, Smartphone,
-    Globe
+    Globe, ChevronRight
 } from 'lucide-react'
 import { Navigation } from '@/components/Navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { useTranslation } from '@/lib/LocaleContext'
 
 type SpeedResult = {
     downloadMbps: number
@@ -22,6 +23,7 @@ type SpeedResult = {
 }
 
 export default function SpeedTestPage() {
+    const { t, isRtl } = useTranslation()
     const [testing, setTesting] = useState(false)
     const [progress, setProgress] = useState(0)
     const [result, setResult] = useState<SpeedResult | null>(null)
@@ -118,7 +120,7 @@ export default function SpeedTestPage() {
                         source: 'speedtest_v3_premium',
                         download: result.downloadMbps,
                         upload: result.uploadMbps,
-                        ping: result.ping, // Using result.ping as result.pingMs is not defined
+                        ping: result.ping,
                         reason: leadForm.reason,
                         installation_timing: leadForm.timing,
                         captured_at: new Date().toISOString()
@@ -138,8 +140,8 @@ export default function SpeedTestPage() {
         
         if (result.ping > 40) {
             return {
-                title: "Latence Élevée Détectée",
-                description: `Votre ping de ${result.ping}ms impacte vos appels WhatsApp et vos jeux. La fibre Orange/Inwi peut le diviser par 3.`,
+                title: t('speed_res_title'),
+                description: t('speed_res_bad'),
                 color: "text-orange-600 dark:text-orange-400",
                 bg: "bg-orange-50 dark:bg-orange-900/20",
                 border: "border-orange-200 dark:border-orange-800"
@@ -148,8 +150,8 @@ export default function SpeedTestPage() {
         
         if (result.downloadMbps < 35) {
             return {
-                title: "Goulot d'étranglement 4K",
-                description: `Avec ${result.downloadMbps}Mbps, le streaming 4K saturera votre réseau. 100Mbps minimum recommandé pour votre foyer.`,
+                title: t('speed_res_title'),
+                description: t('speed_res_bad'),
                 color: "text-red-600 dark:text-red-400",
                 bg: "bg-red-50 dark:bg-red-900/20",
                 border: "border-red-200 dark:border-red-800"
@@ -157,8 +159,8 @@ export default function SpeedTestPage() {
         }
 
         return {
-            title: "Connexion Stable détectée",
-            description: "Votre ligne est performante, mais vous pourriez réduire votre facture de 15% en changeant d'opérateur ce mois-ci.",
+            title: t('speed_res_title'),
+            description: t('speed_res_good'),
             color: "text-blue-600 dark:text-blue-400",
             bg: "bg-blue-50 dark:bg-blue-900/20",
             border: "border-blue-200 dark:border-blue-800"
@@ -170,7 +172,7 @@ export default function SpeedTestPage() {
     const insight = getAIInsight()
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 selection:bg-blue-500/30">
+        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 selection:bg-blue-500/30 font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
             <Navigation />
             
             {/* Header / Hero Area */}
@@ -179,16 +181,16 @@ export default function SpeedTestPage() {
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,_#3b82f6_0%,_transparent_70%)] opacity-20"></div>
                 
                 <div className="max-w-4xl mx-auto relative z-10 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-8 backdrop-blur-md border border-white/5 animate-pulse">
-                        <Gauge className="w-3.5 h-3.5" /> Analyse réseau en temps réel
+                    <div className={`inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-8 backdrop-blur-md border border-white/5 animate-pulse ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        <Gauge className="w-3.5 h-3.5" /> {isRtl ? 'تحليل الشبكة في الوقت الحقيقي' : 'Analyse réseau en temps réel'}
                     </div>
                     
                     <h1 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter mb-6 uppercase leading-none">
-                        Quelle est votre <span className="text-blue-500">VRAIE</span> vitesse ?
+                        {t('speed_title')}
                     </h1>
                     
                     <p className="text-zinc-400 text-lg md:text-xl font-bold max-w-2xl mx-auto uppercase tracking-tighter italic">
-                        Ne laissez pas votre opérateur brider votre connexion. Testez maintenant.
+                        {t('speed_subtitle')}
                     </p>
                 </div>
             </div>
@@ -208,13 +210,13 @@ export default function SpeedTestPage() {
                                 onClick={runSpeedTest}
                                 className="px-12 py-6 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl text-2xl shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:shadow-[0_24px_48px_-12px_rgba(37,99,235,0.5)] active:translate-y-1 transition-all uppercase italic tracking-tighter"
                             >
-                                Lancer le Test ⚡
+                                {t('speed_btn_run')} ⚡
                             </button>
                             
-                            <div className="mt-10 flex flex-wrap justify-center gap-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                                <span className="flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> Global Server Network</span>
-                                <span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5" /> 100% Confidential</span>
-                                <span className="flex items-center gap-2"><Smartphone className="w-3.5 h-3.5" /> Mobile & Fiber Ready</span>
+                            <div className={`mt-10 flex flex-wrap justify-center gap-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest ${isRtl ? 'flex-row-reverse' : ''}`}>
+                                <span className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}><Globe className="w-3.5 h-3.5" /> {isRtl ? 'شبكة خوادم عالمية' : 'Global Server Network'}</span>
+                                <span className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}><ShieldCheck className="w-3.5 h-3.5" /> {isRtl ? 'سري 100%' : '100% Confidential'}</span>
+                                <span className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}><Smartphone className="w-3.5 h-3.5" /> {isRtl ? 'جاهز للهاتف والألياف البصرية' : 'Mobile & Fiber Ready'}</span>
                             </div>
                         </div>
                     )}
@@ -232,13 +234,13 @@ export default function SpeedTestPage() {
                                     <div className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em]">{currentPhase}</div>
                                 </div>
                             </div>
-                            <div className="inline-flex items-center gap-3 px-6 py-3 bg-zinc-50 dark:bg-zinc-800 rounded-2xl border border-zinc-100 dark:border-zinc-700">
+                            <div className={`inline-flex items-center gap-3 px-6 py-3 bg-zinc-50 dark:bg-zinc-800 rounded-2xl border border-zinc-100 dark:border-zinc-700 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                 <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
                                 <span className="text-xs font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-                                    {currentPhase === 'ping' && 'Mesure de latence...'}
-                                    {currentPhase === 'download' && 'Analyse du débit descendant...'}
-                                    {currentPhase === 'upload' && 'Mesure du flux montant...'}
-                                    {currentPhase === 'complete' && 'Compilation des données...'}
+                                    {currentPhase === 'ping' && t('speed_phase_ping')}
+                                    {currentPhase === 'download' && t('speed_phase_download')}
+                                    {currentPhase === 'upload' && t('speed_phase_upload')}
+                                    {currentPhase === 'complete' && t('speed_phase_complete')}
                                 </span>
                             </div>
                         </div>
@@ -247,41 +249,41 @@ export default function SpeedTestPage() {
                     {result && (
                         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
                             {/* RESULTS GRID */}
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6" dir="ltr">
                                 <div className="bg-zinc-50 dark:bg-zinc-950 p-8 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 text-center group hover:border-blue-500/30 transition-all shadow-inner">
                                     <TrendingDown className="w-6 h-6 text-blue-600 mx-auto mb-3" />
                                     <div className="text-3xl font-black text-zinc-900 dark:text-white leading-none mb-1 italic tracking-tighter">{result.downloadMbps}</div>
-                                    <div className="text-[9px] text-zinc-400 uppercase font-black tracking-widest leading-none">Download <span className="text-[8px] opacity-60">Mbps</span></div>
+                                    <div className="text-[9px] text-zinc-400 uppercase font-black tracking-widest leading-none">{t('speed_download')} <span className="text-[8px] opacity-60">Mbps</span></div>
                                 </div>
                                 <div className="bg-zinc-50 dark:bg-zinc-950 p-8 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 text-center group hover:border-purple-500/30 transition-all shadow-inner">
                                     <TrendingUp className="w-6 h-6 text-purple-600 mx-auto mb-3" />
                                     <div className="text-3xl font-black text-zinc-900 dark:text-white leading-none mb-1 italic tracking-tighter">{result.uploadMbps}</div>
-                                    <div className="text-[9px] text-zinc-400 uppercase font-black tracking-widest leading-none">Upload <span className="text-[8px] opacity-60">Mbps</span></div>
+                                    <div className="text-[9px] text-zinc-400 uppercase font-black tracking-widest leading-none">{t('speed_upload')} <span className="text-[8px] opacity-60">Mbps</span></div>
                                 </div>
                                 <div className="bg-zinc-50 dark:bg-zinc-950 p-8 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 text-center group hover:border-orange-500/30 transition-all shadow-inner">
                                     <Activity className="w-6 h-6 text-orange-600 mx-auto mb-3" />
                                     <div className="text-3xl font-black text-zinc-900 dark:text-white leading-none mb-1 italic tracking-tighter">{result.ping}</div>
-                                    <div className="text-[9px] text-zinc-400 uppercase font-black tracking-widest leading-none">Ping <span className="text-[8px] opacity-60">ms</span></div>
+                                    <div className="text-[9px] text-zinc-400 uppercase font-black tracking-widest leading-none">{t('speed_ping')} <span className="text-[8px] opacity-60">ms</span></div>
                                 </div>
                                 <div className="bg-zinc-50 dark:bg-zinc-950 p-8 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 text-center group hover:border-emerald-500/30 transition-all shadow-inner">
                                     <Sparkles className="w-6 h-6 text-emerald-600 mx-auto mb-3" />
                                     <div className="text-3xl font-black text-zinc-900 dark:text-white leading-none mb-1 italic tracking-tighter">{result.jitter}</div>
-                                    <div className="text-[9px] text-zinc-400 uppercase font-black tracking-widest leading-none">Jitter <span className="text-[8px] opacity-60">ms</span></div>
+                                    <div className="text-[9px] text-zinc-400 uppercase font-black tracking-widest leading-none">{t('speed_jitter')} <span className="text-[8px] opacity-60">ms</span></div>
                                 </div>
                             </div>
 
                             {/* AI INSIGHTS BOX */}
                             {insight && (
-                                <div className={`${insight.bg} ${insight.border} p-6 md:p-8 rounded-[2rem] border-2 flex items-start gap-6 relative overflow-hidden group shadow-xl`}>
-                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform">
+                                <div className={`${insight.bg} ${insight.border} p-6 md:p-8 rounded-[2rem] border-2 flex items-start gap-6 relative overflow-hidden group shadow-xl ${isRtl ? 'flex-row-reverse' : ''}`}>
+                                    <div className={`absolute top-0 ${isRtl ? 'left-0' : 'right-0'} p-4 opacity-10 group-hover:scale-125 transition-transform`}>
                                         <BrainCircuit className="w-20 h-20" />
                                     </div>
                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg bg-white dark:bg-zinc-800 ${insight.color}`}>
                                         <BrainCircuit className="w-7 h-7" />
                                     </div>
-                                    <div className="relative z-10">
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/50 dark:bg-black/20 rounded-full text-[9px] font-black uppercase tracking-widest mb-2 border border-white/50 dark:border-white/5">
-                                            <Zap className="w-2.5 h-2.5" /> Algorithme MonForfait AI
+                                    <div className="relative z-10 text-start">
+                                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 bg-white/50 dark:bg-black/20 rounded-full text-[9px] font-black uppercase tracking-widest mb-2 border border-white/50 dark:border-white/5 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                                            <Zap className="w-2.5 h-2.5" /> {isRtl ? 'خوارزمية MonForfait الذكية' : 'Algorithme MonForfait AI'}
                                         </div>
                                         <h3 className={`text-xl font-black mb-1 uppercase italic tracking-tight tracking-tighter ${insight.color}`}>{insight.title}</h3>
                                         <p className="text-zinc-600 dark:text-zinc-400 font-bold leading-relaxed max-w-2xl text-sm italic">"{insight.description}"</p>
@@ -290,76 +292,76 @@ export default function SpeedTestPage() {
                             )}
 
                             {!sent ? (
-                                <div className="bg-zinc-900 dark:bg-zinc-950 p-8 md:p-12 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
+                                <div className="bg-zinc-900 dark:bg-zinc-950 p-8 md:p-12 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group text-start">
                                     <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_100%_0%,_#3b82f6_0%,_transparent_60%)]"></div>
                                     <div className="relative z-10">
-                                        <div className="flex items-center gap-4 mb-8">
-                                            <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 transform -rotate-6">
+                                        <div className={`flex items-center gap-4 mb-8 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                                            <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 transform -rotate-6 shrink-0">
                                                 <TrendingUp className="w-7 h-7" />
                                             </div>
                                             <div>
-                                                <h3 className="font-black text-2xl uppercase italic tracking-tighter">Débloquer mon éligibilité</h3>
-                                                <p className="text-zinc-400 font-bold text-xs uppercase tracking-widest opacity-80">Nos experts analysent vos résultats pour vous trouver mieux.</p>
+                                                <h3 className="font-black text-2xl uppercase italic tracking-tighter">{t('speed_form_title')}</h3>
+                                                <p className="text-zinc-400 font-bold text-xs uppercase tracking-widest opacity-80">{t('speed_form_desc')}</p>
                                             </div>
                                         </div>
 
                                         <form onSubmit={saveSpeedTestLead} className="space-y-6">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Identité</label>
-                                                    <input required value={leadForm.name} onChange={e => setLeadForm({ ...leadForm, name: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm" placeholder="Nom complet" />
+                                                    <label className={`text-[10px] font-black uppercase text-zinc-500 tracking-widest ${isRtl ? 'mr-1' : 'ml-1'}`}>{t('speed_form_name')}</label>
+                                                    <input required value={leadForm.name} onChange={e => setLeadForm({ ...leadForm, name: e.target.value })} className={`w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm ${isRtl ? 'text-right' : 'text-left'}`} placeholder={t('speed_form_name')} />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Mobile</label>
-                                                    <input required type="tel" value={leadForm.phone} onChange={e => setLeadForm({ ...leadForm, phone: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm" placeholder="06 -- -- -- --" />
+                                                    <label className={`text-[10px] font-black uppercase text-zinc-500 tracking-widest ${isRtl ? 'mr-1' : 'ml-1'}`}>{t('speed_form_phone')}</label>
+                                                    <input required type="tel" value={leadForm.phone} onChange={e => setLeadForm({ ...leadForm, phone: e.target.value })} className={`w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm ${isRtl ? 'text-right' : 'text-left'}`} placeholder="06 -- -- -- --" />
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Ville</label>
-                                                    <input required value={leadForm.city} onChange={e => setLeadForm({ ...leadForm, city: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm" placeholder="Ex: Casablanca" />
+                                                    <label className={`text-[10px] font-black uppercase text-zinc-500 tracking-widest ${isRtl ? 'mr-1' : 'ml-1'}`}>{t('speed_form_city')}</label>
+                                                    <input required value={leadForm.city} onChange={e => setLeadForm({ ...leadForm, city: e.target.value })} className={`w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm ${isRtl ? 'text-right' : 'text-left'}`} placeholder={isRtl ? 'مثال: الدار البيضاء' : 'Ex: Casablanca'} />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Adresse / Secteur</label>
-                                                    <input required value={leadForm.address} onChange={e => setLeadForm({ ...leadForm, address: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm" placeholder="N° Rue, Quartier..." />
+                                                    <label className={`text-[10px] font-black uppercase text-zinc-500 tracking-widest ${isRtl ? 'mr-1' : 'ml-1'}`}>{t('speed_form_address')}</label>
+                                                    <input required value={leadForm.address} onChange={e => setLeadForm({ ...leadForm, address: e.target.value })} className={`w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm ${isRtl ? 'text-right' : 'text-left'}`} placeholder={isRtl ? 'رقم الشارع، الحي...' : 'N° Rue, Quartier...'} />
                                                 </div>
-                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Situation actuelle</label>
-                                                    <select required value={leadForm.reason} onChange={e => setLeadForm({ ...leadForm, reason: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm appearance-none cursor-pointer">
-                                                        <option value="" className="text-zinc-900">Motif de ce test...</option>
-                                                        <option value="too_slow" className="text-zinc-900">Connexion trop lente (Switching)</option>
-                                                        <option value="price" className="text-zinc-900">Je paie trop cher pour ce débit</option>
-                                                        <option value="moving" className="text-zinc-900">Déménagement imminent</option>
-                                                        <option value="first_time" className="text-zinc-900">Premier abonnement Fibre</option>
+                                                    <label className={`text-[10px] font-black uppercase text-zinc-500 tracking-widest ${isRtl ? 'mr-1' : 'ml-1'}`}>{t('speed_form_reason')}</label>
+                                                    <select required value={leadForm.reason} onChange={e => setLeadForm({ ...leadForm, reason: e.target.value })} className={`w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm appearance-none cursor-pointer ${isRtl ? 'text-right pr-5 pl-10' : 'text-left pl-5 pr-10'}`}>
+                                                        <option value="" className="text-zinc-900">{isRtl ? 'سبب هذا الاختبار...' : 'Motif de ce test...'}</option>
+                                                        <option value="too_slow" className="text-zinc-900">{t('speed_form_reason_slow')}</option>
+                                                        <option value="price" className="text-zinc-900">{t('speed_form_reason_price')}</option>
+                                                        <option value="moving" className="text-zinc-900">{t('speed_form_reason_moving')}</option>
+                                                        <option value="first_time" className="text-zinc-900">{t('speed_form_reason_first')}</option>
                                                     </select>
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 tracking-widest">Délai souhaité</label>
-                                                    <select required value={leadForm.timing} onChange={e => setLeadForm({ ...leadForm, timing: e.target.value })} className="w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm appearance-none cursor-pointer">
-                                                        <option value="asap" className="text-zinc-900">Dès que possible (Urgent)</option>
-                                                        <option value="1_month" className="text-zinc-900">D'ici 1 mois</option>
-                                                        <option value="checking" className="text-zinc-900">Simple comparaison</option>
+                                                    <label className={`text-[10px] font-black uppercase text-zinc-500 tracking-widest ${isRtl ? 'mr-1' : 'ml-1'}`}>{t('speed_form_timing')}</label>
+                                                    <select required value={leadForm.timing} onChange={e => setLeadForm({ ...leadForm, timing: e.target.value })} className={`w-full px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-bold text-sm appearance-none cursor-pointer ${isRtl ? 'text-right pr-5 pl-10' : 'text-left pl-5 pr-10'}`}>
+                                                        <option value="asap" className="text-zinc-900">{t('speed_form_timing_asap')}</option>
+                                                        <option value="1_month" className="text-zinc-900">{t('speed_form_timing_1month')}</option>
+                                                        <option value="checking" className="text-zinc-900">{t('speed_form_timing_checking')}</option>
                                                     </select>
                                                 </div>
                                             </div>
-                    </div>
 
-                                            <div className="bg-red-500/20 text-red-400 p-4 rounded-2xl text-[10px] font-bold flex items-center gap-3 border border-red-500/30 uppercase tracking-widest italic">
-                                                <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-                                                Installation prioritaire disponible sous 48h dans votre secteur
+                                            <div className={`bg-red-500/20 text-red-400 p-4 rounded-2xl text-[10px] font-bold flex items-center gap-3 border border-red-500/30 uppercase tracking-widest italic ${isRtl ? 'flex-row-reverse' : ''}`}>
+                                                <div className="w-2 h-2 bg-red-500 rounded-full animate-ping shrink-0"></div>
+                                                {isRtl ? 'التركيب ذو الأولوية متوفر في غضون 48 ساعة في منطقتك' : 'Installation prioritaire disponible sous 48h dans votre secteur'}
                                             </div>
 
                                             <button disabled={isSubmitting} className="w-full py-5 bg-white text-zinc-900 font-black rounded-2xl hover:bg-blue-50 hover:shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)] active:translate-y-1 transition-all flex flex-col items-center justify-center gap-1 group shadow-2xl uppercase italic tracking-tighter">
                                                 {isSubmitting ? (
                                                     <div className="flex items-center gap-3">
                                                         <Loader2 className="w-5 h-5 animate-spin" />
-                                                        <span>Traitement AI...</span>
+                                                        <span>{isRtl ? 'جاري المعالجة...' : 'Traitement AI...'}</span>
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <span>VÉRIFIER MON ÉLIGIBILITÉ ⚡</span>
-                                                        <span className="text-[9px] font-bold opacity-40 group-hover:opacity-100 transition-opacity">Expertise et devis 100% gratuits</span>
+                                                        <span>{t('speed_form_btn').toUpperCase()} ⚡</span>
+                                                        <span className="text-[9px] font-bold opacity-40 group-hover:opacity-100 transition-opacity">{isRtl ? 'خبرة وتقييم مجاني 100%' : 'Expertise et devis 100% gratuits'}</span>
                                                     </>
                                                 )}
                                             </button>
@@ -371,9 +373,9 @@ export default function SpeedTestPage() {
                                     <div className="w-20 h-20 bg-emerald-500 rounded-3xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-emerald-500/20 transform rotate-12">
                                         <CheckCircle2 className="w-10 h-10" />
                                     </div>
-                                    <h3 className="font-black text-3xl text-emerald-600 dark:text-emerald-400 mb-4 uppercase italic tracking-tighter italic">DOSSIER TRANSMIS ! 🚀</h3>
+                                    <h3 className="font-black text-3xl text-emerald-600 dark:text-emerald-400 mb-4 uppercase italic tracking-tighter">{t('speed_form_success').toUpperCase()} 🚀</h3>
                                     <p className="text-zinc-600 dark:text-zinc-400 font-bold max-w-md mx-auto leading-relaxed">
-                                        Un expert MonForfait.ma va analyzer votre zone et vous recontacter par téléphone dans les <span className="text-emerald-600 dark:text-emerald-400 font-black">2h ouvrées</span>.
+                                        {t('speed_form_success_desc')}
                                     </p>
                                 </div>
                             )}
@@ -381,21 +383,21 @@ export default function SpeedTestPage() {
                     )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 pb-20">
+                <div className={`grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 pb-20 ${isRtl ? 'text-right' : 'text-left'}`}>
                     <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 shadow-xl group hover:-translate-y-2 transition-transform">
-                        <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-inner group-hover:scale-110 transition-transform">⚡</div>
-                        <h3 className="font-black text-lg text-zinc-900 dark:text-white mb-2 uppercase italic tracking-tighter">Hyper-Précis</h3>
-                        <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 leading-relaxed uppercase tracking-wider">Algorithme de mesure multi-point pour une précision chirurgicale.</p>
+                        <div className={`w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-inner group-hover:scale-110 transition-transform ${isRtl ? 'mr-0 ml-auto' : ''}`}>⚡</div>
+                        <h3 className="font-black text-lg text-zinc-900 dark:text-white mb-2 uppercase italic tracking-tighter">{t('speed_card1_title')}</h3>
+                        <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 leading-relaxed uppercase tracking-wider">{t('speed_card1_desc')}</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 shadow-xl group hover:-translate-y-2 transition-transform">
-                        <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-inner group-hover:scale-110 transition-transform">🔒</div>
-                        <h3 className="font-black text-lg text-zinc-900 dark:text-white mb-2 uppercase italic tracking-tighter">Audit Fibre</h3>
-                        <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 leading-relaxed uppercase tracking-wider">Vérification technique de raccordement incluse après le test.</p>
+                        <div className={`w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-inner group-hover:scale-110 transition-transform ${isRtl ? 'mr-0 ml-auto' : ''}`}>🔒</div>
+                        <h3 className="font-black text-lg text-zinc-900 dark:text-white mb-2 uppercase italic tracking-tighter">{t('speed_card2_title')}</h3>
+                        <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 leading-relaxed uppercase tracking-wider">{t('speed_card2_desc')}</p>
                     </div>
                     <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 shadow-xl group hover:-translate-y-2 transition-transform">
-                        <div className="w-12 h-12 bg-orange-50 dark:bg-orange-900/20 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-inner group-hover:scale-110 transition-transform">🆓</div>
-                        <h3 className="font-black text-lg text-zinc-900 dark:text-white mb-2 uppercase italic tracking-tighter">Totalement Gratuit</h3>
-                        <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 leading-relaxed uppercase tracking-wider">Service offert par notre plateforme pour garantir votre confort.</p>
+                        <div className={`w-12 h-12 bg-orange-50 dark:bg-orange-900/20 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-inner group-hover:scale-110 transition-transform ${isRtl ? 'mr-0 ml-auto' : ''}`}>🆓</div>
+                        <h3 className="font-black text-lg text-zinc-900 dark:text-white mb-2 uppercase italic tracking-tighter">{t('speed_card3_title')}</h3>
+                        <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 leading-relaxed uppercase tracking-wider">{t('speed_card3_desc')}</p>
                     </div>
                 </div>
             </div>

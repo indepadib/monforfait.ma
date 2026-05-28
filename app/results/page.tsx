@@ -8,6 +8,7 @@ import { Navigation } from '@/components/Navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Sparkles, TrendingUp, CheckCircle } from 'lucide-react'
 import { ShareResults } from '@/components/ShareResults'
+import { useTranslation } from '@/lib/LocaleContext'
 
 type QuizAnswers = {
     category?: 'internet' | 'mobile' | 'both'
@@ -17,6 +18,7 @@ type QuizAnswers = {
 }
 
 export default function ResultsPage() {
+    const { t, isRtl } = useTranslation()
     const router = useRouter()
     const [answers, setAnswers] = useState<QuizAnswers>({})
     const [offers, setOffers] = useState<(OfferProps & { matchScore?: number })[]>([])
@@ -158,16 +160,16 @@ export default function ResultsPage() {
     function getMatchReason(offer: OfferProps): string {
         const isFibre = offer.technology?.toUpperCase().includes('FTTH') || offer.technology?.toUpperCase().includes('FIBRE')
 
-        if (answers.userType === 'family' && isFibre) return 'Idéal pour votre famille : la fibre garantit 0 coupure même si tous les appareils sont connectés.'
-        if (answers.priority === 'fastest' && offer.download_speed && offer.download_speed >= 100) return `Recommandé pour la vitesse : ${offer.download_speed} Mbps pour télécharger instantanément.`
-        if (answers.priority === 'cheapest' && offer.price_dh < 200) return `Meilleur budget : l'offre la plus économique à seulement ${offer.price_dh} DH.`
-        if (answers.priority === 'best_value' && offer.category === 'mobile' && offer.voice_minutes === -1) return 'Rapport qualité/prix imbattable avec appels illimités inclus.'
+        if (answers.userType === 'family' && isFibre) return t('res_reason_family')
+        if (answers.priority === 'fastest' && offer.download_speed && offer.download_speed >= 100) return t('res_reason_fastest').replace('{speed}', offer.download_speed.toString())
+        if (answers.priority === 'cheapest' && offer.price_dh < 200) return t('res_reason_cheapest').replace('{price}', offer.price_dh.toString())
+        if (answers.priority === 'best_value' && offer.category === 'mobile' && offer.voice_minutes === -1) return t('res_reason_best_value')
         
-        return 'Excellente offre correspondant à votre profil de consommation.'
+        return t('res_reason_default')
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black">
+        <div className={`min-h-screen bg-white dark:bg-black ${isRtl ? 'text-right' : 'text-left'}`}>
             <Navigation />
 
             {/* Hero Section */}
@@ -175,30 +177,30 @@ export default function ResultsPage() {
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 
                 <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold mb-6">
+                    <div className={`inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold mb-6 ${isRtl ? 'flex-row-reverse' : ''}`}>
                         <Sparkles className="w-4 h-4" />
-                        Résultats personnalisés
+                        {t('res_personalized')}
                     </div>
 
                     <h1 className="text-4xl md:text-6xl font-black mb-6">
-                        Vos offres sur mesure {answers.city && `à ${answers.city}`}
+                        {t('res_title')}{answers.city && ' ' + t('res_at_city').replace('{city}', answers.city)}
                     </h1>
 
                     <p className="text-xl text-white/90 mb-8">
-                        Basé sur vos réponses, voici les {offers.length} meilleures options pour vous
+                        {t('res_subtitle').replace('{count}', offers.length.toString())}
                     </p>
 
-                    <div className="flex flex-wrap justify-center gap-3 text-sm">
+                    <div className={`flex flex-wrap justify-center gap-3 text-sm ${isRtl ? 'flex-row-reverse' : ''}`}>
                         {answers.category && (
-                            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                            <div className={`flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full ${isRtl ? 'flex-row-reverse' : ''}`}>
                                 <CheckCircle className="w-4 h-4" />
-                                {answers.category === 'internet' ? 'Internet' : answers.category === 'mobile' ? 'Mobile' : 'Internet + Mobile'}
+                                {answers.category === 'internet' ? (isRtl ? 'إنترنت' : 'Internet') : answers.category === 'mobile' ? (isRtl ? 'هاتف محمول' : 'Mobile') : (isRtl ? 'إنترنت + هاتف محمول' : 'Internet + Mobile')}
                             </div>
                         )}
                         {answers.priority && (
-                            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                            <div className={`flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full ${isRtl ? 'flex-row-reverse' : ''}`}>
                                 <TrendingUp className="w-4 h-4" />
-                                {answers.priority === 'cheapest' ? 'Meilleur prix' : answers.priority === 'fastest' ? 'Plus rapide' : 'Meilleur rapport Q/P'}
+                                {answers.priority === 'cheapest' ? t('quiz_q3_o1_label') : answers.priority === 'fastest' ? t('quiz_q3_o2_label') : t('quiz_q3_o3_label')}
                             </div>
                         )}
                     </div>
@@ -214,7 +216,7 @@ export default function ResultsPage() {
                 {loading ? (
                     <div className="text-center py-20 animate-pulse">
                         <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full mx-auto mb-4 animate-spin"></div>
-                        <div className="text-zinc-500 font-medium">Analyse de vos besoins...</div>
+                        <div className="text-zinc-500 font-medium">{t('res_loading')}</div>
                     </div>
                 ) : (
                     <>
@@ -223,9 +225,9 @@ export default function ResultsPage() {
                                 <div key={offer.id || idx} className="relative">
                                     {/* Match Badge */}
                                     {offer.matchScore && offer.matchScore >= 85 && (
-                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                                        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                             <Sparkles className="w-3 h-3" />
-                                            {offer.matchScore}% de correspondance
+                                            {t('res_match_score').replace('{score}', offer.matchScore.toString())}
                                         </div>
                                     )}
 
@@ -247,23 +249,23 @@ export default function ResultsPage() {
                         {/* CTA Section */}
                         <div className="mt-16 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-zinc-900 dark:to-zinc-800 rounded-3xl p-8 md:p-12 text-center border border-zinc-200 dark:border-zinc-700">
                             <h2 className="text-2xl md:text-3xl font-bold mb-4 text-zinc-900 dark:text-white">
-                                Pas convaincu ?
+                                {t('res_not_convinced')}
                             </h2>
                             <p className="text-zinc-600 dark:text-zinc-400 mb-6 max-w-2xl mx-auto">
-                                Parcourez toutes nos offres ou refaites le quiz pour affiner vos résultats
+                                {t('res_not_convinced_desc')}
                             </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <div className={`flex flex-col sm:flex-row gap-4 justify-center ${isRtl ? 'flex-row-reverse' : ''}`}>
                                 <button
                                     onClick={() => router.push('/')}
                                     className="px-8 py-4 bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-bold rounded-xl hover:border-blue-500 transition-all"
                                 >
-                                    Voir toutes les offres
+                                    {t('res_btn_all')}
                                 </button>
                                 <button
                                     onClick={() => router.push('/quiz')}
                                     className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
                                 >
-                                    Refaire le quiz
+                                    {t('res_btn_redo')}
                                 </button>
                             </div>
                         </div>

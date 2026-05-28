@@ -1,0 +1,186 @@
+<!--
+  monforfait.ma — Voice AI Integration
+  MODIFICATIONS FORMULAIRE FRONTEND
+
+  2 changements obligatoires dans le formulaire existant :
+  1. Checkbox de consentement (LÉGALEMENT OBLIGATOIRE)
+  2. Appel API au submit pour mettre le lead en file d'attente
+
+  Ce fichier montre le formulaire AVANT et APRÈS les modifications.
+  Adapter aux templates/frameworks utilisés sur monforfait.ma.
+-->
+
+<!-- ╔══════════════════════════════════════════════════════════╗ -->
+<!-- ║  PARTIE 1 — HTML à ajouter dans le formulaire existant  ║ -->
+<!-- ╚══════════════════════════════════════════════════════════╝ -->
+
+<!--
+  Ajouter CE BLOC juste avant le bouton de soumission du formulaire.
+  Le checkbox est obligatoire (required). Sans cocher, le formulaire ne se soumet pas.
+  Le texte légal est requis pour la conformité CNDP (Loi 09-08).
+-->
+<div class="voice-consent-block" style="margin: 16px 0; padding: 14px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+
+  <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;">
+    <input
+      type="checkbox"
+      id="consent_voice"
+      name="consent_voice"
+      value="1"
+      required
+      style="margin-top: 3px; width: 16px; height: 16px; flex-shrink: 0;"
+    >
+    <span style="font-size: 13px; color: #495057; line-height: 1.5;">
+      J'accepte d'être recontacté(e) par téléphone par un conseiller de monforfait.ma
+      pour affiner ma recherche. Mes données sont traitées conformément à notre
+      <a href="/politique-de-confidentialite" target="_blank" style="color: #007bff;">
+        politique de confidentialité
+      </a>
+      et à la
+      <a href="https://www.cndp.ma/fr/cadre-juridique/textes-legislatifs-et-reglementaires/loi-n-09-08.html" target="_blank" style="color: #007bff;">
+        loi 09-08
+      </a>.
+      Je peux retirer mon consentement à tout moment.
+      <span style="color: #dc3545;">*</span>
+    </span>
+  </label>
+
+  <!-- Message d'erreur si non coché -->
+  <div id="consent-error" style="display:none; color: #dc3545; font-size: 12px; margin-top: 6px; margin-left: 26px;">
+    Vous devez accepter d'être recontacté pour continuer.
+  </div>
+
+</div>
+
+
+<!-- ╔══════════════════════════════════════════════════════════╗ -->
+<!-- ║  PARTIE 2 — JavaScript à ajouter au formulaire existant ║ -->
+<!-- ╚══════════════════════════════════════════════════════════╝ -->
+<script>
+/**
+ * À ajouter dans le script de soumission du formulaire existant.
+ * Après soumission réussie (lead créé en DB), appeler triggerVoiceQueue().
+ *
+ * IMPORTANT: triggerVoiceQueue() est appelé APRÈS que le lead est en DB
+ * avec son ID. Ne jamais appeler avant d'avoir l'ID du lead.
+ */
+
+/**
+ * Met le lead en file d'attente pour être appelé par l'agent IA.
+ * @param {number} leadId - ID du lead nouvellement créé
+ * @param {boolean} consentVoice - Le prospect a-t-il coché la case ?
+ */
+async function triggerVoiceQueue(leadId, consentVoice) {
+  if (!consentVoice) {
+    console.log('[voice] Pas de consentement — lead non mis en file d appel');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/voice/queue', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Ajouter le CSRF token si nécessaire (Laravel, etc.)
+        // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+      },
+      body: JSON.stringify({ lead_id: leadId })
+    });
+
+    if (!response.ok) throw new Error('Queue API error: ' + response.status);
+
+    const data = await response.json();
+    console.log('[voice] Lead mis en file d appel:', data);
+
+  } catch (err) {
+    // Ne PAS bloquer l'UX si la file d'appels échoue
+    // Le lead reste en DB, on peut le rappeler manuellement
+    console.error('[voice] Erreur mise en file:', err.message);
+  }
+}
+
+
+// ─── EXEMPLE D'INTÉGRATION avec le submit existant ───────────────────────────
+// Adapter selon le code JavaScript actuel de monforfait.ma
+
+document.getElementById('comparison-form')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const consentVoice = formData.get('consent_voice') === '1';
+
+  // Validation du consentement
+  if (!consentVoice) {
+    document.getElementById('consent-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('consent-error').style.display = 'none';
+
+  // Soumission du formulaire existant (adapter l'URL)
+  try {
+    const response = await fetch('/api/leads', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.lead_id) {
+      // ← Ajouter CES DEUX LIGNES après la création du lead
+      await triggerVoiceQueue(result.lead_id, consentVoice);
+      // Continuer le flow existant (redirection, message de succès, etc.)
+    }
+
+  } catch (err) {
+    console.error('Form submit error:', err);
+  }
+});
+
+
+// ─── POUR PHP/LARAVEL ────────────────────────────────────────────────────────
+// Si le formulaire est soumis côté serveur (pas AJAX), ajouter dans le controller:
+/*
+  // Dans LeadController@store, après $lead->save() :
+
+  if ($request->boolean('consent_voice')) {
+    // Mettre à jour le consentement
+    $lead->update([
+      'consent_voice' => true,
+      'consent_at'    => now(),
+    ]);
+
+    // Appeler l'API interne (ou dispatcher un job Queue Laravel)
+    // Option 1 — Job async (recommandé):
+    dispatch(new TriggerVoiceCallJob($lead->id));
+
+    // Option 2 — HTTP interne:
+    Http::post(config('app.url') . '/api/voice/queue', ['lead_id' => $lead->id]);
+  }
+*/
+</script>
+
+
+<!-- ╔══════════════════════════════════════════════════════════╗ -->
+<!-- ║  PARTIE 3 — Champ caché pour tracer la source du lead   ║ -->
+<!-- ╚══════════════════════════════════════════════════════════╝ -->
+<!--
+  Ajouter dans le formulaire pour tracer d'où vient le lead.
+  Utile pour analyser quelle source génère les meilleurs leads vocaux.
+-->
+<input type="hidden" id="lead_source" name="lead_source" value="">
+<input type="hidden" id="lead_utm_source" name="utm_source" value="">
+<input type="hidden" id="lead_utm_medium" name="utm_medium" value="">
+<input type="hidden" id="lead_utm_campaign" name="utm_campaign" value="">
+
+<script>
+// Capture automatique des paramètres UTM et de la source
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const set    = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+
+  set('lead_utm_source',   params.get('utm_source')   || document.referrer || 'direct');
+  set('lead_utm_medium',   params.get('utm_medium')   || '');
+  set('lead_utm_campaign', params.get('utm_campaign') || '');
+  set('lead_source',       params.get('utm_source') ? 'paid' : (document.referrer.includes('google') ? 'google_organic' : 'direct'));
+})();
+</script>
