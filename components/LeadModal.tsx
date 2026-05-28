@@ -69,15 +69,16 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                             preferred_operator: preferredOperator
                         }
                     })
+                });
+                // If user consented to voice verification, queue a call
+                if (consentVoice && leadData) {
+                  await fetch('/api/voice/queue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ leadId: leadData.id, phone })
+                  });
                 }
-        // If user consented to voice verification, queue a call
-        if (consentVoice && leadData) {
-          await fetch('/api/voice/queue', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ leadId: leadData.id, phone })
-          });
-        }
+            }
         } catch (err) {
             console.error("Lead save failed", err)
         }
