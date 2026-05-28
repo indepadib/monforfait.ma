@@ -302,9 +302,62 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
   // Neighborhood Speed test benchmark mock details
   const neighborhoodName = lead.city === 'Casablanca' ? 'El Maârif' : lead.city === 'Rabat' ? 'Agdal' : 'Centre Ville';
   
-  // Custom AI Pitch generator
-  const leadBudget = lead.budget ?? 249;
-  const generatedPitch = `Bonjour ${lead.first_name}, je suis conseiller commercial chez Orange. Je vous appelle suite à votre diagnostic réseau sur MonForfait.ma à ${lead.city} (${neighborhoodName}). J'ai vu que vous cherchez une éligibilité Fibre pour un budget de ${leadBudget} DH/mois avec un délai ${lead.intent_timeline?.replace(/_/g, ' ') || 'immédiat'}. Nos voisins dans votre quartier de ${neighborhoodName} profitent de notre Fibre 100 Mbps stable. Nous pouvons vous raccorder dès cette semaine pour seulement ${leadBudget - 50} DH/mois. Ça vous intéresse ?`;
+  // Custom context-aware AI Sales Pitch Generator
+  const generateAISalesPitch = (leadData: Lead) => {
+    const name = leadData.first_name || 'Prospect';
+    const city = leadData.city || 'votre ville';
+    const budgetVal = leadData.budget ?? 249;
+    const currentOp = leadData.current_operator || leadData.needs_details?.preferred_operator || 'votre opérateur actuel';
+    const isPro = leadData.type === 'B2B';
+    const timeline = leadData.intent_timeline || 'immédiat';
+
+    let intro = "";
+    let painPoint = "";
+    let valueProp = "";
+    let callToAction = "";
+
+    // 1. INTRO
+    if (isPro) {
+      const company = leadData.company_name ? ` pour ${leadData.company_name}` : "";
+      intro = `Bonjour M. ${name}, je suis conseiller commercial Grands Comptes. Je vous contacte suite à votre audit réseau sur MonForfait.ma concernant votre entreprise${company} à ${city}.`;
+    } else {
+      intro = `Bonjour ${name}, c'est Yassine de MonForfait.ma. Je vous appelle suite au diagnostic de couverture réseau que vous avez complété pour votre domicile à ${city}.`;
+    }
+
+    // 2. PAIN POINT (Based on reason and current operator)
+    const reason = leadData.needs_details?.reason || '';
+    if (reason.toLowerCase().includes('déménagement') || reason === 'moving') {
+      painPoint = ` J'ai bien noté que vous préparez un déménagement. C'est le moment idéal pour installer une ligne fibre neuve et éviter toute coupure de service le jour J.`;
+    } else if (reason.toLowerCase().includes('lent') || reason === 'too_slow' || reason === 'speed' || reason.toLowerCase().includes('vitesse')) {
+      painPoint = ` Vous m'avez indiqué que votre débit actuel rame. C'est un souci fréquent dans le secteur de ${neighborhoodName} avec les anciennes lignes en cuivre ADSL.`;
+    } else if (reason.toLowerCase().includes('changement') || reason === 'switching') {
+      painPoint = ` J'ai vu que vous souhaitez quitter ${currentOp}. Plusieurs abonnés dans votre rue ont fait ce choix récemment pour profiter d'une meilleure stabilité réseau chez nous.`;
+    } else {
+      painPoint = ` Vous cherchez à optimiser vos dépenses télécom mensuelles.`;
+    }
+
+    // 3. VALUE PROPOSITION (Based on B2B / B2C and budget)
+    if (isPro) {
+      valueProp = ` Pour votre structure de ${leadData.company_size || '10 à 50'} collaborateurs, nous proposons un raccordement Fibre Optique Pro dédié avec une Garantie de Temps de Rétablissement (GTR) sous 4h. Sur votre budget de ${budgetVal} DH, nous pouvons inclure la fibre et le routeur backup 4G/5G.`;
+    } else {
+      if (budgetVal < 200) {
+        valueProp = ` Nous disposons d'une offre spéciale portabilité à 249 DH/mois sans engagement, ce qui réduira considérablement votre facture tout en multipliant votre débit actuel par 10.`;
+      } else {
+        valueProp = ` Nos tests speedtest à proximité indiquent une excellente éligibilité Fibre à 100 Mbps stables. Nous vous proposons notre tarif spécial exclusif avec l'installation gratuite et le premier mois offert.`;
+      }
+    }
+
+    // 4. CALL TO ACTION (Based on temperature / score / timeline)
+    if (leadData.score >= 70 || timeline === 'immédiat') {
+      callToAction = ` Nos techniciens réseau interviennent justement dans votre quartier de ${neighborhoodName} cette semaine. On peut valider l'éligibilité technique de votre immeuble maintenant pour réserver votre raccordement prioritaire ?`;
+    } else {
+      callToAction = ` Je vous envoie le récapitulatif détaillé et le lien d'inscription par WhatsApp pour que vous l'étudiez. Est-ce le bon numéro ?`;
+    }
+
+    return `${intro}${painPoint}${valueProp}${callToAction}`;
+  };
+
+  const generatedPitch = generateAISalesPitch(lead);
 
   const copyPitch = () => {
     navigator.clipboard.writeText(generatedPitch);
