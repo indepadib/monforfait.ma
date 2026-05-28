@@ -72,6 +72,58 @@ export async function POST(req: Request) {
             }
         }
 
+        // 4.5. Instant AI Voice Verification Call (via Bland.ai API)
+        if (process.env.BLAND_AI_API_KEY) {
+            try {
+                let formattedPhone = phone.trim().replace(/\s/g, '');
+                if (formattedPhone.startsWith('0')) {
+                    formattedPhone = '+212' + formattedPhone.substring(1);
+                } else if (!formattedPhone.startsWith('+') && !formattedPhone.startsWith('212')) {
+                    formattedPhone = '+212' + formattedPhone;
+                } else if (formattedPhone.startsWith('212')) {
+                    formattedPhone = '+' + formattedPhone;
+                }
+
+                const response = await fetch('https://api.bland.ai/v1/calls', {
+                    method: 'POST',
+                    headers: {
+                        'authorization': process.env.BLAND_AI_API_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone_number: formattedPhone,
+                        task: `Bonjour, je suis l'assistant vocal intelligent de MonForfait.ma. Je vous appelle très rapidement pour valider votre numéro de téléphone et confirmer votre demande d'éligibilité fibre à ${city}. Confirmez-vous que vous souhaitez recevoir les offres ? Merci beaucoup et à très bientôt.`,
+                        voice: 'Florian', // Standard French voice
+                        language: 'fr',
+                        reduce_latency: true
+                    })
+                });
+
+                if (response.ok) {
+                    console.log(`[AI Voice Verification] Call successfully triggered to ${formattedPhone}`);
+                    if (leadId) {
+                        // Log the call trigger event in Supabase inside needs_details without breaking constraints
+                        const updatedNeeds = {
+                            ...needs_details,
+                            ai_verification: {
+                                triggered: true,
+                                provider: 'bland.ai',
+                                called_at: new Date().toISOString()
+                            }
+                        };
+                        await supabase.from('leads').update({
+                            needs_details: updatedNeeds
+                        }).eq('id', leadId);
+                    }
+                } else {
+                    const errBody = await response.json();
+                    console.warn('[AI Voice Verification] Bland.ai rejected call:', errBody);
+                }
+            } catch (callError) {
+                console.error('[AI Voice Verification] Exception occurred while triggering call:', callError);
+            }
+        }
+
         // 5. Admin Email Alert (High Score Alert only)
         if (process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL_NOTIFICATION && score >= 70) {
             const resend = new Resend(process.env.RESEND_API_KEY)
