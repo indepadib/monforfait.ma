@@ -425,7 +425,39 @@ export type TranslationKeys =
   | 'toast_action_2'
   | 'toast_action_3'
   | 'consent_checkbox_label'
-  | 'consent_checkbox_error';
+  | 'consent_checkbox_error'
+
+  // Missing Offers
+  | 'offers_title_all'
+  | 'offers_search_placeholder'
+  | 'offers_results_count'
+  | 'offers_sort_recommended'
+  | 'offers_sort_data_desc'
+  | 'offers_no_results'
+  | 'offers_adjust_filters'
+  | 'offers_reset_filters'
+
+  // Missing Results
+  | 'results_alternatives'
+  | 'results_alternatives_desc'
+  | 'results_analyzing'
+  | 'results_analyzing_desc'
+  | 'results_best_match'
+  | 'results_claim_btn'
+  | 'results_claim_short'
+  | 'results_next_steps'
+  | 'results_promo_desc'
+  | 'results_promo_title'
+  | 'results_step1_desc'
+  | 'results_step1_title'
+  | 'results_step2_desc'
+  | 'results_step2_title'
+  | 'results_step3_desc'
+  | 'results_step3_title'
+  | 'results_subtitle'
+  | 'results_success_badge'
+  | 'results_title'
+  | 'results_whatsapp_msg';
 
 export const translations: Record<'fr' | 'ar', Record<TranslationKeys, string>> = {
   fr: {
@@ -791,6 +823,36 @@ export const translations: Record<'fr' | 'ar', Record<TranslationKeys, string>> 
     conf_sec4_title: 'On se bat pour vous',
     conf_sec4_desc: 'Un problème avec un opérateur ? Un doute sur vos frais de résiliation ? Nos experts surveillent le marché quotidiennement pour dénoncer les abus.',
     conf_sec4_btn: "Besoin d'aide ? Contactez un expert sur WhatsApp",
+
+    // Missing Offers & Results
+    offers_title_all: 'Toutes les offres',
+    offers_search_placeholder: 'Rechercher une offre...',
+    offers_results_count: '{count} offres trouvées',
+    offers_sort_recommended: 'Recommandé',
+    offers_sort_data_desc: 'Data décroissant',
+    offers_no_results: 'Aucun résultat',
+    offers_adjust_filters: 'Veuillez ajuster vos filtres.',
+    offers_reset_filters: 'Réinitialiser les filtres',
+    results_alternatives: 'Alternatives',
+    results_alternatives_desc: 'Voici quelques alternatives',
+    results_analyzing: 'Analyse en cours',
+    results_analyzing_desc: 'Veuillez patienter...',
+    results_best_match: 'Meilleur match',
+    results_claim_btn: 'Réclamer cette offre',
+    results_claim_short: 'Réclamer',
+    results_next_steps: 'Prochaines étapes',
+    results_promo_desc: 'Promotion exclusive',
+    results_promo_title: 'Offre Promo',
+    results_step1_desc: 'Description étape 1',
+    results_step1_title: 'Étape 1',
+    results_step2_desc: 'Description étape 2',
+    results_step2_title: 'Étape 2',
+    results_step3_desc: 'Description étape 3',
+    results_step3_title: 'Étape 3',
+    results_subtitle: 'Vos résultats',
+    results_success_badge: 'Succès',
+    results_title: 'Résultats',
+    results_whatsapp_msg: 'Envoyer sur WhatsApp',
 
     // Partenaires Page
     part_title: 'Programme Partenaires & Médias',
@@ -1228,6 +1290,36 @@ export const translations: Record<'fr' | 'ar', Record<TranslationKeys, string>> 
     conf_sec4_title: 'نحن هنا من أجلك',
     conf_sec4_desc: 'تواجه مشكلة مع مشغل؟ لديك شكوك حول مصاريف الإلغاء؟ يراقب خبراؤنا السوق يومياً للحد من التجاوزات.',
     conf_sec4_btn: 'هل تحتاج للمساعدة؟ تواصل مع خبير عبر واتساب',
+
+    // Missing Offers & Results
+    offers_title_all: 'كل العروض',
+    offers_search_placeholder: 'ابحث عن عرض...',
+    offers_results_count: '{count} عروض موجودة',
+    offers_sort_recommended: 'موصى به',
+    offers_sort_data_desc: 'البيانات (تنازلي)',
+    offers_no_results: 'لا يوجد نتائج',
+    offers_adjust_filters: 'الرجاء تعديل الفلاتر.',
+    offers_reset_filters: 'إعادة ضبط الفلاتر',
+    results_alternatives: 'بدائل',
+    results_alternatives_desc: 'إليك بعض البدائل',
+    results_analyzing: 'جاري التحليل',
+    results_analyzing_desc: 'يرجى الانتظار...',
+    results_best_match: 'أفضل تطابق',
+    results_claim_btn: 'اطلب هذا العرض',
+    results_claim_short: 'اطلب',
+    results_next_steps: 'الخطوات التالية',
+    results_promo_desc: 'عرض ترويجي حصري',
+    results_promo_title: 'عرض ترويجي',
+    results_step1_desc: 'وصف الخطوة 1',
+    results_step1_title: 'الخطوة 1',
+    results_step2_desc: 'وصف الخطوة 2',
+    results_step2_title: 'الخطوة 2',
+    results_step3_desc: 'وصف الخطوة 3',
+    results_step3_title: 'الخطوة 3',
+    results_subtitle: 'نتائجك',
+    results_success_badge: 'نجاح',
+    results_title: 'النتائج',
+    results_whatsapp_msg: 'إرسال عبر واتساب',
 
     // Partenaires Page
     part_title: 'برنامج الشراكات والإعلام',
