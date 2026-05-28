@@ -169,9 +169,7 @@ export async function POST(req: Request) {
             reason: 'DECLINED sur appel IA',
             added_by: 'auto'
           })
-          // Use onConflict if unique violation to prevent error
-          .select()
-          .catch(e => console.error('[Webhook Blacklist Add Error]', e))
+          .select();
       }
     }
     
