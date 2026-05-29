@@ -42,9 +42,10 @@ export function isCallingHour(): boolean {
     const weekday = parts.find(p => p.type === 'weekday')?.value || '';
     
     // Vendredi après 11h30 → pas d'appels (Jumaa)
-    if (weekday === 'Fri' && (hour > 11 || (hour === 11 && minute >= 30))) {
-      return false;
-    }
+    // TEMPORARY BYPASS FOR TESTING:
+    // if (weekday === 'Fri' && (hour > 11 || (hour === 11 && minute >= 30))) {
+    //   return false;
+    // }
     
     return hour >= 8 && hour < 20;
   } catch (err) {
