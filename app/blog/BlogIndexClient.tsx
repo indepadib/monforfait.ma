@@ -1,13 +1,45 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, User, ArrowRight, Tag } from 'lucide-react';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { BLOG_POSTS } from '@/lib/blog-data';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function BlogIndexClient() {
+  const [posts, setPosts] = useState(BLOG_POSTS);
+
+  useEffect(() => {
+    async function loadBlogs() {
+      try {
+        const { data, error } = await supabase
+          .from('blogs')
+          .select('*')
+          .order('published_at', { ascending: false });
+        
+        if (!error && data && data.length > 0) {
+          // Format data to match BLOG_POSTS structure
+          const formattedPosts = data.map(dbPost => ({
+            slug: dbPost.slug,
+            title: dbPost.title,
+            excerpt: dbPost.excerpt,
+            coverImage: dbPost.cover_image,
+            category: dbPost.category,
+            date: dbPost.published_at,
+            author: { name: dbPost.author_name }
+          }));
+          setPosts(formattedPosts);
+        }
+      } catch (err) {
+        console.error("Error fetching blogs from DB", err);
+      }
+    }
+    loadBlogs();
+  }, []);
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black">
       <Navigation />
@@ -31,7 +63,7 @@ export default function BlogIndexClient() {
       {/* Grid */}
       <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {BLOG_POSTS.map((post) => (
+          {posts.map((post) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}

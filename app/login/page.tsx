@@ -12,9 +12,9 @@ import {
 function LoginPortalContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'admin' ? 'admin' : 'operator';
+  const initialTab = (searchParams.get('tab') as 'operator' | 'admin' | 'commercial') || 'operator';
 
-  const [activeTab, setActiveTab] = useState<'operator' | 'admin'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'operator' | 'admin' | 'commercial'>(initialTab);
   const [view, setView] = useState<'login' | 'signup' | 'forgot_password'>('login');
   
   // Login form states
@@ -34,8 +34,8 @@ function LoginPortalContent() {
 
   // Sync tab with search params
   useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'admin' || tab === 'operator') {
+    const tab = searchParams.get('tab') as 'operator' | 'admin' | 'commercial';
+    if (tab === 'admin' || tab === 'operator' || tab === 'commercial') {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -45,6 +45,9 @@ function LoginPortalContent() {
     if (activeTab === 'operator') {
       setEmail('orange@telecom.ma');
       setPassword('orange123');
+    } else if (activeTab === 'commercial') {
+      setEmail('commercial@monforfait.ma');
+      setPassword('commercial123');
     } else {
       setEmail('admin@monforfait.ma');
       setPassword('admin123');
@@ -68,22 +71,45 @@ function LoginPortalContent() {
           const acc = JSON.parse(registered);
           if (acc.password === password) {
             isValid = true;
-            company = acc.companyName;
+            company = acc.companyName || company;
           }
         }
         
         if (email === 'orange@telecom.ma' && password === 'orange123') {
           isValid = true;
-          company = 'Orange Maroc B2B';
         }
 
         if (isValid) {
           localStorage.setItem('operator_logged_in', 'true');
+          localStorage.setItem('operator_email', email);
           localStorage.setItem('operator_company_name', company);
-          localStorage.setItem('operator_contact_email', email);
-          router.push('/operateurs/dashboard');
+          document.cookie = `operator_email=${encodeURIComponent(email)}; path=/; max-age=86400`;
+          router.push('/operateurs/dashboard/leads');
         } else {
           setError("Identifiants Opérateur incorrects. (Démo: orange@telecom.ma / orange123)");
+          setIsLoading(false);
+        }
+      } else if (activeTab === 'commercial') {
+        // Check commercial accounts
+        const registeredComm = localStorage.getItem('commercial_account_' + email);
+        let isValidComm = false;
+        if (registeredComm) {
+          const acc = JSON.parse(registeredComm);
+          if (acc.password === password) isValidComm = true;
+        }
+        
+        if (email === 'commercial@monforfait.ma' && password === 'commercial123') {
+          isValidComm = true;
+        }
+
+        if (isValidComm) {
+          localStorage.setItem('admin_logged_in', 'true');
+          localStorage.setItem('user_role', 'commercial');
+          document.cookie = "admin_logged_in=true; path=/; max-age=86400";
+          document.cookie = "user_role=commercial; path=/; max-age=86400";
+          router.push('/admin/leads');
+        } else {
+          setError("Identifiants Commercial incorrects. (Démo: commercial@monforfait.ma / commercial123)");
           setIsLoading(false);
         }
       } else {
@@ -103,6 +129,9 @@ function LoginPortalContent() {
 
         if (isValidAdmin) {
           localStorage.setItem('admin_logged_in', 'true');
+          localStorage.setItem('user_role', 'admin');
+          document.cookie = "admin_logged_in=true; path=/; max-age=86400";
+          document.cookie = "user_role=admin; path=/; max-age=86400";
           router.push('/admin/leads');
         } else {
           setError("Identifiants Administrateur incorrects. (Démo: admin@monforfait.ma / admin123)");
@@ -200,6 +229,20 @@ function LoginPortalContent() {
             </button>
             <button
               onClick={() => {
+                setActiveTab('commercial');
+                setError(null);
+                setSuccessMessage(null);
+              }}
+              className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'commercial' 
+                  ? 'bg-amber-600 text-white shadow-lg' 
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Users className="w-4 h-4" /> Commercial
+            </button>
+            <button
+              onClick={() => {
                 setActiveTab('admin');
                 setError(null);
                 setSuccessMessage(null);
@@ -254,7 +297,7 @@ function LoginPortalContent() {
                   <input 
                     type="email" 
                     required
-                    placeholder={activeTab === 'operator' ? 'ex: orange@telecom.ma' : 'ex: admin@monforfait.ma'}
+                    placeholder={activeTab === 'operator' ? 'ex: orange@telecom.ma' : activeTab === 'commercial' ? 'ex: commercial@monforfait.ma' : 'ex: admin@monforfait.ma'}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-800 bg-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-600 text-xs font-semibold text-white placeholder-slate-600"

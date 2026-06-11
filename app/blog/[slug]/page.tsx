@@ -10,13 +10,33 @@ import { BLOG_POSTS, BlogPost } from '@/lib/blog-data'
 import { Calendar, User, ChevronLeft, Share2 } from 'lucide-react'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 
+import { supabase } from '@/lib/supabaseClient'
+
 type Props = {
     params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const resolvedParams = await params
-    const post = BLOG_POSTS.find(p => p.slug === resolvedParams.slug)
+    let post: any = null
+    
+    try {
+        const { data } = await supabase.from('blogs').select('*').eq('slug', resolvedParams.slug).single()
+        if (data) {
+            post = {
+                title: data.title,
+                excerpt: data.excerpt,
+                coverImage: data.cover_image,
+                date: data.published_at,
+                author: { name: data.author_name }
+            }
+        }
+    } catch(e) {}
+
+    if (!post) {
+        post = BLOG_POSTS.find(p => p.slug === resolvedParams.slug)
+    }
+    
     if (!post) return {}
 
     return {
@@ -41,7 +61,27 @@ export async function generateStaticParams() {
 
 export default async function BlogPostPage({ params }: Props) {
     const resolvedParams = await params
-    const post = BLOG_POSTS.find(p => p.slug === resolvedParams.slug)
+    let post: any = null
+    
+    try {
+        const { data } = await supabase.from('blogs').select('*').eq('slug', resolvedParams.slug).single()
+        if (data) {
+            post = {
+                slug: data.slug,
+                title: data.title,
+                excerpt: data.excerpt,
+                content: data.content,
+                coverImage: data.cover_image,
+                category: data.category,
+                date: data.published_at,
+                author: { name: data.author_name }
+            }
+        }
+    } catch(e) {}
+
+    if (!post) {
+        post = BLOG_POSTS.find(p => p.slug === resolvedParams.slug)
+    }
 
     if (!post) {
         notFound()

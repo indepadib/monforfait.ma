@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { OffersClient } from './OffersClient'
 import type { Metadata } from 'next'
 

@@ -74,6 +74,7 @@ export default function AdminLeadsPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('admin_logged_in')
+    document.cookie = "admin_logged_in=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push('/login?tab=admin')
   }
 

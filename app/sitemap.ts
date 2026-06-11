@@ -1,83 +1,63 @@
-import { MetadataRoute } from 'next'
-import { createClient } from '@supabase/supabase-js'
-import { BLOG_POSTS, BlogPost } from '@/lib/blog-data'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-// Resource lists from the app structure
-const CITIES = [
-    'casablanca', 'rabat', 'marrakech', 'tanger', 'agadir', 
-    'fes', 'meknes', 'oujda', 'kenitra', 'tetouan', 'safi'
-];
-
-const OPERATORS = ['inwi', 'orange', 'iam'];
+import { MetadataRoute } from 'next';
+import { supabase } from '@/lib/supabaseClient';
+import { BLOG_POSTS } from '@/lib/blog-data';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://monforfait.ma'
+  const baseUrl = 'https://monforfait.ma';
 
-    // Static routes
-    const staticRoutes = [
-        '',
-        '/quiz',
-        '/offers',
-        '/speedtest',
-        '/blog',
-        '/comparatif',
-        '/compare',
-        '/confiance',
-        '/contact',
-        '/eligibilite',
-        '/fibre-optique-casablanca',
-        '/forfait-mobile-pas-cher',
-        '/observatoire',
-        '/partenaires',
-        '/offres',
-    ].map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: route === '' ? 1 : 0.8,
-    }))
+  const defaultRoutes = [
+    '',
+    '/offers',
+    '/compare',
+    '/speedtest',
+    '/eligibilite',
+    '/observatoire',
+    '/contact',
+    '/confiance',
+    '/partenaires',
+    '/quiz',
+    '/blog'
+  ].map((route) => ({
+    url: `${baseUrl}${route}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: route === '' ? 1 : 0.8,
+  }));
 
-    // Operator routes
-    const operatorRoutes = OPERATORS.map((slug) => ({
-        url: `${baseUrl}/operateurs/${slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.9,
-    }))
-
-    // City routes
-    const cityRoutes = CITIES.map((slug) => ({
-        url: `${baseUrl}/ville/${slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-    }))
-
-    // Dynamic routes (Offers from DB)
-    const { data: offers } = await supabase
-        .from('plans')
-        .select('id, updated_at')
-        .eq('is_active', true)
-
-    const offerRoutes = (offers || []).map((offer) => ({
-        url: `${baseUrl}/offers/${offer.id}`,
-        lastModified: new Date(offer.updated_at || new Date()),
+  // Fetch blogs for dynamic sitemap
+  let blogRoutes: any[] = [];
+  try {
+    const { data: blogs } = await supabase.from('blogs').select('slug, published_at');
+    if (blogs && blogs.length > 0) {
+      blogRoutes = blogs.map((blog) => ({
+        url: `${baseUrl}/blog/${blog.slug}`,
+        lastModified: new Date(blog.published_at),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
-    }))
+      }));
+    } else {
+      blogRoutes = BLOG_POSTS.map((blog) => ({
+        url: `${baseUrl}/blog/${blog.slug}`,
+        lastModified: new Date(blog.date),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      }));
+    }
+  } catch(e) {}
 
-    // Blog routes
-    const blogRoutes = BLOG_POSTS.map((post: BlogPost) => ({
-        url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: new Date(post.date),
-        changeFrequency: 'monthly' as const,
-        priority: 0.6,
-    }))
+  // Fetch plans (offers)
+  let planRoutes: any[] = [];
+  try {
+    const { data: plans } = await supabase.from('plans').select('id');
+    if (plans) {
+      planRoutes = plans.map((plan) => ({
+        url: `${baseUrl}/offers/${plan.id}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
+      }));
+    }
+  } catch(e) {}
 
-    return [...staticRoutes, ...operatorRoutes, ...cityRoutes, ...offerRoutes, ...blogRoutes]
+  return [...defaultRoutes, ...blogRoutes, ...planRoutes];
 }
-

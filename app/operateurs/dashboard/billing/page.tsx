@@ -30,6 +30,81 @@ export default function OperatorBillingPage() {
   const [cardCvc, setCardCvc] = useState('');
   const [cardName, setCardName] = useState('');
 
+  const handleDownloadInvoice = (invoice: Invoice) => {
+    const operatorCompany = localStorage.getItem('operator_company_name') || 'Entreprise Inconnue';
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Facture ${invoice.id}</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; padding: 40px; color: #333; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 40px; }
+            .logo { font-size: 24px; font-weight: 900; }
+            .logo span { color: #3b82f6; }
+            .title { font-size: 28px; color: #1e293b; font-weight: bold; }
+            .details { display: flex; justify-content: space-between; margin-bottom: 40px; }
+            .box { padding: 20px; background: #f8fafc; border-radius: 8px; width: 45%; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+            th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+            th { background: #f1f5f9; color: #475569; font-size: 12px; text-transform: uppercase; }
+            .total-row { font-weight: bold; font-size: 18px; }
+            .footer { text-align: center; color: #94a3b8; font-size: 12px; margin-top: 50px; border-top: 1px solid #eee; padding-top: 20px; }
+          </style>
+        </head>
+        <body onload="window.print(); window.close();">
+          <div class="header">
+            <div class="logo">Mon<span>Forfait</span>.ma</div>
+            <div class="title">FACTURE</div>
+          </div>
+          <div class="details">
+            <div class="box">
+              <p><strong>Émetteur :</strong></p>
+              <p>MonForfait.ma<br>Casablanca, Maroc<br>contact@monforfait.ma</p>
+            </div>
+            <div class="box">
+              <p><strong>Client :</strong></p>
+              <p>${operatorCompany}<br>Partenaire B2B</p>
+            </div>
+          </div>
+          <div style="margin-bottom: 30px;">
+            <p><strong>N° Facture :</strong> ${invoice.id}</p>
+            <p><strong>Date :</strong> ${invoice.date}</p>
+            <p><strong>Statut :</strong> Payé</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Type</th>
+                <th style="text-align:right">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${invoice.description}</td>
+                <td>${invoice.type === 'reload' ? 'Recharge Wallet' : 'Achat de Lead'}</td>
+                <td style="text-align:right">${invoice.amount} DH</td>
+              </tr>
+              <tr class="total-row">
+                <td colspan="2" style="text-align:right">Total Net :</td>
+                <td style="text-align:right">${invoice.amount} DH</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="footer">
+            Merci de votre confiance. Pour toute question, contactez-nous à support@monforfait.ma.
+          </div>
+        </body>
+      </html>
+    `;
+    
+    const printWindow = window.open('', '', 'width=800,height=900');
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+    }
+  };
+
   useEffect(() => {
     // Load wallet balance from localStorage
     const savedBalance = localStorage.getItem('operator_wallet_balance');
@@ -79,41 +154,61 @@ export default function OperatorBillingPage() {
     setInvoices(initialInvoices.reverse());
   }, []);
 
-  const handleConfirmPayment = (e: React.FormEvent) => {
+  const handleConfirmPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsReloading(true);
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: reloadAmount,
+          operatorEmail: localStorage.getItem('operator_email') || 'unknown'
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.url) {
+        // Redirect to real Stripe/Payment gateway
+        window.location.href = result.url;
+        return;
+      }
+
+      // If simulated or success returned directly
       const currentBalance = parseFloat(localStorage.getItem('operator_wallet_balance') || '5000');
       const newBalance = currentBalance + reloadAmount;
       localStorage.setItem('operator_wallet_balance', newBalance.toString());
       setWalletBalance(newBalance);
       
       const newInvoice: Invoice = {
-        id: `FAC-2026-R0${invoices.length + 1}`,
+        id: `FAC-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
         date: new Date().toLocaleDateString('fr-FR'),
-        description: `Rechargement de compte - Carte Bancaire (Visa ${cardNumber.slice(-4) ? '•••• ' + cardNumber.slice(-4) : '•••• 8492'})`,
+        description: `Rechargement Wallet B2B - Terminison de Carte **${cardNumber.slice(-4) || 'XXXX'}`,
         type: 'reload',
         amount: reloadAmount,
         status: 'paid'
       };
-
-      setInvoices([newInvoice, ...invoices]);
       
-      // Dispatch storage event to update layout header instantly
+      setInvoices([newInvoice, ...invoices]);
       window.dispatchEvent(new Event('storage'));
       
-      setIsReloading(false);
       setIsPaymentModalOpen(false);
       setReloadSuccess(true);
       
-      // Clear payment form details
       setCardNumber('');
       setCardExpiry('');
       setCardCvc('');
       setCardName('');
 
       setTimeout(() => setReloadSuccess(false), 3000);
-    }, 1500);
+    } catch (err) {
+      console.error("Payment failed", err);
+      alert("Le paiement a échoué.");
+    } finally {
+      setIsReloading(false);
+    }
   };
 
   return (
@@ -318,7 +413,10 @@ export default function OperatorBillingPage() {
                       {invoice.type === 'reload' ? `+${invoice.amount}` : `-${invoice.amount}`} DH
                     </td>
                     <td className="py-4 text-right">
-                      <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => handleDownloadInvoice(invoice)}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                      >
                         <Download className="w-4 h-4" />
                       </button>
                     </td>
