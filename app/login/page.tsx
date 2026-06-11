@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   ShieldCheck, Lock, Mail, ArrowRight, 
   Building, AlertCircle, Briefcase, Eye, EyeOff,
-  UserPlus, CheckCircle, RefreshCw, Key
+  UserPlus, CheckCircle, RefreshCw, Key, Users
 } from 'lucide-react';
 
 function LoginPortalContent() {
