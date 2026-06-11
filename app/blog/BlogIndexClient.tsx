@@ -22,14 +22,19 @@ export default function BlogIndexClient() {
         
         if (!error && data && data.length > 0) {
           // Format data to match BLOG_POSTS structure
-          const formattedPosts = data.map(dbPost => ({
+          const formattedPosts = data.map((dbPost: any) => ({
             slug: dbPost.slug,
             title: dbPost.title,
             excerpt: dbPost.excerpt,
+            content: dbPost.content || "",
             coverImage: dbPost.cover_image,
-            category: dbPost.category,
+            category: dbPost.category as any,
             date: dbPost.published_at,
-            author: { name: dbPost.author_name }
+            author: { 
+              name: dbPost.author_name,
+              avatar: dbPost.author_avatar || "",
+              role: dbPost.author_role || ""
+            }
           }));
           setPosts(formattedPosts);
         }
