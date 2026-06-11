@@ -34,7 +34,8 @@ export default function BlogIndexClient() {
               name: dbPost.author_name,
               avatar: dbPost.author_avatar || "",
               role: dbPost.author_role || ""
-            }
+            },
+            tags: dbPost.tags || []
           }));
           setPosts(formattedPosts);
         }
