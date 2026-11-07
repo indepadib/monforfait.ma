@@ -1,48 +1,20 @@
 import { Navigation } from '@/components/Navigation'
-
-export default function PrivacyPage() {
-    return (
-        <div className="min-h-screen bg-white dark:bg-black">
-            <Navigation />
-            <main className="max-w-4xl mx-auto px-4 py-16 prose dark:prose-invert">
-                <h1>Politique de Confidentialité</h1>
-                <p>Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}</p>
-
-                <h2>1. Collecte des données</h2>
-                <p>
-                    Sur MonForfait.ma, la confidentialité de vos données est notre priorité.
-                    Nous collectons uniquement les données strictement nécessaires au fonctionnement du service :
-                </p>
-                <ul>
-                    <li>Réponses au quiz (anonymisées) pour personnaliser les offres.</li>
-                    <li>Coordonnées (nom, téléphone) uniquement si vous remplissez volontairement un formulaire de contact/rappel.</li>
-                    <li>Données techniques (cookies, IP) pour l'analyse d'audience via Google Analytics.</li>
-                </ul>
-
-                <h2>2. Utilisation des données</h2>
-                <p>Vos données sont utilisées pour :</p>
-                <ul>
-                    <li>Vous afficher les offres telecom les plus pertinentes.</li>
-                    <li>Vous mettre en relation avec les opérateurs (uniquement sur votre demande explicite).</li>
-                    <li>Améliorer nos services et détecter les bugs.</li>
-                </ul>
-
-                <h2>3. Partage des données</h2>
-                <p>
-                    <strong>Nous ne vendons pas vos données personnelles.</strong> Elles sont transmises aux opérateurs partenaires (Orange, Inwi, Maroc Telecom ou leurs distributeurs agréés) uniquement lorsque vous cliquez sur "Demander un rappel" ou "Souscrire".
-                </p>
-
-                <h2>4. Vos droits (loi 09-08)</h2>
-                <p>
-                    Conformément à la loi n° 09-08 relative à la protection des personnes physiques à l'égard du traitement des données à caractère personnel, vous disposez d'un droit d'accès, de rectification et d'opposition.
-                    Pour toute question concernant cette politique, contactez-nous à : <span className="font-bold">contact@maplyo.com</span>
-                </p>
-
-                <h2>5. Cookies</h2>
-                <p>
-                    Nous utilisons des cookies pour mémoriser vos préférences (thème, réponses quiz). Vous pouvez les désactiver à tout moment via notre bandeau de consentement ou les paramètres de votre navigateur.
-                </p>
-            </main>
-        </div>
-    )
+export default function PrivacyPage(){
+ return <div className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-white">
+  <Navigation/>
+  <main className="max-w-3xl mx-auto px-5 py-24 space-y-5">
+   <h1 className="text-4xl font-bold">Politique de confidentialité</h1>
+   <p className="text-sm text-zinc-500">Mise à jour : 7 novembre 2026</p>
+   <h2 className="text-xl font-semibold">Données recueillies</h2>
+   <p>Lors d'une demande de mise en relation, MonForfait.ma recueille les coordonnées que vous fournissez (nom, téléphone, email facultatif, ville et adresse de raccordement) ainsi que votre besoin et votre préférence d'offre.</p>
+   <h2 className="text-xl font-semibold">Finalités et partage</h2>
+   <p>Ces informations servent à examiner la demande et, seulement avec votre accord explicite, à la communiquer à un opérateur ou un distributeur partenaire adapté pour qu'il puisse vous recontacter. La mise en relation peut faire l'objet d'une rémunération de MonForfait.ma par le partenaire. Aucune communication de données aux partenaires ne doit avoir lieu sans consentement vérifiable et cadre contractuel approprié.</p>
+   <h2 className="text-xl font-semibold">Historique et consentement</h2>
+   <p>Les demandes collectées avant la mise en place de la preuve de consentement à la transmission ne sont pas automatiquement considérées comme autorisées à être commercialisées. Vous pouvez demander le retrait de votre accord.</p>
+   <h2 className="text-xl font-semibold">Conservation et sécurité</h2>
+   <p>Les données sont conservées uniquement pour la durée nécessaire au traitement de la demande et aux obligations applicables. L'accès aux coordonnées est réservé aux personnes autorisées. Nous vérifions les mesures et formalités nécessaires auprès de la CNDP.</p>
+   <h2 className="text-xl font-semibold">Vos droits</h2>
+   <p>Conformément à la loi marocaine 09-08, vous pouvez demander l'accès, la rectification ou l'opposition au traitement de vos données en écrivant à <a className="underline" href="mailto:contact@monforfait.ma">contact@monforfait.ma</a>.</p>
+  </main>
+ </div>
 }
