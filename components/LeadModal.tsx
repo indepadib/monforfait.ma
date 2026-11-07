@@ -1,9 +1,10 @@
 "use client"
 
+import { captureLead } from '@/lib/leadGateway'
+import { LeadShareConsent } from '@/components/LeadShareConsent'
 import * as React from 'react'
 import { useState } from 'react'
 import { X, Loader2, CheckCircle, Flame, ShieldCheck, Zap } from 'lucide-react'
-import { supabase } from '@/lib/supabaseClient'
 import { OfferProps } from './OfferCard'
 import { event as trackEvent } from '@/lib/analytics'
 import { CONFIG } from '@/lib/config'
@@ -20,6 +21,7 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
     const [loading, setLoading] = useState(false)
     const [sent, setSent] = useState(false);
   const [consentVoice, setConsentVoice] = useState(false)
+  const [consentShare, setConsentShare] = useState(false)
 
     const isPro = offer.target_audience === 'professional'
 
@@ -28,59 +30,17 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
         setLoading(true)
 
         try {
-            const { data: leadData, error: leadError } = await supabase.from('leads').insert({
-                user_name: name,
-                user_email: email || `${phone}@lead.local`,
-                user_phone: phone,
-                city: city,
-                address: address,
-                selected_plan_id: offer.id,
-                status: isPro ? 'new_pro' : 'new_qualified',
-                is_pro: isPro,
-                needs_details: {
-                    source: 'web_v4_premium',
-                    installation_timing: timing,
-                    preferred_operator: preferredOperator,
-                    reason: reason,
-                    captured_at: new Date().toISOString()
-                }
-            }).select('id').single()
-
-            if (leadData) {
-                // Secondary notification pipeline
-                await fetch('/api/leads/notify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        leadId: leadData.id,
-                        phone: phone,
-                        user_name: name,
-                        city: city,
-                        address: address,
-                        is_pro: isPro,
-                        source: 'LeadModal_V3',
-                        needs_details: {
-                            offer: offer.title,
-                            operator: offer.operator_name,
-                            city,
-                            address,
-                            reason,
-                            installation_timing: timing,
-                            preferred_operator: preferredOperator
-                        }
-                    })
-                });
-                // If user consented to voice verification, queue a call
-                if (consentVoice && leadData) {
-                  await fetch('/api/voice/queue', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ leadId: leadData.id, phone })
-                  });
-                }
-            }
+            await captureLead({
+              user_name:name,user_phone:phone,user_email:email || undefined,
+              city,address,selected_plan_id:offer.id,
+              status:isPro ? 'new_pro' : 'new_qualified',is_pro:isPro,
+              consent_to_share:consentShare,consent_voice:consentVoice,
+              needs_details:{source:'web_v4_premium',installation_timing:timing,preferred_operator:preferredOperator,reason}
+            });
         } catch (err) {
-            console.error("Lead save failed", err)
+            setLoading(false);
+            alert(err instanceof Error ? err.message : 'Demande non enregistrée');
+            return;
         }
 
         // WhatsApp Redirect Message
@@ -121,10 +81,10 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                     </div>
                     <h3 className="text-2xl font-black mb-3 dark:text-white tracking-tight italic">ENVOYÉ ! ⚡</h3>
                     <p className="text-zinc-500 text-sm mb-6 leading-relaxed">
-                        Un expert MonForfait.ma va analyser votre adresse et vous contacter sous <span className="text-green-600 dark:text-green-400 font-black">2h ouvrées</span>.
+                        Nous avons enregistré votre demande. Un partenaire pourra vous recontacter si une offre correspond à votre besoin.
                     </p>
                     <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl text-[11px] text-zinc-400 font-bold uppercase tracking-widest border border-zinc-100 dark:border-zinc-800">
-                        🚀 Installation prioritaire activée
+                        Demande enregistrée
                     </div>
                 </div>
             </div>
@@ -272,6 +232,7 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                         </div>
 
                         <div className="pt-6 relative">
+                <LeadShareConsent checked={consentShare} onChange={setConsentShare} />
                 <div className="flex items-center mt-4">
                   <input
                     type="checkbox"
