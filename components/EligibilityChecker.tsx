@@ -1,7 +1,8 @@
 "use client";
 
+import { captureLead } from '@/lib/leadGateway'
+import { LeadShareConsent } from '@/components/LeadShareConsent'
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
 import { Wifi, Home, MapPin, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import VoiceConsentCheckbox from '@/components/VoiceConsentCheckbox';
 import { AddressMapPicker } from '@/components/AddressMapPicker';
@@ -23,8 +24,10 @@ export function EligibilityChecker() {
     const [timing, setTiming] = useState('asap');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [sent, setSent] = useState(false);
-  const [consentVoice, setConsentVoice] = useState(false);
+  const [consentVoice, setConsentVoice] = useState(false)
+  const [consentShare, setConsentShare] = useState(false);
     const [comment, setComment] = useState('');
+  const [submitError,setSubmitError] = useState('');
 
 
     const handleNeedSelection = (selectedNeed: string) => {
@@ -49,58 +52,17 @@ export function EligibilityChecker() {
         if (name && phone.length >= 10) {
             setStep('SCANNING');
             
-            // 1. Save to Supabase
+            setSubmitError('');
             try {
-                const { data: leadData } = await supabase.from('leads').insert({
-                    user_name: name,
-                    user_phone: phone,
-                    address: address,
-                    status: 'eligibility_qualified',
-                    needs_details: {
-                        source: 'eligibility_v3',
-                        need,
-                        reason,
-                        installation_timing: timing,
-                        comment,
-                        lat,
-                        lon,
-                        captured_at: new Date().toISOString()
-                    }
-
-                }).select('id').single();
-                // Queue voice verification if consented
-                if (consentVoice && leadData) {
-                  await fetch('/api/voice/queue', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ leadId: leadData.id, phone })
-                  });
-                }
-
-                // 2. Secondary notification pipeline
-                await fetch('/api/leads/notify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        leadId: leadData?.id,
-                        phone: phone,
-                        user_name: name,
-                        city: city || address.split(',').slice(-3, -2)[0]?.trim() || 'Casablanca',
-                        address: address,
-                        source: 'eligibility_checker',
-                        needs_details: {
-                            reason,
-                            need,
-                            installation_timing: timing,
-                            comment,
-                            location: { lat, lon },
-                            captured_at: new Date().toISOString()
-                        }
-
-                    })
-                });
+              await captureLead({
+                user_name:name,user_phone:phone,address,city:city||'',
+                status:'eligibility_qualified',consent_to_share:consentShare,consent_voice:consentVoice,
+                needs_details:{source:'eligibility_v3',need,reason,installation_timing:timing,comment,lat,lon}
+              });
             } catch (err) {
-                console.error("Failed to save lead", err);
+              setSubmitError(err instanceof Error ? err.message : 'Enregistrement impossible');
+              setStep('CONTACT');
+              return;
             }
 
             // Simulate scanning
@@ -280,6 +242,8 @@ export function EligibilityChecker() {
                             {t('elig_contact_btn')} <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
                         </button>
                     
+{submitError && <p role="alert" className="text-red-600 text-sm">{submitError}</p>}
+<LeadShareConsent checked={consentShare} onChange={setConsentShare} />
 <VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
 </form>
                 </div>
