@@ -5,7 +5,6 @@ import { LeadShareConsent } from '@/components/LeadShareConsent'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2, Phone } from 'lucide-react'
-import VoiceConsentCheckbox from '@/components/VoiceConsentCheckbox'
 import { trackEvent } from '@/lib/analytics'
 
 export function QuickCaptureForm() {
@@ -13,7 +12,7 @@ export function QuickCaptureForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
-  const [consentVoice, setConsentVoice] = useState(false)
+  
   const [consentShare, setConsentShare] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -52,7 +51,7 @@ export function QuickCaptureForm() {
       await captureLead({
         user_name:formData.first_name+' '+formData.last_name,
         user_email:formData.email,user_phone:cleanPhone,status:'new',
-        consent_to_share:consentShare,consent_voice:consentVoice,
+        consent_to_share:consentShare,consent_voice:false,
         needs_details:{interest:formData.need,source:'hero_quick_capture'}
       });
 
@@ -177,7 +176,7 @@ export function QuickCaptureForm() {
 </button>
 
 <LeadShareConsent checked={consentShare} onChange={setConsentShare} />
-<VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
+
       </form>
     </div>
   )
