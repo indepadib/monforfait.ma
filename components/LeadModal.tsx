@@ -20,7 +20,7 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
     const [preferredOperator, setPreferredOperator] = useState(offer.operator_name || '')
     const [loading, setLoading] = useState(false)
     const [sent, setSent] = useState(false);
-  const [consentVoice, setConsentVoice] = useState(false)
+  
   const [consentShare, setConsentShare] = useState(false)
 
     const isPro = offer.target_audience === 'professional'
@@ -34,7 +34,7 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
               user_name:name,user_phone:phone,user_email:email || undefined,
               city,address,selected_plan_id:offer.id,
               status:isPro ? 'new_pro' : 'new_qualified',is_pro:isPro,
-              consent_to_share:consentShare,consent_voice:consentVoice,
+              consent_to_share:consentShare,consent_voice:false,
               needs_details:{source:'web_v4_premium',installation_timing:timing,preferred_operator:preferredOperator,reason}
             });
         } catch (err) {
@@ -233,18 +233,6 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
 
                         <div className="pt-6 relative">
                 <LeadShareConsent checked={consentShare} onChange={setConsentShare} />
-                <div className="flex items-center mt-4">
-                  <input
-                    type="checkbox"
-                    id="voiceConsent"
-                    checked={consentVoice}
-                    onChange={(e) => setConsentVoice(e.target.checked)}
-                    className="mr-2"
-                  />
-                  <label htmlFor="voiceConsent" className="text-sm text-zinc-400">
-                    J'accepte la validation téléphonique automatisée (appel vocal)
-                  </label>
-                </div>
                             <button 
                                 type="submit"
                                 disabled={loading} 
