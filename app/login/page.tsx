@@ -19,7 +19,7 @@ export default function PrivateLogin(){
  }
  async function magic(){
   setBusy(true);setMessage('')
-  const {error}=await supabase.auth.signInWithOtp({email,emailRedirectTo:window.location.origin+'/admin'})
+  const {error}=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin+'/admin'}})
   setBusy(false)
   setMessage(error?'Lien non envoyé. Vérifiez votre adresse et réessayez.':'Si le compte est autorisé, un lien de connexion a été envoyé.')
  }
