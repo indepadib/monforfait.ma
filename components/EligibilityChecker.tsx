@@ -4,7 +4,6 @@ import { captureLead } from '@/lib/leadGateway'
 import { LeadShareConsent } from '@/components/LeadShareConsent'
 import React, { useState, useEffect } from 'react';
 import { Wifi, Home, MapPin, Phone, User, CheckCircle2, ChevronRight, Activity, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
-import VoiceConsentCheckbox from '@/components/VoiceConsentCheckbox';
 import { AddressMapPicker } from '@/components/AddressMapPicker';
 import { useTranslation } from '@/lib/LocaleContext';
 
@@ -21,7 +20,7 @@ export function EligibilityChecker() {
     const [phone, setPhone] = useState('');
     const [reason, setReason] = useState('');
     const [city, setCity] = useState('');
-    const [timing, setTiming] = useState('asap');
+    const [timing, setTiming] = useState('checking');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [sent, setSent] = useState(false);
   const [consentVoice, setConsentVoice] = useState(false)
@@ -42,7 +41,7 @@ export function EligibilityChecker() {
 
     const handleLocationSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (address.trim().length > 3) {
+        if (address.trim().length > 3 && city.trim().length > 1) {
             setStep('CONTACT');
         }
     };
@@ -50,25 +49,24 @@ export function EligibilityChecker() {
     const handleContactSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (name && phone.length >= 10) {
-            setStep('SCANNING');
+            setIsSubmitting(true);
             
             setSubmitError('');
             try {
               await captureLead({
                 user_name:name,user_phone:phone,address,city:city||'',
-                status:'eligibility_qualified',consent_to_share:consentShare,consent_voice:consentVoice,
+                status:'new',consent_to_share:consentShare,consent_voice:consentVoice,
                 needs_details:{source:'eligibility_v3',need,reason,installation_timing:timing,comment,lat,lon}
               });
             } catch (err) {
               setSubmitError(err instanceof Error ? err.message : 'Enregistrement impossible');
               setStep('CONTACT');
+              setIsSubmitting(false);
               return;
             }
 
-            // Simulate scanning
-            setTimeout(() => {
-                setStep('RESULT');
-            }, 3500);
+            setIsSubmitting(false);
+            setStep('RESULT');
         }
     };
 
@@ -163,9 +161,14 @@ export function EligibilityChecker() {
                                 setLon(lo);
                             }}
                         />
+                        <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-200">
+                            Ville / commune *
+                            <input type="text" required minLength={2} value={city} onChange={e=>setCity(e.target.value)}
+                              placeholder="Casablanca, Rabat, Tanger…" className="mt-2 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-4 py-3"/>
+                        </label>
                         <button
                             type="submit"
-                            disabled={!address}
+                            disabled={!address || !city.trim()}
                             className={`w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 ${isRtl ? 'flex-row-reverse' : ''}`}
                         >
                             {t('elig_loc_btn')} <ChevronRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
@@ -238,31 +241,14 @@ export function EligibilityChecker() {
                             />
                         </div>
 
-                        <button type="submit" className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/30 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                            {t('elig_contact_btn')} <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
+                        <button type="submit" disabled={isSubmitting} className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/30 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            {isSubmitting ? 'Enregistrement…' : t('elig_contact_btn')} <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
                         </button>
                     
 {submitError && <p role="alert" className="text-red-600 text-sm">{submitError}</p>}
 <LeadShareConsent checked={consentShare} onChange={setConsentShare} />
-<VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
-</form>
-                </div>
-            )}
 
-            {step === 'SCANNING' && (
-                <div className="py-12 text-center animate-in zoom-in duration-500 text-zinc-900 dark:text-white">
-                    <div className="relative w-32 h-32 mx-auto mb-8">
-                        <div className="absolute inset-0 border-4 border-blue-100 dark:border-zinc-800 rounded-full"></div>
-                        <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-                        <MapPin className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-blue-600 animate-pulse" />
-                        {/* Radar ping effect */}
-                        <div className="absolute inset-0 bg-blue-400/20 rounded-full animate-ping"></div>
-                    </div>
-                    <h3 className="text-2xl font-black mb-2 animate-pulse">{t('elig_scan_title')}</h3>
-                    <p className="text-zinc-500">{t('elig_scan_desc').replace('{address}', address)}</p>
-                    <div className="mt-6 flex justify-center gap-1 text-sm text-zinc-400">
-                        <span className="animate-bounce" style={{ animationDelay: '0ms' }}>{t('elig_scan_connecting')}</span>
-                    </div>
+</form>
                 </div>
             )}
 
@@ -271,24 +257,16 @@ export function EligibilityChecker() {
                     <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                         <CheckCircle2 className="w-10 h-10" />
                     </div>
-                    <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-4">{t('elig_res_title')}</h3>
-                    <div className={`flex items-center justify-center gap-4 mb-8 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                        <div className={`flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-1 rounded-md ${isRtl ? 'flex-row-reverse' : ''}`}>
-                            <ShieldCheck className="w-3 h-3 text-green-500" /> {t('elig_res_encrypted')}
-                        </div>
-                        <div className={`flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-1 rounded-md ${isRtl ? 'flex-row-reverse' : ''}`}>
-                            <CheckCircle2 className="w-3 h-3 text-blue-500" /> {t('elig_res_verified')}
-                        </div>
-                    </div>
+                    <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-4">{locale === 'ar' ? 'تم تسجيل طلبك' : 'Votre demande est enregistrée'}</h3>
                     <p className="text-zinc-600 dark:text-zinc-400 mb-8 max-w-md mx-auto">
-                        {t('elig_res_desc').replace('{address}', address)}
+                        {locale === 'ar' ? 'سيتم تأكيد توفر الخدمة من طرف الشريك بعد التحقق من العنوان.' : 'La disponibilité de la fibre doit encore être vérifiée par un opérateur à votre adresse.'}
                     </p>
                     <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-2xl p-6 mb-8 text-left">
                         <h4 className={`font-bold text-blue-800 dark:text-blue-400 mb-2 flex items-center gap-2 ${isRtl ? 'flex-row-reverse text-right' : ''}`}>
-                             {t('elig_res_advisor_title')}
+                             {locale === 'ar' ? 'الخطوة القادمة' : 'Prochaine étape'}
                         </h4>
                         <p className={`text-sm text-blue-700/80 dark:text-blue-300/80 italic ${isRtl ? 'text-right' : 'text-left'}`}>
-                            {t('elig_res_advisor_desc')}
+                            {locale === 'ar' ? 'قد يتواصل معك شريك مختص من أجل تأكيد التغطية والعرض.' : 'Un partenaire pourra vous recontacter pour vérifier la couverture et proposer une offre adaptée. Aucun raccordement n’est confirmé à ce stade.'}
                         </p>
                     </div>
                     <a href="/?scam=true" className={`inline-flex w-full bg-black dark:bg-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white font-black py-4 px-8 rounded-xl items-center justify-center gap-2 transition-transform active:scale-95 shadow-2xl ${isRtl ? 'flex-row-reverse' : ''}`}>
