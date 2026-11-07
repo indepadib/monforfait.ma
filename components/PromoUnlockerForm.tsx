@@ -15,7 +15,7 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
-  const [consentVoice, setConsentVoice] = useState(false)
+  
   const [consentShare, setConsentShare] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -47,7 +47,7 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
       await captureLead({
         user_name:formData.firstName,user_phone:formData.phone,city:formData.city,
         status:mode === 'b2b' ? 'new_pro' : 'new',is_pro:mode==='b2b',
-        consent_to_share:consentShare,consent_voice:consentVoice,
+        consent_to_share:consentShare,consent_voice:false,
         needs_details:{interest:formData.need,current_bill:formData.currentBill,
           source:'hero_promo_'+mode,utm_source,utm_medium,utm_campaign,lead_source}
       });
@@ -271,22 +271,6 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
                 </div>
 
             <LeadShareConsent checked={consentShare} onChange={setConsentShare} />
-            {/* Optional voice qualification */}
-            <div className="voice-consent-block p-4 bg-zinc-900/50 border border-white/10 rounded-xl mt-4 text-xs">
-                <label className={`flex items-start gap-2.5 cursor-pointer text-zinc-400 font-medium ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
-                    <input
-                        type="checkbox"
-                        checked={consentVoice}
-                        onChange={(e) => setConsentVoice(e.target.checked)}
-                        className="mt-1 w-4 h-4 shrink-0 rounded border-zinc-700 bg-zinc-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-zinc-900 focus:ring-2"
-                    />
-                    <span className="leading-relaxed">
-                        {t('consent_checkbox_label')}
-                        <span className="text-red-500 ml-1">*</span>
-                    </span>
-                </label>
-            </div>
-
             {error && (
               <div className={`p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm font-medium flex items-center gap-2 ${isRtl ? 'flex-row-reverse text-right' : ''}`}>
                 <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
