@@ -3,7 +3,7 @@ import {useEffect,useState} from 'react'
 import {supabase} from '@/lib/supabaseClient'
 import Link from 'next/link'
 type Lead={id:string;user_name:string|null;user_phone:string;user_email:string|null;city:string|null;status:string;created_at:string;consent_to_share:boolean;sales_status:string;is_pro:boolean;needs_details?:{interest?:string;need?:string;installation_timing?:string}}
-type Partner={id:string;business_name:string;business_email:string|null;partner_type:string;sales_status:string}
+type Partner={id:string;business_name:string;business_email:string|null;contact_name?:string|null;contact_phone?:string|null;partner_type:string;regions?:string|null;services?:string|null;estimated_volume?:string|null;source?:string;sales_status:string}
 const stages=['unreviewed','needs_verification','qualified','contacted','partner_proposed','activated','invoiced','paid','lost','invalid']
 const fmt=(iso:string)=>new Date(iso).toLocaleDateString('fr-MA')
 export default function AdminDashboard(){
@@ -42,6 +42,11 @@ export default function AdminDashboard(){
   if(r.error||!r.data?.success){setError('Partenaire non enregistré');return}
   setName('');setEmail('');await refresh()
  }
+ async function updatePartner(id:string,sales_status:string){
+  const r=await supabase.functions.invoke('leads-gateway',{body:{action:'admin.update_partner',partner_id:id,sales_status}})
+  if(r.error||!r.data?.success){setError('Statut partenaire non enregistré');return}
+  setPartners(prev=>prev.map(p=>p.id===id?{...p,sales_status}:p))
+ }
  async function logout(){await supabase.auth.signOut();window.location.href='/login?tab=admin'}
  const shown=leads.filter(l=>[l.user_name,l.city,l.user_phone,l.needs_details?.interest,l.needs_details?.need].some(v=>String(v||'').toLowerCase().includes(search.toLowerCase())))
  if(!ready) return <main className="p-8">Chargement sécurisé…</main>
@@ -76,7 +81,18 @@ export default function AdminDashboard(){
       <input type="email" placeholder="Email professionnel" value={email} onChange={e=>setEmail(e.target.value)} className="border rounded-xl p-3"/>
       <button disabled={saving} className="bg-blue-600 text-white px-5 rounded-xl">{saving?'…':'Ajouter'}</button>
     </form>
-    <div className="flex flex-wrap gap-2">{partners.map(p=><span className="border rounded-full bg-zinc-50 px-4 py-2 text-sm" key={p.id}>{p.business_name} · {p.sales_status}</span>)}</div>
+    <div className="grid md:grid-cols-2 gap-3">{partners.length===0&&<p className="text-sm text-zinc-500">Aucune demande partenaire pour le moment. Partagez la page /partenaires avec les distributeurs.</p>}{partners.map(p=><article className="border rounded-2xl bg-zinc-50 p-4 space-y-2" key={p.id}>
+        <div className="flex flex-wrap gap-2 justify-between items-center">
+          <strong>{p.business_name}</strong>
+          <select className="border rounded-lg p-2 text-sm" aria-label="Statut du partenaire" value={p.sales_status} onChange={e=>updatePartner(p.id,e.target.value)}>
+            {['prospect','inbound','contacted','pilot','contracted','active','rejected'].map(stage=><option key={stage} value={stage}>{stage}</option>)}
+          </select>
+        </div>
+        <p className="text-sm text-zinc-600">{p.contact_name||'Contact non renseigné'} · {p.partner_type}</p>
+        {p.business_email&&<a className="block text-sm underline text-blue-700 break-all" href={'mailto:'+p.business_email}>{p.business_email}</a>}
+        {p.contact_phone&&<p className="text-sm">{p.contact_phone}</p>}
+        <p className="text-xs text-zinc-500">Zones : {p.regions||'À qualifier'} · Produit : {p.services||'À préciser'} · Capacité : {p.estimated_volume||'À préciser'}</p>
+      </article>)}</div>
    </section>
   </div>
  </main>
