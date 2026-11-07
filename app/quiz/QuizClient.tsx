@@ -1,10 +1,11 @@
 "use client"
 
+import { captureLead } from '@/lib/leadGateway'
+import { LeadShareConsent } from '@/components/LeadShareConsent'
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ChevronRight, Wifi, Smartphone, Users, Zap, DollarSign, TrendingUp, MapPin, User, Mail, Phone, Home, Lock, Sparkles } from 'lucide-react'
 import VoiceConsentCheckbox from '@/components/VoiceConsentCheckbox'
-import { supabase } from '@/lib/supabaseClient'
 import { Navigation } from '@/components/Navigation'
 import { event as trackEvent } from '@/lib/analytics'
 import { useTranslation } from '@/lib/LocaleContext'
@@ -33,6 +34,7 @@ function QuizContent() {
     const [leadData, setLeadData] = useState<LeadData>({ name: '', phone: '', email: '', address: '' })
     const [loading, setLoading] = useState(false)
     const [consentVoice, setConsentVoice] = useState(false)
+  const [consentShare, setConsentShare] = useState(false)
     const [emailVerified, setEmailVerified] = useState(false)
 
     const QUESTIONS = [
@@ -121,49 +123,13 @@ function QuizContent() {
         try {
             const isPro = answers.userType === 'small_office' || answers.userType === 'enterprise'
 
-            // Save lead to database
-            const { data, error } = await supabase.from('leads').insert({
-                user_name: leadData.name,
-                user_email: leadData.email,
-                user_phone: leadData.phone,
-                city: city,
-                address: leadData.address,
-                status: isPro ? 'new_pro' : 'new_qualified', // High quality lead
-                is_pro: isPro,
-                needs_details: {
-                    quiz_answers: answers,
-                    captured_at: new Date().toISOString(),
-                    lead_source: 'quiz_pre_results'
-                }
-            }).select();
-      // Queue voice verification if consented
-      if (consentVoice && data?.[0]?.id) {
-        await fetch('/api/voice/queue', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ leadId: data[0].id, phone: leadData.phone })
-        });
-      }
-
-            if (error) {
-                console.error("Supabase insert error:", error);
-                throw error;
-            }
-
-            // Trigger B2B Notification Pipeline
-            fetch('/api/leads/notify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    leadId: data?.[0]?.id || null, // Best effort
-                    phone: leadData.phone,
-                    needs_details: { 
-                        quiz_answers: answers,
-                        leadData
-                    },
-                    source: 'quiz_completion'
-                })
-            }).catch(err => console.error("Webhook trigger failed", err))
+            const saved = await captureLead({
+              user_name:leadData.name,user_email:leadData.email,user_phone:leadData.phone,
+              city,address:leadData.address,status:isPro ? 'new_pro' : 'new_qualified',
+              is_pro:isPro,consent_to_share:consentShare,consent_voice:consentVoice,
+              needs_details:{quiz_answers:answers,lead_source:'quiz_pre_results'}
+            });
+            const data = saved.id ? [{id:saved.id}] : [];
 
             // Save full context to session for results page
             const fullContext = {
@@ -385,7 +351,8 @@ function QuizContent() {
                                         </>
                                     )}
                                 </button>
-                                <VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
+                                <LeadShareConsent checked={consentShare} onChange={setConsentShare} />
+<VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
                             </form>
                         </div>
                     </div>
