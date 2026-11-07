@@ -1,10 +1,11 @@
 'use client'
 
+import { captureLead } from '@/lib/leadGateway'
+import { LeadShareConsent } from '@/components/LeadShareConsent'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2, Phone } from 'lucide-react'
 import VoiceConsentCheckbox from '@/components/VoiceConsentCheckbox'
-import { supabase } from '@/lib/supabaseClient'
 import { trackEvent } from '@/lib/analytics'
 
 export function QuickCaptureForm() {
@@ -13,6 +14,7 @@ export function QuickCaptureForm() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
   const [consentVoice, setConsentVoice] = useState(false)
+  const [consentShare, setConsentShare] = useState(false)
 
   const [formData, setFormData] = useState({
     need: 'fibre',
@@ -47,48 +49,12 @@ export function QuickCaptureForm() {
         throw new Error('Le numéro de téléphone doit être un numéro marocain valide (ex: 0612345678).')
       }
 
-      const { data: leadData, error: submitError } = await supabase
-        .from('leads')
-        .insert([
-          {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email,
-            user_phone: cleanPhone,
-            status: 'new',
-            needs_details: {
-              interest: formData.need,
-              source: 'hero_quick_capture'
-            }
-          }
-        ])
-        .select()
-        .single()
-
-      if (submitError) throw submitError
-
-      // Queue voice verification if consented
-      if (consentVoice && leadData?.id) {
-        await fetch('/api/voice/queue', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ leadId: leadData.id, phone: cleanPhone })
-        })
-      }
-
-      // Trigger B2B Notification Pipeline
-      fetch('/api/leads/notify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-              phone: cleanPhone,
-              first_name: formData.first_name,
-              last_name: formData.last_name,
-              email: formData.email,
-              needs_details: { interest: formData.need },
-              source: 'hero_quick_capture'
-          })
-      }).catch(err => console.error("Webhook trigger failed", err))
+      await captureLead({
+        user_name:formData.first_name+' '+formData.last_name,
+        user_email:formData.email,user_phone:cleanPhone,status:'new',
+        consent_to_share:consentShare,consent_voice:consentVoice,
+        needs_details:{interest:formData.need,source:'hero_quick_capture'}
+      });
 
       trackEvent('quick_lead_submitted', { interest: formData.need })
       setSuccess(true)
@@ -210,6 +176,7 @@ export function QuickCaptureForm() {
   )}
 </button>
 
+<LeadShareConsent checked={consentShare} onChange={setConsentShare} />
 <VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
       </form>
     </div>
