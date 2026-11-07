@@ -4,7 +4,7 @@ import { captureLead } from '@/lib/leadGateway'
 import { LeadShareConsent } from '@/components/LeadShareConsent'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, Loader2, MapPin, Phone, User, ChevronRight, Shield, Coins, BellRing, ArrowRight, Timer } from 'lucide-react'
+import { CheckCircle, Loader2, MapPin, Phone, User, ChevronRight, Shield, Coins, BellRing, ArrowRight } from 'lucide-react'
 import { trackEvent } from '@/lib/analytics'
 import { useTranslation } from '@/lib/LocaleContext'
 
@@ -15,23 +15,8 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
-  const [timeLeft, setTimeLeft] = useState(899) // 14 mins 59 seconds
   const [consentVoice, setConsentVoice] = useState(false)
   const [consentShare, setConsentShare] = useState(false)
-
-  React.useEffect(() => {
-     if (timeLeft <= 0) return;
-     const interval = setInterval(() => {
-         setTimeLeft(prev => prev - 1);
-     }, 1000);
-     return () => clearInterval(interval);
-  }, [timeLeft]);
-
-  const formatTime = (seconds: number) => {
-      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-      const s = (seconds % 60).toString().padStart(2, '0');
-      return `${m}:${s}`;
-  };
 
   const [formData, setFormData] = useState({
     need: 'fibre',
@@ -42,12 +27,6 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
   })
 
   // Simulated dynamic savings calculation
-  const getSavings = () => {
-      const bill = parseInt(formData.currentBill);
-      if (isNaN(bill)) return 1140; // Default
-      return Math.round((bill * 0.4) * 12); // Assuming 40% savings per year
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -136,15 +115,8 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
             </p>
         {mode === 'b2c' && (
             <div className="flex flex-col items-center gap-3">
-                <div className="inline-block bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                    <p className="text-sm font-medium text-zinc-400">
-                    {t('promo_savings').replace('{savings}', getSavings().toString())}
-                    </p>
-                </div>
-                {/* Scarcity Timer */}
-                <div className={`flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-1.5 rounded-full text-xs font-bold font-mono shadow-sm ${isRtl ? 'flex-row-reverse' : ''}`}>
-                    <Timer className="w-4 h-4 animate-pulse" />
-                    {t('promo_timer').replace('{time}', formatTime(timeLeft))}
+                <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
+                  Comparaison gratuite. Prix et disponibilité à confirmer auprès des opérateurs.
                 </div>
             </div>
         )}
@@ -169,9 +141,9 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
                 {mode === 'b2b' ? t('promo_success_title_b2b') : t('promo_success_title_b2c')}
             </h3>
             <p className="text-zinc-600 dark:text-zinc-400 mb-6 font-medium">
-                {mode === 'b2b' 
-                    ? (locale === 'ar' ? `تلقينا طلبكم. سيتصل بكم خبيرنا في غضون ساعتين على الرقم ${formData.phone}` : `Notre expert PME/GE a bien reçu votre demande. Il vous contactera d'ici 2h sur le ${formData.phone} pour auditer votre facture.`)
-                    : (locale === 'ar' ? `تلقينا طلبكم. سيتصل بكم أحد مستشارينا في الساعات القادمة على الرقم ${formData.phone}` : `Nos experts ont bien reçu votre demande. Un conseiller vous contactera dans les prochaines heures sur le ${formData.phone} pour vous confirmer votre éligibilité.`)
+                {locale === 'ar'
+                    ? 'تم تسجيل طلبكم. يمكن أن يتواصل معكم شريك مناسب بعد التحقق من المعلومات.'
+                    : 'Demande enregistrée. Un partenaire adapté pourra vous recontacter après vérification.'
                 }
             </p>
             <div className={`bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-500 font-bold uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
