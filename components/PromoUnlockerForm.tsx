@@ -1,9 +1,10 @@
 'use client'
 
+import { captureLead } from '@/lib/leadGateway'
+import { LeadShareConsent } from '@/components/LeadShareConsent'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle, Loader2, MapPin, Phone, User, ChevronRight, Shield, Coins, BellRing, ArrowRight, Timer } from 'lucide-react'
-import { supabase } from '@/lib/supabaseClient'
 import { trackEvent } from '@/lib/analytics'
 import { useTranslation } from '@/lib/LocaleContext'
 
@@ -16,6 +17,7 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
   const [error, setError] = useState('')
   const [timeLeft, setTimeLeft] = useState(899) // 14 mins 59 seconds
   const [consentVoice, setConsentVoice] = useState(false)
+  const [consentShare, setConsentShare] = useState(false)
 
   React.useEffect(() => {
      if (timeLeft <= 0) return;
@@ -63,75 +65,13 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
       const utm_campaign = params.get('utm_campaign') || '';
       const lead_source = params.get('utm_source') ? 'paid' : (typeof document !== 'undefined' && document.referrer.includes('google') ? 'google_organic' : 'direct');
 
-      // Attempt to save to Supabase (might fail due to RLS)
-      const { data: insertedData, error: submitError } = await supabase
-        .from('leads')
-        .insert([
-          {
-            user_name: formData.firstName,
-            user_phone: formData.phone,
-            city: formData.city,
-            status: 'new',
-            consent_voice: consentVoice,
-            consent_at: consentVoice ? new Date().toISOString() : null,
-            needs_details: {
-              interest: formData.need,
-              current_bill: formData.currentBill,
-              source: `hero_promo_${mode}`,
-              utm_source,
-              utm_medium,
-              utm_campaign,
-              lead_source
-            }
-          }
-        ])
-        .select('id')
-        .single()
-
-      if (submitError) {
-          console.warn("Supabase insert warning (likely RLS):", submitError.message);
-          // We don't throw here to ensure the webhook gets triggered and the user is not blocked!
-      }
-
-      const leadId = insertedData?.id || null;
-
-      // Trigger B2B Notification Pipeline (This is the critical part for business)
-      try {
-          await fetch('/api/leads/notify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                  leadId,
-                  first_name: formData.firstName,
-                  phone: formData.phone,
-                  city: formData.city,
-                  needs_details: { 
-                    interest: formData.need, 
-                    current_bill: formData.currentBill,
-                    utm_source,
-                    utm_medium,
-                    utm_campaign,
-                    lead_source
-                  },
-                  source: `hero_promo_${mode}`
-              })
-          })
-      } catch(err) {
-          console.error("Webhook trigger failed", err)
-      }
-
-      // Trigger Vapi Voice Queue
-      if (consentVoice && leadId) {
-          try {
-              await fetch('/api/voice/queue', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ leadId })
-              })
-          } catch(err) {
-              console.error("[voice] Queue trigger failed", err)
-          }
-      }
+      await captureLead({
+        user_name:formData.firstName,user_phone:formData.phone,city:formData.city,
+        status:mode === 'b2b' ? 'new_pro' : 'new',is_pro:mode==='b2b',
+        consent_to_share:consentShare,consent_voice:consentVoice,
+        needs_details:{interest:formData.need,current_bill:formData.currentBill,
+          source:'hero_promo_'+mode,utm_source,utm_medium,utm_campaign,lead_source}
+      });
 
       trackEvent('promo_lead_submitted', { interest: formData.need, bill: formData.currentBill, mode: mode })
       setSuccess(true)
@@ -358,14 +298,14 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
                     )}
                 </div>
 
-            {/* Consent checkbox for voice qualification */}
+            <LeadShareConsent checked={consentShare} onChange={setConsentShare} />
+            {/* Optional voice qualification */}
             <div className="voice-consent-block p-4 bg-zinc-900/50 border border-white/10 rounded-xl mt-4 text-xs">
                 <label className={`flex items-start gap-2.5 cursor-pointer text-zinc-400 font-medium ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
                     <input
                         type="checkbox"
                         checked={consentVoice}
                         onChange={(e) => setConsentVoice(e.target.checked)}
-                        required
                         className="mt-1 w-4 h-4 shrink-0 rounded border-zinc-700 bg-zinc-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-zinc-900 focus:ring-2"
                     />
                     <span className="leading-relaxed">
