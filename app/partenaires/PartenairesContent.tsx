@@ -23,6 +23,20 @@ export default function PartenairesContent() {
                 </div>
             </div>
 
+
+            <section className="max-w-4xl mx-auto px-4 pt-14 text-zinc-900 dark:text-white">
+              <div className="bg-white dark:bg-zinc-950 border border-blue-200 dark:border-blue-900 rounded-3xl p-7 md:p-10">
+                <p className="uppercase text-xs font-bold tracking-widest text-blue-600">Acquisition télécoms à la performance</p>
+                <h2 className="text-2xl md:text-3xl font-black mt-3">Testez des demandes fibre avec une intention réelle</h2>
+                <p className="text-zinc-600 dark:text-zinc-300 mt-4">MonForfait.ma recueille des demandes de comparaison, principalement sur la fibre résidentielle. Nous recherchons des partenaires de distribution et des opérateurs pour un pilote mesuré : qualification, accord de mise en relation, suivi des contacts et validation des abonnements activés. Aucun volume minimum ni taux de transformation n'est garanti.</p>
+                <div className="grid md:grid-cols-3 gap-3 mt-6 text-sm">
+                  <div className="rounded-xl bg-zinc-50 dark:bg-zinc-900 p-4"><strong>1. Ciblage</strong><p className="text-zinc-500 mt-1">Ville, technologie, délai de raccordement</p></div>
+                  <div className="rounded-xl bg-zinc-50 dark:bg-zinc-900 p-4"><strong>2. Pilote</strong><p className="text-zinc-500 mt-1">Leads vérifiés et consentis sous accord</p></div>
+                  <div className="rounded-xl bg-zinc-50 dark:bg-zinc-900 p-4"><strong>3. Facturation</strong><p className="text-zinc-500 mt-1">Modèle CPL ou activation selon contrat</p></div>
+                </div>
+                <a href="mailto:contact@monforfait.ma?subject=Pilote%20acquisition%20Fibre%20MonForfait" className="inline-flex rounded-xl bg-blue-600 text-white font-bold px-6 py-4 mt-6">Demander une proposition de pilote</a>
+              </div>
+            </section>
             <div className="max-w-4xl mx-auto px-4 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
                     {/* Option 1 */}
@@ -36,7 +50,7 @@ export default function PartenairesContent() {
                                 {t('part_sec1_desc')}
                             </p>
                         </div>
-                        <a href="mailto:contact@maplyo.com" className={`px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 self-start ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        <a href="mailto:contact@monforfait.ma" className={`px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 self-start ${isRtl ? 'flex-row-reverse' : ''}`}>
                             <Mail className="w-5 h-5" />
                             {t('part_sec1_btn')}
                         </a>
