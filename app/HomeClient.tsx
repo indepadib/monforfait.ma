@@ -12,7 +12,6 @@ import { TrustBadges } from '@/components/TrustBadges';
 import { B2BBanner } from '@/components/B2BBanner';
 import { HeroQuickFilter } from '@/components/HeroQuickFilter';
 import { PromoUnlockerForm } from '@/components/PromoUnlockerForm';
-import { LiveFOMOTicker } from '@/components/LiveFOMOTicker';
 import { ScamDetector } from '@/components/ScamDetector';
 import { PartnerLogos } from '@/components/PartnerLogos';
 import { useTranslation } from '@/lib/LocaleContext';
@@ -37,9 +36,9 @@ export function HomeClient() {
             
             {/* Left Column: Text & Hook */}
             <div className={`text-center ${isRtl ? 'lg:text-right' : 'lg:text-left'}`}>
-              <div className={`mb-6 lg:mb-8 h-10 flex items-center justify-center ${isRtl ? 'lg:justify-end' : 'lg:justify-start'} overflow-hidden`}>
-                 <LiveFOMOTicker />
-              </div>
+              <p className="mb-6 text-sm text-blue-200 font-semibold tracking-wide">
+                Offres Internet et mobile au Maroc · Comparaison gratuite
+              </p>
 
               {/* SEO Surtitle */}
               <div className={`inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-blue-300 mb-6 uppercase tracking-wider ${isRtl ? 'flex-row-reverse' : ''}`}>
@@ -60,28 +59,9 @@ export function HomeClient() {
 
               {/* Social Proof & Trust Badges */}
               <div className="flex flex-col gap-6 mt-8">
-                {/* User Avatars Row */}
-                <div className={`flex flex-col sm:flex-row items-center ${isRtl ? 'lg:items-end justify-center lg:justify-end' : 'lg:items-start justify-center lg:justify-start'} gap-4 text-sm text-zinc-400`}>
-                  <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                    <div className={`flex ${isRtl ? 'space-x-reverse -space-x-2' : '-space-x-2'}`}>
-                      <img src="https://i.pravatar.cc/100?img=11" alt="User" width="40" height="40" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
-                      <img src="https://i.pravatar.cc/100?img=12" alt="User" width="40" height="40" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
-                      <img src="https://i.pravatar.cc/100?img=13" alt="User" width="40" height="40" className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] shadow-lg" />
-                      <div className="w-10 h-10 rounded-full border-2 border-[#0A0F1C] bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-blue-500/20">
-                        +5k
-                      </div>
-                    </div>
-                    <div className={`flex flex-col ${isRtl ? 'items-end' : 'items-start'}`}>
-                      <div className="flex gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <svg key={i} className="w-4 h-4 fill-yellow-500" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                      </div>
-                      <span className="font-medium text-zinc-300 mt-0.5">{t('hero_approved')}</span>
-                    </div>
-                  </div>
+                <div className="text-sm text-zinc-300">
+                  Comparez les offres, puis demandez une mise en relation avec votre accord explicite.
+                  Les prix et l'éligibilité réelle restent à confirmer auprès des opérateurs.
                 </div>
 
                 {/* Trust Icons Row */}
