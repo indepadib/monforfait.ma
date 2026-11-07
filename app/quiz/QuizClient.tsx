@@ -5,7 +5,6 @@ import { LeadShareConsent } from '@/components/LeadShareConsent'
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ChevronRight, Wifi, Smartphone, Users, Zap, DollarSign, TrendingUp, MapPin, User, Mail, Phone, Home, Lock, Sparkles } from 'lucide-react'
-import VoiceConsentCheckbox from '@/components/VoiceConsentCheckbox'
 import { Navigation } from '@/components/Navigation'
 import { event as trackEvent } from '@/lib/analytics'
 import { useTranslation } from '@/lib/LocaleContext'
@@ -33,7 +32,7 @@ function QuizContent() {
     const [city, setCity] = useState('')
     const [leadData, setLeadData] = useState<LeadData>({ name: '', phone: '', email: '', address: '' })
     const [loading, setLoading] = useState(false)
-    const [consentVoice, setConsentVoice] = useState(false)
+    
   const [consentShare, setConsentShare] = useState(false)
     const [emailVerified, setEmailVerified] = useState(false)
 
@@ -126,7 +125,7 @@ function QuizContent() {
             const saved = await captureLead({
               user_name:leadData.name,user_email:leadData.email,user_phone:leadData.phone,
               city,address:leadData.address,status:isPro ? 'new_pro' : 'new_qualified',
-              is_pro:isPro,consent_to_share:consentShare,consent_voice:consentVoice,
+              is_pro:isPro,consent_to_share:consentShare,consent_voice:false,
               needs_details:{quiz_answers:answers,lead_source:'quiz_pre_results'}
             });
             const data = saved.id ? [{id:saved.id}] : [];
@@ -352,7 +351,7 @@ function QuizContent() {
                                     )}
                                 </button>
                                 <LeadShareConsent checked={consentShare} onChange={setConsentShare} />
-<VoiceConsentCheckbox consentVoice={consentVoice} setConsentVoice={setConsentVoice} />
+
                             </form>
                         </div>
                     </div>
