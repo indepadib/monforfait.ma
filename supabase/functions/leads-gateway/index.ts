@@ -139,6 +139,31 @@ Deno.serve(async req => {
       finished:["lost","invalid","paid"].includes(lead.sales_status)},200,origin);
   }
 
+
+  if (body.action === "tracking.select") {
+    const code=text(body.tracking_token,64).toLowerCase();
+    const offerId=text(body.selected_plan_id,64);
+    if(!/^[a-f0-9]{48}$/.test(code)||!idPattern.test(offerId))
+      return response({error:"Référence ou offre invalide."},422,origin);
+    const hash=await sha256(code);
+    const r=await rest("leads?tracking_token_hash=eq."+hash+
+      "&select=id,created_at,sales_status,consent_to_share&limit=1");
+    if(!r.ok)return response({error:"Service indisponible"},503,origin);
+    const lead=(await r.json())[0];
+    if(!lead||!lead.consent_to_share)return response({error:"Référence inconnue."},404,origin);
+    if(Date.now()-new Date(lead.created_at).getTime()>7*86400*1000
+       ||["lost","invalid","activated","invoiced","paid"].includes(lead.sales_status))
+       return response({error:"Ce dossier n'est plus modifiable. Contactez-nous."},403,origin);
+    const plan=await rest("plans?id=eq."+offerId+"&is_active=eq.true&select=id&limit=1");
+    if(!plan.ok||!(await plan.json()).length)return response({error:"Offre indisponible ou non vérifiée."},422,origin);
+    const updated=await rest("leads?id=eq."+lead.id,{
+      method:"PATCH",headers:restHeaders("return=representation"),
+      body:JSON.stringify({selected_plan_id:offerId})
+    });
+    if(!updated.ok)return response({error:"Sélection non enregistrée."},503,origin);
+    return response((await updated.json()).length===1?{success:true}:{error:"Dossier introuvable."},200,origin);
+  }
+
   // Private administrative actions require an authenticated Supabase user in the
   // server-side allowlist; client-set cookies and localStorage are never trusted.
 
