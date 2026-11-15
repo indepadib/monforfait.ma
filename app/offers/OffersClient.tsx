@@ -52,6 +52,8 @@ function OffersContent() {
         voice_minutes,
         technology,
         highlight_badge,
+        source_url,
+        source_checked_at,
         target_audience,
         operators (name)
       `)
@@ -71,6 +73,8 @@ function OffersContent() {
                 voice_minutes: offer.voice_minutes,
                 technology: offer.technology,
                 highlight_badge: offer.highlight_badge,
+                source_url: offer.source_url,
+                source_checked_at: offer.source_checked_at,
                 target_audience: offer.target_audience || 'individual',
             }))
             setOffers(formatted)
@@ -202,6 +206,7 @@ function OffersContent() {
                             </div>
                         </div>
 
+                        <p className="mb-5 text-sm text-zinc-500 dark:text-zinc-400">Tarifs publiés par les opérateurs et vérifiés le 15 novembre 2026. Confirmation d’éligibilité et conditions contractuelles auprès de l’opérateur.</p>
                         {/* Loading / Grid */}
                         {loading ? (
                             <div className="flex items-center justify-center py-20">
