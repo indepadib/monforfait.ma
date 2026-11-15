@@ -172,14 +172,15 @@ Deno.serve(async req => {
     const code=text(body.tracking_token,64).toLowerCase();
     if(!/^[a-f0-9]{48}$/.test(code))return response({error:"Référence de suivi invalide."},422,origin);
     const hash=await sha256(code);
-    const r=await rest("leads?tracking_token_hash=eq."+hash+"&select=created_at,sales_status,consent_withdrawn_at&limit=1");
+    const r=await rest("leads?tracking_token_hash=eq."+hash+"&select=created_at,sales_status,consent_to_share,consent_withdrawn_at&limit=1");
     if(!r.ok)return response({error:"Suivi momentanément indisponible."},503,origin);
     const lead=(await r.json())[0];
     if(!lead)return response({error:"Référence inconnue ou expirée."},404,origin);
     // Never return client PII, partner pricing, or internal notes through a public receipt.
     return response({success:true,created_at:lead.created_at,
       status:lead.consent_withdrawn_at?"Accord de mise en relation retiré":publicProgressLabel(lead.sales_status),
-      finished:Boolean(lead.consent_withdrawn_at)||isTerminalStatus(lead.sales_status)},200,origin);
+      finished:Boolean(lead.consent_withdrawn_at)||isTerminalStatus(lead.sales_status),
+      consent_active:Boolean(lead.consent_to_share)&&!lead.consent_withdrawn_at},200,origin);
   }
 
 
