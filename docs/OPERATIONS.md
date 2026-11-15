@@ -2,6 +2,20 @@
 
 **Statut :** plateforme technique de qualification et mise en relation, avec catalogue sourcé, suivi des demandes, CRM et espace partenaires. **Ce document ne signifie pas que des contrats commerciaux sont conclus ou que la conformité réglementaire est certifiée.**
 
+## Assistance, vie privée et intégration
+
+- **Formulaire /contact :** les demandes d'assistance sont conservées dans `monforfait_contact_messages` et non dans les prospects commerciaux. Un accord de traitement du message est requis. L'équipe doit consulter `/admin` → « Boîte de réception » et consigner le résultat ; aucun email automatique n'est prétendu envoyé.
+- **Retrait du consentement :** le client conserve sa référence personnelle aléatoire de 48 caractères. Sur `/suivi`, « Retirer mon accord » appelle la fonction privée de retrait atomique, qui annule les nouveaux partages, révoque la visibilité des accès partenaires courants et conserve les justificatifs comptables nécessaires. Les anciens dossiers sans référence doivent passer par une vérification d'identité manuelle.
+- **Concurrence :** `monforfait_release_sale` acquiert les verrous PostgreSQL dans le même ordre que le retrait du consentement : prospect puis dossier commercial. Le partenaire doit être sous contrat vérifié, avoir un compte autorisé, et seul un lead qualifié/consenti peut lui être attribué pour 30 jours. Aucune transmission en lecture libre.
+- **Fiches opérateurs et offres :** `/operateurs/inwi`, `/operateurs/orange`, `/operateurs/iam` et `/offres/{uuid}` utilisent la table `plans`, les prix et sources disponibles. Les autres offres ne sont plus bloquées derrière des fausses promotions.
+- **Widget :** `/widget` est une comparaison publique sans collecte d'identité, intégrable en iframe HTTPS. Code d'intégration disponible dans `/partenaires`. Vérifier régulièrement que les restrictions anti-clickjacking restent actives sur les pages privées.
+- **Guide :** `/guide-internet-maroc.pdf` est accessible sans email. `/api/send-guide` GET redirige vers cette ressource. Le POST email reste explicitement indisponible faute de domaine d'envoi vérifié.
+- **Transparence :** aucun support WhatsApp ni délai de réponse ne doit être affiché sans canal réel. Les mentions légales d'identification et la conformité CNDP restent à documenter par le responsable légal.
+
+### Tests reproductibles
+
+En plus de TypeScript, Deno et Next build, la CI démarre Next.js avec une configuration de test et exécute `node scripts/smoke-routes.mjs` pour vérifier les principales routes HTTP, sans envoyer de faux formulaires ni créer de prospects. Le test vérifie également que `/admin` est protégé du framing et que `/widget` peut être intégré.
+
 ## Parcours visiteur
 - `/offers` : sélection d'offres actives. Chaque fiche comporte sa source officielle et sa date de vérification.
 - `/quiz` et `/eligibilite` : demande volontaire, consentement explicite avant création de lead.
