@@ -19,6 +19,9 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
     const [preferredOperator, setPreferredOperator] = useState(offer.operator_name || '')
     const [loading, setLoading] = useState(false)
     const [sent, setSent] = useState(false);
+    const [receipt,setReceipt]=useState<string|null>(null)
+    const [duplicate,setDuplicate]=useState(false)
+    const [error,setError]=useState("")
   
   const [consentShare, setConsentShare] = useState(false)
 
@@ -27,18 +30,21 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         setLoading(true)
+        setError('')
 
         try {
-            await captureLead({
+            const saved=await captureLead({
               user_name:name,user_phone:phone,user_email:email || undefined,
               city,address,selected_plan_id:offer.id,
               status:isPro ? 'new_pro' : 'new_qualified',is_pro:isPro,
               consent_to_share:consentShare,consent_voice:false,
               needs_details:{source:'web_v4_premium',installation_timing:timing,preferred_operator:preferredOperator,reason}
             });
+            setReceipt(saved.tracking_token)
+            setDuplicate(saved.duplicate)
         } catch (err) {
             setLoading(false);
-            alert(err instanceof Error ? err.message : 'Demande non enregistrée');
+            setError(err instanceof Error ? err.message : 'Demande non enregistrée');
             return;
         }
 
@@ -59,13 +65,17 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                     <div className="w-20 h-20 bg-green-50 dark:bg-green-900/20 rounded-3xl flex items-center justify-center mx-auto mb-6 text-green-500 transform rotate-12">
                         <CheckCircle className="w-10 h-10" />
                     </div>
-                    <h3 className="text-2xl font-black mb-3 dark:text-white tracking-tight italic">ENVOYÉ ! ⚡</h3>
+                    <h3 className="text-2xl font-black mb-3 dark:text-white tracking-tight italic">Demande enregistrée</h3>
                     <p className="text-zinc-500 text-sm mb-6 leading-relaxed">
-                        Nous avons enregistré votre demande. Un partenaire pourra vous recontacter si une offre correspond à votre besoin.
+                        {duplicate ? 'Une demande récente associée à ce numéro existe déjà. Aucun nouveau dossier n’a été créé.' : 'Votre demande est enregistrée. Vous pouvez consulter son statut ; la disponibilité d’un partenaire et le raccordement ne sont pas garantis.'}
                     </p>
-                    <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl text-[11px] text-zinc-400 font-bold uppercase tracking-widest border border-zinc-100 dark:border-zinc-800">
-                        Demande enregistrée
-                    </div>
+                    {receipt&&<div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-4 text-xs text-zinc-700 dark:text-zinc-300">
+                       <p className="font-bold">Référence privée de suivi (à conserver)</p>
+                       <p className="break-all font-mono mt-2 select-all">{receipt}</p>
+                       <button type="button" className="mt-3 text-blue-700 dark:text-blue-300 underline" onClick={()=>void navigator.clipboard.writeText(receipt)}>Copier la référence</button>
+                    </div>}
+                    {!receipt&&<p className="text-xs text-zinc-500">Votre référence précédente est conservée sur cet appareil si elle est encore disponible.</p>}
+                    <a href="/suivi" className="block mt-5 text-sm font-bold text-blue-700 underline">Suivre ma demande et gérer mon consentement</a>
                     <button type="button" onClick={onClose} className="mt-6 w-full rounded-xl bg-blue-600 text-white font-bold py-3">Fermer</button>
                 </div>
             </div>
@@ -81,10 +91,10 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
                     <div className="relative z-10">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 rounded-full text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2 backdrop-blur-md border border-blue-500/30">
-                            <Zap className="w-3 h-3" /> Lead Intelligence Platform
+                            <Zap className="w-3 h-3" /> Comparaison télécom
                         </div>
                         <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">
-                            {isPro ? 'Finaliser Demande PRO' : 'Demande Prioritaire'}
+                            {isPro ? 'Demande professionnelle' : 'Demander une mise en relation'}
                         </h3>
                     </div>
                     <button onClick={onClose} className="absolute top-6 right-8 text-zinc-400 hover:text-white transition-all bg-white/5 p-2 rounded-full backdrop-blur-xl border border-white/5 hover:scale-110 active:scale-90">
@@ -93,17 +103,7 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                 </div>
 
                 <div className="p-8">
-                    <div className="bg-red-500/5 dark:bg-red-500/10 text-red-600 dark:text-red-400 p-4 rounded-2xl text-xs font-black mb-8 flex items-center gap-4 border border-red-500/20 relative group overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/10 to-red-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                        <div className="relative">
-                            <div className="w-4 h-4 bg-red-600 rounded-full animate-ping absolute opacity-20"></div>
-                            <Flame className="w-5 h-5 relative z-10 animate-pulse" />
-                        </div>
-                        <span className="flex-1 italic tracking-tight uppercase leading-snug">
-                            Attention: Les techniciens fibre sont sur-sollicités dans votre quartier. Réservez votre raccordement maintenant.
-                        </span>
-                    </div>
-
+                    <p className="mb-6 rounded-xl bg-blue-50 dark:bg-blue-950/30 p-4 text-xs text-zinc-700 dark:text-zinc-300">Tarif public indicatif. La couverture, les frais et les délais doivent être confirmés avec l’opérateur ; ce formulaire n’effectue aucune réservation de raccordement.</p>
                     <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-center mb-8 pb-8 border-b border-zinc-100 dark:border-zinc-800">
                         <div className="flex items-center gap-4">
                             <div className="w-14 h-14 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center p-2 shadow-inner border border-zinc-200 dark:border-zinc-700">
@@ -118,11 +118,12 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                             </div>
                         </div>
                         <div className="bg-zinc-900 dark:bg-white px-6 py-3 rounded-2xl text-center shadow-lg transform -rotate-2">
-                            <div className="text-[9px] text-zinc-400 dark:text-zinc-500 uppercase font-black leading-none mb-0.5 tracking-tighter">Prix Exclusif</div>
+                            <div className="text-[9px] text-zinc-400 dark:text-zinc-500 uppercase font-black leading-none mb-0.5 tracking-tighter">Tarif public</div>
                             <div className="font-black text-white dark:text-black text-2xl leading-none">{offer.price_dh} <span className="text-xs">DH</span></div>
                         </div>
                     </div>
 
+                    {error&&<p role="alert" className="rounded-xl bg-red-50 text-red-700 p-3 text-sm mb-4">{error}</p>}
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="space-y-2">

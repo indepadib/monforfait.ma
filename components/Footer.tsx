@@ -29,6 +29,7 @@ export function Footer() {
                             <li><Link href="/offers" className="hover:text-blue-600 transition-colors">{t('nav_offers')}</Link></li>
                             <li><Link href="/suivi" className="hover:text-blue-600 transition-colors">Suivre ma demande</Link></li>
                             <li><Link href="/quiz" className="hover:text-blue-600 transition-colors">{t('nav_quiz')}</Link></li>
+                            <li><a href="/guide-internet-maroc.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">Guide Internet PDF</a></li>
                             <li><Link href="/compare" className="hover:text-blue-600 transition-colors">{t('nav_comparator')}</Link></li>
                             <li><Link href="/blog" className="hover:text-blue-600 transition-colors">Blog & Actualités</Link></li>
                             <li><Link href="/confiance" className="hover:text-blue-600 transition-colors font-bold text-zinc-900 dark:text-white">Pourquoi nous faire confiance ?</Link></li>

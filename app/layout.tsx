@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { CompareBar } from '@/components/CompareBar';
-import { CookieConsent } from '@/components/CookieConsent';
-import { ConsentControlledScripts } from '@/components/ConsentControlledScripts';
-import { Footer } from '@/components/Footer';
-import { StickyMobileFooter } from '@/components/StickyMobileFooter';
-import { AgentChatbot } from '@/components/AgentChatbot';
+import {SiteChrome} from "@/components/SiteChrome";
+
+
+
+
+
+
 
 export const viewport: Viewport = {
   themeColor: "#3B82F6",
@@ -108,12 +109,7 @@ export default function RootLayout({
       <body className="antialiased">
         <LocaleProvider>
           {children}
-          <AgentChatbot />
-          <Footer />
-          <CookieConsent />
-          <ConsentControlledScripts />
-          <CompareBar />
-          <StickyMobileFooter />
+          <SiteChrome />
         </LocaleProvider>
       </body>
     </html>

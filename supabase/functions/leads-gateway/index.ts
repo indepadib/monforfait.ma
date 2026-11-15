@@ -89,6 +89,43 @@ Deno.serve(async req => {
   if (Number(req.headers.get("Content-Length") || "0") > 16000) return response({error:"Too large"},413,origin);
   let body:Record<string,any>;
   try {body = await req.json();} catch {return response({error:"Invalid JSON"},400,origin);}
+  // Public inquiries go to a dedicated private inbox, not the lead-sales table.
+  // Never claim that an email was delivered when it has only been stored.
+  if (body.action === "contact.submit") {
+    if(text(body.website,100))return response({success:true},200,origin);
+    if(body.consent_to_contact!==true)return response({error:"Veuillez confirmer que nous pouvons traiter votre message."},422,origin);
+    const name=text(body.name,120),email=text(body.email,200).toLowerCase();
+    const subject=text(body.subject,180),message=text(body.message,5000);
+    const category=text(body.category,32);
+    if(name.length<2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+       subject.length<3 || message.length<10 || message.length>5000)
+      return response({error:"Complétez votre nom, un email valide, le sujet et le message."},422,origin);
+    const since=new Date(Date.now()-5*60*1000).toISOString();
+    const previous=await rest("monforfait_contact_messages?email=eq."+encodeURIComponent(email)+
+      "&created_at=gte."+encodeURIComponent(since)+"&select=id&limit=1");
+    if(!previous.ok)return response({error:"Le formulaire est momentanément indisponible."},503,origin);
+    if((await previous.json()).length)return response({error:"Une demande avec cet email a déjà été envoyée récemment. Réessayez plus tard."},429,origin);
+    const saved=await rest("monforfait_contact_messages?select=id",{
+      method:"POST",headers:restHeaders("return=representation"),
+      body:JSON.stringify({name,email,subject,message,
+        category:["general","technical","privacy","billing","partnership"].includes(category)?category:"general"})
+    });
+    if(!saved.ok){console.error("contact submit error",saved.status);return response({error:"Message non enregistré."},503,origin);}
+    const result=await saved.json();
+    return response({success:true,reference:result[0]?.id?.slice(0,8)||null},200,origin);
+  }
+  if(body.action==="tracking.withdraw"){
+    const code=text(body.tracking_token,64).toLowerCase();
+    if(!/^[a-f0-9]{48}$/.test(code))return response({error:"Référence invalide."},422,origin);
+    const hash=await sha256(code);
+    const r=await rest("rpc/monforfait_withdraw_consent",{
+      method:"POST",body:JSON.stringify({p_hash:hash})
+    });
+    if(!r.ok)return response({error:"Retrait momentanément indisponible."},503,origin);
+    const success=await r.json();
+    return response(success?{success:true}:{error:"Référence inconnue."},success?200:404,origin);
+  }
+
   if (body.action === "capture") {
     const lead=body.lead ?? {};
     if (lead.consent_to_share !== true) return response({error:"Consentement explicite requis pour une demande de mise en relation."},422,origin);
@@ -105,7 +142,7 @@ Deno.serve(async req => {
     const trackingHash=await sha256(trackingToken);
     // Limit repeated submissions. Never reveal existing IDs to unauthenticated callers.
     const since=new Date(Date.now()-10*60*1000).toISOString();
-    const prior=await rest("leads?phone_normalized=eq."+encodeURIComponent(phone)+"&created_at=gte."+encodeURIComponent(since)+"&select=id&limit=1");
+    const prior=await rest("leads?phone_normalized=eq."+encodeURIComponent(phone)+"&created_at=gte."+encodeURIComponent(since)+"&consent_to_share=eq.true&tracking_token_hash=not.is.null&select=id&limit=1");
     if (prior.ok && (await prior.json()).length > 0) {
       return response({success:true,lead_id:null,duplicate:true},200,origin);
     }
@@ -135,14 +172,15 @@ Deno.serve(async req => {
     const code=text(body.tracking_token,64).toLowerCase();
     if(!/^[a-f0-9]{48}$/.test(code))return response({error:"Référence de suivi invalide."},422,origin);
     const hash=await sha256(code);
-    const r=await rest("leads?tracking_token_hash=eq."+hash+"&select=created_at,sales_status&limit=1");
+    const r=await rest("leads?tracking_token_hash=eq."+hash+"&select=created_at,sales_status,consent_to_share,consent_withdrawn_at&limit=1");
     if(!r.ok)return response({error:"Suivi momentanément indisponible."},503,origin);
     const lead=(await r.json())[0];
     if(!lead)return response({error:"Référence inconnue ou expirée."},404,origin);
     // Never return client PII, partner pricing, or internal notes through a public receipt.
     return response({success:true,created_at:lead.created_at,
-      status:publicProgressLabel(lead.sales_status),
-      finished:isTerminalStatus(lead.sales_status)},200,origin);
+      status:lead.consent_withdrawn_at?"Accord de mise en relation retiré":publicProgressLabel(lead.sales_status),
+      finished:Boolean(lead.consent_withdrawn_at)||isTerminalStatus(lead.sales_status),
+      consent_active:Boolean(lead.consent_to_share)&&!lead.consent_withdrawn_at},200,origin);
   }
 
 
@@ -261,6 +299,27 @@ Deno.serve(async req => {
 
   const adminUserId=await authorize(req);
   if(!adminUserId)return response({error:"Access denied"},403,origin);
+
+  if(body.action==="admin.contact.list"){
+    const stage=text(body.status,32),valid=["new","in_progress","answered","closed"];
+    const limit=Math.max(1,Math.min(100,Math.floor(Number(body.limit)||50)));
+    const offset=Math.max(0,Math.min(10000,Math.floor(Number(body.offset)||0)));
+    let q="monforfait_contact_messages?select=id,name,email,subject,message,category,status,status_note,created_at,updated_at&order=created_at.desc&limit="+limit+"&offset="+offset;
+    if(valid.includes(stage))q+="&status=eq."+stage;
+    const r=await rest(q,{headers:restHeaders("count=exact")});
+    return response(r.ok?{success:true,messages:await r.json(),total:countFromRange(r.headers.get("content-range")),limit,offset}:{error:"Boîte de réception indisponible."},r.ok?200:503,origin);
+  }
+  if(body.action==="admin.contact.update"){
+    const id=text(body.message_id,64),status=text(body.status,32),note=text(body.status_note,400);
+    if(!idPattern.test(id)||!["in_progress","answered","closed"].includes(status)||note.length<8)
+      return response({error:"Veuillez renseigner une étape et une note vérifiable."},422,origin);
+    const r=await rest("monforfait_contact_messages?id=eq."+id,{
+      method:"PATCH",headers:restHeaders("return=representation"),
+      body:JSON.stringify({status,status_note:note,handled_by:adminUserId,updated_at:new Date().toISOString()})
+    });
+    if(!r.ok)return response({error:"Mise à jour refusée."},503,origin);
+    return response((await r.json()).length?{success:true}:{error:"Message introuvable."},200,origin);
+  }
 
   if (body.action === "admin.stats") {
     const stages=["unreviewed","needs_verification","qualified","contacted","partner_proposed","activated","invoiced","paid","lost","invalid"];
@@ -389,10 +448,15 @@ Deno.serve(async req => {
     const invoice=text(body.invoice_reference,140),payment=text(body.payment_reference,140);
     if (!idPattern.test(saleId) || !["accepted","activated","invoiced","paid","rejected"].includes(next))
       return response({error:"Étape commerciale invalide"},422,origin);
-    const oldRes=await rest("monforfait_lead_sales?id=eq."+encodeURIComponent(saleId)+"&select=id,sales_stage,shared_at,invoice_reference,activated_at,invoiced_at,paid_at&limit=1");
+    const oldRes=await rest("monforfait_lead_sales?id=eq."+encodeURIComponent(saleId)+"&select=id,lead_id,sales_stage,shared_at,invoice_reference,activated_at,invoiced_at,paid_at&limit=1");
     if(!oldRes.ok)return response({error:"Suivi indisponible"},503,origin);
     const before=(await oldRes.json())[0];
     if(!before)return response({error:"Dossier inconnu"},404,origin);
+    const currentLead=await rest("leads?id=eq."+before.lead_id+"&select=id,consent_to_share,consent_withdrawn_at&limit=1");
+    if(!currentLead.ok)return response({error:"Vérification du consentement indisponible."},503,origin);
+    const consent=(await currentLead.json())[0];
+    if((!consent?.consent_to_share||consent?.consent_withdrawn_at)&&next!=="rejected")
+      return response({error:"Accord retiré ou invalide : la vente ne peut plus avancer."},403,origin);
     if(!mayAdvanceCommercialStage(before.sales_stage,next))
       return response({error:"Transition non autorisée depuis l'étape actuelle"},422,origin);
     if(["activated","invoiced","paid"].includes(next)&&!before.shared_at)
@@ -452,35 +516,18 @@ Deno.serve(async req => {
   if(body.action==="admin.sales.release"){
     const saleId=text(body.sale_id),contract=text(body.contract_reference,180);
     if(!idPattern.test(saleId)||contract.length<6)
-      return response({error:"Contrat de distribution signé et référence nécessaires."},422,origin);
-    const r=await rest("monforfait_lead_sales?id=eq."+saleId+
-      "&select=id,lead_id,partner_id,sales_stage,shared_at&limit=1");
-    if(!r.ok)return response({error:"Dossier indisponible."},503,origin);
-    const sale=(await r.json())[0];
-    if(!sale||sale.sales_stage!=="accepted"||sale.shared_at)
-      return response({error:"Seul un dossier accepté et non partagé peut être transmis."},403,origin);
-    const [lr,pr]=await Promise.all([
-      rest("leads?id=eq."+sale.lead_id+"&select=id,consent_to_share,consent_at,consent_version,sales_status&limit=1"),
-      rest("monforfait_partners?id=eq."+sale.partner_id+"&select=id,sales_status&limit=1")
-    ]);
-    if(!lr.ok||!pr.ok)return response({error:"Vérification indisponible."},503,origin);
-    const lead=(await lr.json())[0],partner=(await pr.json())[0];
-    if(!lead?.consent_to_share||!lead.consent_at||!lead.consent_version
-      ||!["qualified","contacted","partner_proposed"].includes(lead.sales_status)
-      ||!partner||!["contracted","active"].includes(partner.sales_status)||!partner.contract_verified_at)
-      return response({error:"Consentement documenté et partenaire sous contrat indispensables."},403,origin);
-    const now=new Date(),expiry=new Date(now.getTime()+30*86400*1000);
-    const update=await rest("monforfait_lead_sales?id=eq."+saleId+"&shared_at=is.null&sales_stage=eq.accepted",{
-      method:"PATCH",headers:restHeaders("return=representation"),
-      body:JSON.stringify({shared_at:now.toISOString(),shared_by:adminUserId,
-        contract_reference:contract,access_expires_at:expiry.toISOString()})
+      return response({error:"Une référence de contrat signé est obligatoire."},422,origin);
+    // Atomic DB operation locks the lead before the sale to serialize with
+    // self-service consent withdrawal; it also checks the partner account.
+    const r=await rest("rpc/monforfait_release_sale",{
+      method:"POST",
+      body:JSON.stringify({p_sale_id:saleId,p_admin_user:adminUserId,p_contract:contract})
     });
-    if(!update.ok)return response({error:"Transmission non enregistrée."},503,origin);
-    const updated=await update.json();
-    return response(updated.length===1?{success:true,shared_at:now.toISOString(),expires_at:expiry.toISOString()}
-      :{error:"Dossier déjà modifié."},updated.length===1?200:409,origin);
+    if(!r.ok)return response({error:"Transmission indisponible. Aucun accès n'a été confirmé."},503,origin);
+    const result=await r.json();
+    return response(result?.success?result:{error:result?.error||"Transmission refusée."},
+      result?.success?200:403,origin);
   }
-
 
   if(body.action==="admin.catalog.list"){
     const [plans,operators,audit]=await Promise.all([

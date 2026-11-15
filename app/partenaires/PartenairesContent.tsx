@@ -4,6 +4,7 @@ import { Navigation } from '@/components/Navigation'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Handshake, Mail, Code, ExternalLink } from 'lucide-react'
+import {PartnerWidgetEmbed} from '@/components/PartnerWidgetEmbed'
 import { useTranslation } from '@/lib/LocaleContext'
 
 export default function PartenairesContent() {
@@ -116,6 +117,7 @@ export default function PartenairesContent() {
               </div>
               </div>
             </section>
+            <PartnerWidgetEmbed/>
             <div className="max-w-4xl mx-auto px-4 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
                     {/* Option 1 */}
