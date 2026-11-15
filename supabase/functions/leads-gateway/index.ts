@@ -31,18 +31,44 @@ function restHeaders(prefer?: string) {
 async function rest(path: string, init: RequestInit = {}) {
   return fetch(supabaseUrl + "/rest/v1/" + path, {...init, headers:{...restHeaders(), ...(init.headers as Record<string,string> || {})}});
 }
-async function authorize(req: Request): Promise<boolean> {
+async function authUserId(req: Request): Promise<string|null> {
   const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i,"");
-  if (!token || !serviceKey || !anonKey) return false;
+  if (!token || !serviceKey || !anonKey) return null;
   const userRes = await fetch(supabaseUrl+"/auth/v1/user", {
     headers: {"apikey":anonKey, "Authorization":"Bearer "+token}
   });
-  if (!userRes.ok) return false;
+  if (!userRes.ok) return null;
   const user = await userRes.json();
-  if (!user?.id || !idPattern.test(user.id)) return false;
-  const rows = await rest("monforfait_admins?user_id=eq."+encodeURIComponent(user.id)+"&select=user_id&limit=1");
-  return rows.ok && (await rows.json()).length === 1;
+  return user?.id && idPattern.test(user.id) ? user.id : null;
 }
+async function authorize(req: Request): Promise<string|null> {
+  const userId=await authUserId(req);
+  if(!userId)return null;
+  const rows = await rest("monforfait_admins?user_id=eq."+encodeURIComponent(userId)+"&select=user_id&limit=1");
+  return rows.ok && (await rows.json()).length === 1 ? userId : null;
+}
+async function authorizePartner(req:Request):Promise<{userId:string,partnerId:string}|null>{
+  const userId=await authUserId(req);
+  if(!userId)return null;
+  const r=await rest("monforfait_partner_users?user_id=eq."+encodeURIComponent(userId)+"&select=partner_id&limit=1");
+  if(!r.ok)return null;
+  const row=(await r.json())[0];
+  return row?.partner_id&&idPattern.test(row.partner_id)?{userId,partnerId:row.partner_id}:null;
+}
+async function sha256(input:string):Promise<string>{
+  const bytes=new TextEncoder().encode(input);
+  return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)),
+    b=>b.toString(16).padStart(2,"0")).join("");
+}
+function randomTrackingToken(){
+  const bytes=crypto.getRandomValues(new Uint8Array(24));
+  return Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+}
+function countFromRange(header:string|null){
+  const v=header?.split("/").at(-1);
+  return v&&/^\d+$/.test(v)?Number(v):null;
+}
+
 Deno.serve(async req => {
   const origin = req.headers.get("Origin");
   if (req.method === "OPTIONS") return new Response(null, {status:204,headers:headersFor(origin)});
@@ -64,6 +90,8 @@ Deno.serve(async req => {
     if (JSON.stringify(details).length > 7000) return response({error:"Données trop volumineuses"},413,origin);
     const statusAllowed=["new","new_qualified","new_pro","eligibility_qualified","hot_lead","speedtest_captured"];
     const now=new Date().toISOString();
+    const trackingToken=randomTrackingToken();
+    const trackingHash=await sha256(trackingToken);
     // Limit repeated submissions. Never reveal existing IDs to unauthenticated callers.
     const since=new Date(Date.now()-10*60*1000).toISOString();
     const prior=await rest("leads?phone_normalized=eq."+encodeURIComponent(phone)+"&created_at=gte."+encodeURIComponent(since)+"&select=id&limit=1");
@@ -80,6 +108,7 @@ Deno.serve(async req => {
       status:statusAllowed.includes(lead.status) ? lead.status : "new",
       selected_plan_id:idPattern.test(text(lead.selected_plan_id)) ? lead.selected_plan_id : null,
       consent_to_share:true, consent_at:now, consent_version:"partner-referral-v1-2026-11-07",
+       tracking_token_hash:trackingHash,
       needs_details:{...details, source, consent_to_share:true, consent_at:now, consent_version:"partner-referral-v1-2026-11-07", consent_voice:lead.consent_voice===true}
     };
     const inserted=await rest("leads?select=id", {method:"POST",headers:restHeaders("return=representation"),body:JSON.stringify(record)});
@@ -88,8 +117,30 @@ Deno.serve(async req => {
       return response({error:"Impossible d'enregistrer la demande."},503,origin);
     }
     const rows=await inserted.json();
-    return response({success:true,lead_id:rows?.[0]?.id||null,duplicate:false},200,origin);
+    return response({success:true,lead_id:rows?.[0]?.id||null,tracking_token:trackingToken,duplicate:false},200,origin);
   }
+
+  if (body.action === "tracking.status") {
+    const code=text(body.tracking_token,64).toLowerCase();
+    if(!/^[a-f0-9]{48}$/.test(code))return response({error:"Référence de suivi invalide."},422,origin);
+    const hash=await sha256(code);
+    const r=await rest("leads?tracking_token_hash=eq."+hash+"&select=created_at,sales_status&limit=1");
+    if(!r.ok)return response({error:"Suivi momentanément indisponible."},503,origin);
+    const lead=(await r.json())[0];
+    if(!lead)return response({error:"Référence inconnue ou expirée."},404,origin);
+    const statuses:Record<string,string>={
+      unreviewed:"Demande reçue",needs_verification:"Vérification en cours",
+      qualified:"Demande qualifiée",contacted:"Prise de contact en cours",
+      partner_proposed:"Étude de mise en relation",
+      activated:"Activation à confirmer",invoiced:"Dossier en cours",
+      paid:"Dossier finalisé",lost:"Demande clôturée",invalid:"Demande non retenue"
+    };
+    // Never return client PII, partner pricing, or internal notes through a public receipt.
+    return response({success:true,created_at:lead.created_at,
+      status:statuses[lead.sales_status]||"Demande reçue",
+      finished:["lost","invalid","paid"].includes(lead.sales_status)},200,origin);
+  }
+
   // Private administrative actions require an authenticated Supabase user in the
   // server-side allowlist; client-set cookies and localStorage are never trusted.
 
@@ -125,24 +176,115 @@ Deno.serve(async req => {
     }
     return response({success:true},200,origin);
   }
-  if (!(await authorize(req))) return response({error:"Access denied"},403,origin);
-  if (body.action === "admin.list") {
-    const limit=Math.max(1,Math.min(250,Number(body.limit)||150));
-    const r=await rest("leads?select=id,user_name,user_phone,user_email,city,status,sales_status,consent_to_share,created_at,is_pro,needs_details&order=created_at.desc&limit="+limit,{
-      headers:restHeaders("count=exact")
+
+  // Partner identity is attached by an administrator after contract verification.
+  // Authentication never uses a caller-supplied email, company ID or browser cookie.
+  if(["partner.profile","partner.list","partner.feedback"].includes(body.action)){
+    const access=await authorizePartner(req);
+    if(!access)return response({error:"Compte partenaire non autorisé."},403,origin);
+    const partnerRes=await rest("monforfait_partners?id=eq."+access.partnerId+
+      "&select=id,business_name,partner_type,sales_status,business_email&limit=1");
+    if(!partnerRes.ok)return response({error:"Partenaire indisponible"},503,origin);
+    const partner=(await partnerRes.json())[0];
+    if(!partner||!["contracted","active"].includes(partner.sales_status))
+      return response({error:"Accès partenaire en attente de contrat."},403,origin);
+    if(body.action==="partner.profile")return response({success:true,partner},200,origin);
+    const now=new Date().toISOString();
+    if(body.action==="partner.list"){
+      const q="monforfait_lead_sales?partner_id=eq."+access.partnerId+
+        "&shared_at=not.is.null&access_expires_at=gt."+encodeURIComponent(now)+
+        "&sales_stage=neq.rejected&select=id,lead_id,commercial_model,sales_stage,shared_at,access_expires_at,created_at&order=shared_at.desc&limit=100";
+      const r=await rest(q);
+      if(!r.ok)return response({error:"Dossiers momentanément indisponibles."},503,origin);
+      const sales=await r.json();
+      const leadIds=sales.map((v:Record<string,unknown>)=>v.lead_id).filter((v:unknown)=>typeof v==="string"&&idPattern.test(v as string));
+      if(!leadIds.length)return response({success:true,partner,sales:[]},200,origin);
+      const ids=leadIds.join(",");
+      const l=await rest("leads?id=in.("+ids+")&select=id,user_name,user_phone,user_email,city,address,status,needs_details&limit=100");
+      if(!l.ok)return response({error:"Détails momentanément indisponibles."},503,origin);
+      const leadMap=new Map((await l.json()).map((v:Record<string,unknown>)=>[v.id,v]));
+      return response({success:true,partner,sales:sales.map((sale:Record<string,unknown>)=>{
+        const lead=leadMap.get(sale.lead_id) as Record<string,unknown>|undefined;
+        // Only the minimum required for qualification is shared.
+        const detail=lead?.needs_details && typeof lead.needs_details==="object" ? lead.needs_details as Record<string,unknown> : {};
+        return {...sale,lead:lead?{
+          name:lead.user_name,phone:lead.user_phone,email:lead.user_email,
+          city:lead.city,address:lead.address,need:text(detail.interest||detail.reason||detail.need,180)
+        }:null};
+      })},200,origin);
+    }
+    const saleId=text(body.sale_id),outcome=text(body.outcome,30),note=text(body.notes,400);
+    if(!idPattern.test(saleId)||!["received","contacted","no_answer","not_eligible","activated","rejected"].includes(outcome)
+      ||note.length<8)return response({error:"Merci de documenter le retour sur ce dossier (8 caractères minimum)."},422,origin);
+    const saleRes=await rest("monforfait_lead_sales?id=eq."+saleId+"&partner_id=eq."+access.partnerId+
+      "&shared_at=not.is.null&access_expires_at=gt."+encodeURIComponent(now)+"&sales_stage=neq.rejected&select=id&limit=1");
+    if(!saleRes.ok)return response({error:"Dossier indisponible."},503,origin);
+    if((await saleRes.json()).length===0)return response({error:"Dossier non attribué ou accès expiré."},403,origin);
+    const recent=await rest("monforfait_partner_feedback?sale_id=eq."+saleId+"&created_at=gte."+
+      encodeURIComponent(new Date(Date.now()-24*3600*1000).toISOString())+"&select=id&limit=20");
+    if(recent.ok && (await recent.json()).length>=20)return response({error:"Trop de retours sur ce dossier aujourd'hui."},429,origin);
+    const posted=await rest("monforfait_partner_feedback",{
+      method:"POST",headers:restHeaders("return=minimal"),
+      body:JSON.stringify({sale_id:saleId,partner_id:access.partnerId,author_id:access.userId,outcome,notes:note})
     });
-    if (!r.ok) return response({error:"Database unavailable"},503,origin);
-    return response({success:true,leads:await r.json(),count:r.headers.get("content-range")},200,origin);
+    return response(posted.ok?{success:true}:{error:"Retour non enregistré."},posted.ok?200:503,origin);
+  }
+
+  const adminUserId=await authorize(req);
+  if(!adminUserId)return response({error:"Access denied"},403,origin);
+
+  if (body.action === "admin.stats") {
+    const stages=["unreviewed","needs_verification","qualified","contacted","partner_proposed","activated","invoiced","paid","lost","invalid"];
+    const since=new Date(Date.now()-30*86400*1000).toISOString();
+    const q=["","&consent_to_share=eq.true","&created_at=gte."+encodeURIComponent(since),
+      ...stages.map(stage=>"&sales_status=eq."+stage)];
+    const r=await Promise.all(q.map(suffix=>rest("leads?select=id&limit=1"+suffix,{
+      headers:restHeaders("count=exact")
+    })));
+    if(r.some(v=>!v.ok))return response({error:"Statistiques indisponibles"},503,origin);
+    const n=r.map(x=>countFromRange(x.headers.get("content-range"))??0);
+    return response({success:true,total:n[0],consented:n[1],last_30_days:n[2],
+      by_stage:Object.fromEntries(stages.map((stage,i)=>[stage,n[i+3]]))},200,origin);
+  }
+  if (body.action === "admin.list") {
+    const limit=Math.max(1,Math.min(100,Math.floor(Number(body.limit)||50)));
+    const offset=Math.max(0,Math.min(10000,Math.floor(Number(body.offset)||0)));
+    const stage=text(body.sales_status,40);
+    const stages=["unreviewed","needs_verification","qualified","contacted","partner_proposed","activated","invoiced","paid","lost","invalid"];
+    const term=text(body.search,80).replace(/[^\p{L}\p{N}\s-]/gu,"").trim();
+    let q="leads?select=id,user_name,user_phone,user_email,city,status,sales_status,consent_to_share,consent_at,created_at,is_pro,needs_details&order=created_at.desc&limit="+limit+"&offset="+offset;
+    if(stages.includes(stage))q+="&sales_status=eq."+stage;
+    if(term.length>=2){
+      const needle=term.split(/\s+/).join("*");
+      q+="&or="+encodeURIComponent("(user_name.ilike.*"+needle+"*,city.ilike.*"+needle+"*,phone_normalized.ilike.*"+needle+"*)");
+    }
+    const r=await rest(q,{headers:restHeaders("count=exact")});
+    if(!r.ok)return response({error:"Database unavailable"},503,origin);
+    return response({success:true,leads:await r.json(),total:countFromRange(r.headers.get("content-range")),limit,offset},200,origin);
+  }
+  if (body.action === "admin.lead.activity"){
+    const leadId=text(body.lead_id);
+    if(!idPattern.test(leadId))return response({error:"Référence invalide"},422,origin);
+    const r=await rest("monforfait_lead_activity?lead_id=eq."+leadId+
+      "&select=old_status,new_status,status_note,created_at&order=created_at.desc&limit=50");
+    return response(r.ok?{success:true,activity:await r.json()}:{error:"Historique indisponible"},r.ok?200:503,origin);
   }
   if (body.action === "admin.update") {
     const leadId=text(body.lead_id);
     const stage=text(body.sales_status);
-    const allowed=["unreviewed","needs_verification","qualified","contacted","partner_proposed","activated","invoiced","paid","lost","invalid"];
+    const allowed=["unreviewed","needs_verification","qualified","contacted","partner_proposed","lost","invalid"];
+    const note=text(body.sales_status_note,400);
     if (!idPattern.test(leadId) || !allowed.includes(stage)) return response({error:"Invalid update"},422,origin);
+    if (["contacted","partner_proposed","lost","invalid"].includes(stage) && note.length<8)
+      return response({error:"Justifiez cette étape avec une note d'au moins 8 caractères."},422,origin);
     const r=await rest("leads?id=eq."+encodeURIComponent(leadId),{
-      method:"PATCH",headers:restHeaders("return=minimal"),body:JSON.stringify({sales_status:stage})
+      method:"PATCH",headers:restHeaders("return=representation"),
+      body:JSON.stringify({sales_status:stage,sales_status_note:note||null,
+        sales_status_changed_at:new Date().toISOString(),sales_status_changed_by:adminUserId})
     });
-    return response(r.ok?{success:true}:{error:"Update failed"},r.ok?200:503,origin);
+    if(!r.ok)return response({error:"Update failed"},503,origin);
+    return response((await r.json()).length?{success:true}:{error:"Dossier introuvable"},
+      r.ok?200:404,origin);
   }
   if (body.action === "admin.partners") {
     const r=await rest("monforfait_partners?select=id,business_name,business_email,contact_name,contact_phone,partner_type,regions,services,estimated_volume,sales_status,source,created_at&order=created_at.desc&limit=150");
@@ -162,7 +304,7 @@ Deno.serve(async req => {
   // Revenue is counted only when proof of invoicing/payment is recorded;
   // "proposed", "accepted" and "activated" are not cash receipts.
   if (body.action === "admin.sales.list") {
-    const r=await rest("monforfait_lead_sales?select=id,lead_id,partner_id,commercial_model,sales_stage,agreed_amount_dh,invoice_reference,payment_reference,evidence_notes,created_at,activated_at,invoiced_at,paid_at,updated_at&order=created_at.desc&limit=500");
+    const r=await rest("monforfait_lead_sales?select=id,lead_id,partner_id,commercial_model,sales_stage,agreed_amount_dh,invoice_reference,payment_reference,evidence_notes,created_at,activated_at,invoiced_at,paid_at,updated_at,shared_at,access_expires_at,contract_reference&order=created_at.desc&limit=500");
     return response(r.ok?{success:true,sales:await r.json()}:{error:"Could not load commercial pipeline"},r.ok?200:503,origin);
   }
   if (body.action === "admin.sales.propose") {
@@ -224,6 +366,73 @@ Deno.serve(async req => {
     });
     return response(r.ok?{success:true}:{error:"Transition non enregistrée"},r.ok?200:503,origin);
   }
+
+  if(body.action==="admin.partner.link"){
+    const partnerId=text(body.partner_id);
+    if(!idPattern.test(partnerId))return response({error:"Partenaire invalide."},422,origin);
+    const r=await rest("monforfait_partners?id=eq."+partnerId+
+      "&select=id,business_name,business_email,sales_status&limit=1");
+    if(!r.ok)return response({error:"Partenaire indisponible."},503,origin);
+    const partner=(await r.json())[0];
+    if(!partner||!["contracted","active"].includes(partner.sales_status)
+      ||!text(partner.business_email))return response({error:"Un partenaire sous contrat avec email vérifié est requis."},422,origin);
+    const users=await fetch(supabaseUrl+"/auth/v1/admin/users?page=1&per_page=200",{
+      headers:{"apikey":serviceKey,"Authorization":"Bearer "+serviceKey}
+    });
+    if(!users.ok)return response({error:"Service d'identité indisponible."},503,origin);
+    const found=(await users.json()).users?.find((u:Record<string,unknown>)=>
+      typeof u.email==="string"&&u.email.toLowerCase()===partner.business_email.toLowerCase()
+      &&Boolean(u.email_confirmed_at));
+    if(!found||!idPattern.test(found.id))return response({
+      error:"Le contact doit d'abord se connecter avec son email professionnel et confirmer l'adresse."
+    },422,origin);
+    const exists=await rest("monforfait_partner_users?user_id=eq."+found.id+"&select=partner_id&limit=1");
+    if(!exists.ok)return response({error:"Vérification du compte impossible."},503,origin);
+    const mapped=(await exists.json())[0];
+    if(mapped&&mapped.partner_id!==partnerId)return response({error:"Ce compte est déjà affecté à un autre partenaire."},409,origin);
+    if(mapped)return response({success:true,already_linked:true},200,origin);
+    const granted=await rest("monforfait_partner_users",{
+      method:"POST",headers:restHeaders("return=minimal"),
+      body:JSON.stringify({user_id:found.id,partner_id:partnerId})
+    });
+    return response(granted.ok?{success:true}:{error:"Activation partenaire impossible."},
+      granted.ok?200:503,origin);
+  }
+  if(body.action==="admin.partner.feedback"){
+    const r=await rest("monforfait_partner_feedback?select=id,sale_id,partner_id,outcome,notes,created_at&order=created_at.desc&limit=250");
+    return response(r.ok?{success:true,feedback:await r.json()}:{error:"Retours indisponibles."},r.ok?200:503,origin);
+  }
+  if(body.action==="admin.sales.release"){
+    const saleId=text(body.sale_id),contract=text(body.contract_reference,180);
+    if(!idPattern.test(saleId)||contract.length<6)
+      return response({error:"Contrat de distribution signé et référence nécessaires."},422,origin);
+    const r=await rest("monforfait_lead_sales?id=eq."+saleId+
+      "&select=id,lead_id,partner_id,sales_stage,shared_at&limit=1");
+    if(!r.ok)return response({error:"Dossier indisponible."},503,origin);
+    const sale=(await r.json())[0];
+    if(!sale||sale.sales_stage!=="accepted"||sale.shared_at)
+      return response({error:"Seul un dossier accepté et non partagé peut être transmis."},403,origin);
+    const [lr,pr]=await Promise.all([
+      rest("leads?id=eq."+sale.lead_id+"&select=id,consent_to_share,consent_at,consent_version&limit=1"),
+      rest("monforfait_partners?id=eq."+sale.partner_id+"&select=id,sales_status&limit=1")
+    ]);
+    if(!lr.ok||!pr.ok)return response({error:"Vérification indisponible."},503,origin);
+    const lead=(await lr.json())[0],partner=(await pr.json())[0];
+    if(!lead?.consent_to_share||!lead.consent_at||!lead.consent_version
+      ||!partner||!["contracted","active"].includes(partner.sales_status))
+      return response({error:"Consentement documenté et partenaire sous contrat indispensables."},403,origin);
+    const now=new Date(),expiry=new Date(now.getTime()+30*86400*1000);
+    const update=await rest("monforfait_lead_sales?id=eq."+saleId+"&shared_at=is.null&sales_stage=eq.accepted",{
+      method:"PATCH",headers:restHeaders("return=representation"),
+      body:JSON.stringify({shared_at:now.toISOString(),shared_by:adminUserId,
+        contract_reference:contract,access_expires_at:expiry.toISOString()})
+    });
+    if(!update.ok)return response({error:"Transmission non enregistrée."},503,origin);
+    const updated=await update.json();
+    return response(updated.length===1?{success:true,shared_at:now.toISOString(),expires_at:expiry.toISOString()}
+      :{error:"Dossier déjà modifié."},updated.length===1?200:409,origin);
+  }
+
   if (body.action === "admin.create_partner") {
     const name=text(body.business_name,150), email=text(body.business_email,150);
     if (name.length<2 || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) return response({error:"Invalid partner"},422,origin);
