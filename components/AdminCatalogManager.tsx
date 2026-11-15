@@ -109,7 +109,7 @@ export function AdminCatalogManager(){
      <input required type="number" min="1" max="3000" step="0.01" value={form.price} onChange={e=>setForm(p=>({...p,price:e.target.value}))}
       className="mt-2 block w-full rounded-xl border bg-white p-3"/>
     </label>
-    {!form.id&&<label className="text-sm">{form.category==='internet'?'Débit descendant (Mb/s)':'Volume data (Go)'}
+    {<label className="text-sm">{form.category==='internet'?'Débit descendant (Mb/s)':'Volume data (Go)'}
      <input type="number" min="1" max={form.category==='internet'?2000:1000} required value={form.category==='internet'?form.speed:form.data}
       onChange={e=>setForm(p=>({...p,[p.category==='internet'?'speed':'data']:e.target.value}))}
       className="mt-2 block w-full rounded-xl border bg-white p-3"/>
