@@ -1,67 +1,50 @@
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
+import type {Metadata} from 'next'
+import {notFound} from 'next/navigation'
+import {supabase} from '@/lib/supabaseClient'
 import OfferDetailsContent from './OfferDetailsContent'
-
-// This would ideally come from a slugified database lookup
-// but since we're generating on the fly, we'll try to find by ID or Name
-async function getOffer(slug: string) {
-    const { data: offers, error } = await supabase
-        .from('scraped_offers')
-        .select('*')
-    
-    if (error || !offers) return null
-    return offers.find(o => 
-        o.id === slug || 
-        o.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug
-    ) || offers[0] // Fallback for demo purposes
+import type {OfferProps} from '@/components/OfferCard'
+export const dynamic='force-dynamic'
+type Props={params:Promise<{slug:string}>}
+const slugify=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+ .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+async function getOffer(slug:string):Promise<OfferProps|null>{
+ if(!slug||slug.length>160)return null
+ let query=supabase.from('plans')
+  .select('id,title,category,price_dh,download_speed_mbps,upload_speed_mbps,mobile_data_gb,voice_minutes,technology,target_audience,source_url,source_checked_at,operators(name)')
+  .eq('is_active',true)
+ if(uuid.test(slug))query=query.eq('id',slug)
+ else query=query.limit(200)
+ const {data,error}=await query
+ if(error||!data?.length)return null
+ const rows=uuid.test(slug)?data:data.filter(o=>
+  slugify(o.title)===slug || slugify(((o.operators as any)?.name||'')+'-'+o.title)===slug)
+ const offer=rows[0] as any
+ if(!offer)return null
+ return{
+  id:offer.id,title:offer.title,operator_name:offer.operators?.name||'Opérateur',
+  category:offer.category,price_dh:Number(offer.price_dh),download_speed:offer.download_speed_mbps,
+  upload_speed:offer.upload_speed_mbps,mobile_data_gb:offer.mobile_data_gb,
+  voice_minutes:offer.voice_minutes,technology:offer.technology,
+  target_audience:offer.target_audience||'individual',
+  source_url:offer.source_url,source_checked_at:offer.source_checked_at
+ }
 }
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-    const { slug } = await params
-    const offer = await getOffer(slug)
-
-    if (!offer) {
-        return {
-            title: 'Offre Introuvable - MonForfait.ma',
-            description: 'Cette offre internet ou mobile n\'existe plus.'
-        }
-    }
-
-    const title = `Forfait ${offer.name} de ${offer.provider} | MonForfait.ma`
-    const description = `Découvrez l'offre ${offer.name} proposée par ${offer.provider} au prix de ${offer.price} DH/mois. Comparez et trouvez le meilleur forfait au Maroc.`
-
-    return {
-        title,
-        description,
-        openGraph: {
-            title,
-            description,
-            type: 'website',
-            images: [
-                {
-                    url: '/branding/logo-light.png',
-                    width: 1200,
-                    height: 630,
-                    alt: `Forfait ${offer.name} - ${offer.provider}`,
-                }
-            ]
-        },
-        twitter: {
-            card: 'summary_large_image',
-            title,
-            description,
-        }
-    }
+export async function generateMetadata({params}:Props):Promise<Metadata>{
+ const {slug}=await params
+ const offer=await getOffer(slug)
+ if(!offer)return{title:'Offre indisponible',robots:{index:false,follow:false}}
+ return{
+  title:offer.title+' | '+offer.operator_name+' — Tarif au Maroc',
+  description:'Consultez le tarif public de '+offer.title+' ('+offer.operator_name+'), ses caractéristiques, sa source et sa date de vérification. Éligibilité à confirmer.',
+  alternates:{canonical:'https://monforfait.ma/offres/'+offer.id},
+  openGraph:{title:offer.title+' — '+offer.operator_name,
+    description:'Forfait '+(offer.category==='mobile'?'mobile':'internet')+' au tarif public référencé de '+offer.price_dh+' DH/mois.'}
+ }
 }
-
-export default async function OfferDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params
-    const offer = await getOffer(slug)
-
-    if (!offer) {
-        notFound()
-    }
-
-    return <OfferDetailsContent offer={offer} slug={slug} />
+export default async function OfferDetailsPage({params}:Props){
+ const {slug}=await params
+ const offer=await getOffer(slug)
+ if(!offer)notFound()
+ return <OfferDetailsContent offer={offer}/>
 }
