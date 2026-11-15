@@ -1,36 +1,13 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
-  
-  // Protect /admin routes
-  if (path.startsWith('/admin')) {
-    const adminLoggedIn = request.cookies.get('admin_logged_in');
-    
-    if (!adminLoggedIn || adminLoggedIn.value !== 'true') {
-      return NextResponse.redirect(new URL('/login?tab=admin', request.url));
-    }
+// Authorization never relies on browser-set cookies.
+// Supabase Auth identities and the server-side allowlists in leads-gateway
+// enforce access to personal and commercial records.
+export function middleware(request:NextRequest){
+  if(request.nextUrl.pathname.startsWith('/operateurs/dashboard')){
+    return NextResponse.redirect(new URL('/partenaires',request.url))
   }
-
-  // Optionally protect /operateurs/dashboard
-  if (path.startsWith('/operateurs/dashboard')) {
-    const operatorEmail = request.cookies.get('operator_email');
-    
-    // Allow access if admin is logged in (admins can see operator dashboards if needed)
-    const adminLoggedIn = request.cookies.get('admin_logged_in');
-    
-    if ((!operatorEmail || !operatorEmail.value) && (!adminLoggedIn || adminLoggedIn.value !== 'true')) {
-      return NextResponse.redirect(new URL('/login?tab=operator', request.url));
-    }
-  }
-
-  return NextResponse.next();
+  return NextResponse.next()
 }
-
-export const config = {
-  matcher: [
-    '/admin/:path*',
-    '/operateurs/dashboard/:path*'
-  ],
-};
+export const config={matcher:['/operateurs/dashboard/:path*']}
