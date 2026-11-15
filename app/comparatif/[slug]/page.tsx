@@ -1,151 +1,73 @@
-import { Metadata } from 'next';
-import { Navigation } from '@/components/Navigation';
-import { ScamDetector } from '@/components/ScamDetector';
-import { Swords, CheckCircle2, XCircle } from 'lucide-react';
-import Link from 'next/link';
+import { Metadata } from 'next'
+import Link from 'next/link'
+import { Navigation } from '@/components/Navigation'
+import { supabase } from '@/lib/supabaseClient'
+import { notFound } from 'next/navigation'
 
-type Props = {
-    params: Promise<{ slug: string }>
+type Props = {params: Promise<{slug:string}>}
+type Listing = {title:string;price_dh:number;download_speed_mbps:number|null;source_url:string|null;source_checked_at:string|null;operators:{name:string}|null}
+
+const operatorNames: Record<string,string> = {
+  orange:'Orange Morocco',inwi:'Inwi',
+  'maroc-telecom':'Maroc Telecom',maroctelecom:'Maroc Telecom',iam:'Maroc Telecom'
 }
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const { slug } = await params;
-    const parts = slug.split('-vs-');
-    const operator1 = parts[0] || 'Opérateur 1';
-    const operator2 = parts[1] || 'Opérateur 2';
-
-    const op1 = operator1.charAt(0).toUpperCase() + operator1.slice(1).toLowerCase();
-    const op2 = operator2.charAt(0).toUpperCase() + operator2.slice(1).toLowerCase();
-
-    return {
-        title: `Comparatif ${op1} vs ${op2} : Lequel Choisir au Maroc ? (2026)`,
-        description: `Le match définitif : ${op1} contre ${op2}. Comparez la fibre optique, les forfaits mobiles, et le service client pour faire le bon choix.`,
-    };
+function parse(slug:string){
+  const parts=slug.split('-vs-')
+  if(parts.length!==2) return null
+  const a=operatorNames[parts[0]],b=operatorNames[parts[1]]
+  return a&&b&&a!==b?[a,b]:null
 }
-
-// Simulated simple score comparison logic
-const getScore = (op: string) => {
-    const name = op.toLowerCase();
-    if (name.includes('orange')) return { price: 8, network: 9, service: 7, total: 24 };
-    if (name.includes('inwi')) return { price: 9, network: 7, service: 8, total: 24 };
-    if (name.includes('iam') || name.includes('maroctelecom')) return { price: 6, network: 9, service: 6, total: 21 };
-    return { price: 7, network: 7, service: 7, total: 21 }; // Default
+const label=(name:string)=>name==='Orange Morocco'?'Orange Maroc':name
+export async function generateMetadata({params}:Props):Promise<Metadata>{
+ const pair=parse((await params).slug)
+ if(!pair)return {title:'Comparateur fibre — MonForfait.ma'}
+ return {title:`Fibre ${label(pair[0])} vs ${label(pair[1])} | Tarifs vérifiés Maroc`,
+ description:'Comparaison des tarifs publics des offres fibre, d’après les pages officielles. Éligibilité et conditions à confirmer.'}
 }
-
-export default async function VersusPage({ params }: Props) {
-    const { slug } = await params;
-    
-    // Parse the slug safely
-    const parts = slug.split('-vs-');
-    const operator1 = parts[0] || 'Unknown1';
-    const operator2 = parts[1] || 'Unknown2';
-
-    const op1 = operator1.charAt(0).toUpperCase() + operator1.slice(1).toLowerCase();
-    const op2 = operator2.charAt(0).toUpperCase() + operator2.slice(1).toLowerCase();
-
-    const score1 = getScore(op1);
-    const score2 = getScore(op2);
-
-    const winner = score1.total > score2.total ? op1 : (score2.total > score1.total ? op2 : 'Égalité');
-
-    return (
-        <main className="min-h-screen bg-zinc-50 dark:bg-black font-sans pb-20">
-            <Navigation />
-            
-            <div className="bg-red-600 dark:bg-red-950 text-white pt-24 pb-16 px-4 relative overflow-hidden border-b border-red-700 dark:border-red-900">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10">
-                    <Swords className="w-96 h-96" />
-                </div>
-                <div className="max-w-5xl mx-auto relative z-10 text-center">
-                    <div className="inline-block px-4 py-1 bg-black/20 rounded-full text-sm font-bold mb-6 backdrop-blur-sm uppercase tracking-widest border border-white/10">
-                        Le Grand Match 2026
-                    </div>
-                    <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-8">
-                        <span className="text-yellow-400">{op1}</span> 
-                        <span className="px-4 text-red-300">VS</span> 
-                        <span className="text-yellow-400">{op2}</span>
-                    </h1>
-                    <p className="text-xl max-w-2xl mx-auto text-red-100 mb-10">
-                        Lequel de {op1} ou {op2} propose vraiment la meilleure Fibre Optique et les forfaits les moins chers cette année ?
-                    </p>
-                    
-                    {/* Trust visual */}
-                    <div className="flex items-center justify-center gap-2 text-sm font-medium">
-                        <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                        Tarifs B2B mis à jour ce matin
-                    </div>
-                </div>
-            </div>
-
-            <div className="max-w-5xl mx-auto px-4 py-16">
-                
-                {/* Scoring Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 items-stretch">
-                    {/* Operator 1 */}
-                    <div className={`bg-white dark:bg-zinc-900 p-8 rounded-3xl shadow-xl flex flex-col justify-between border-4 ${winner === op1 ? 'border-yellow-400 scale-105 z-10' : 'border-transparent'}`}>
-                        {winner === op1 && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-4 py-1 rounded-full text-sm font-black uppercase">Vainqueur</div>}
-                        <div className="text-center mb-8">
-                            <h2 className="text-3xl font-black dark:text-white mb-2">{op1}</h2>
-                            <div className="text-5xl font-black text-blue-600">{score1.total}/30</div>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800 pb-2">
-                                <span className="font-medium text-zinc-600 dark:text-zinc-400">Prix des forfaits</span>
-                                <span className="font-bold dark:text-white">{score1.price}/10</span>
-                            </div>
-                            <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800 pb-2">
-                                <span className="font-medium text-zinc-600 dark:text-zinc-400">Qualité Réseau</span>
-                                <span className="font-bold dark:text-white">{score1.network}/10</span>
-                            </div>
-                            <div className="flex justify-between items-center pb-2">
-                                <span className="font-medium text-zinc-600 dark:text-zinc-400">Service Client</span>
-                                <span className="font-bold dark:text-white">{score1.service}/10</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ScamDetector in middle (Aggressive conversion) */}
-                    <div className="bg-[#0A0F1C] p-6 rounded-3xl shadow-2xl flex flex-col justify-center border border-zinc-800">
-                        <h3 className="text-white font-black text-xl mb-4 text-center">Faites le test vous-même</h3>
-                        <p className="text-zinc-400 text-sm mb-6 text-center">Nos algorithmes cherchent l'offre exacte qu'il vous faut.</p>
-                        <ScamDetector />
-                    </div>
-
-                    {/* Operator 2 */}
-                    <div className={`bg-white dark:bg-zinc-900 p-8 rounded-3xl shadow-xl flex flex-col justify-between border-4 ${winner === op2 ? 'border-yellow-400 scale-105 z-10' : 'border-transparent'}`}>
-                        {winner === op2 && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-4 py-1 rounded-full text-sm font-black uppercase">Vainqueur</div>}
-                        <div className="text-center mb-8">
-                            <h2 className="text-3xl font-black dark:text-white mb-2">{op2}</h2>
-                            <div className="text-5xl font-black text-purple-600">{score2.total}/30</div>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800 pb-2">
-                                <span className="font-medium text-zinc-600 dark:text-zinc-400">Prix des forfaits</span>
-                                <span className="font-bold dark:text-white">{score2.price}/10</span>
-                            </div>
-                            <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800 pb-2">
-                                <span className="font-medium text-zinc-600 dark:text-zinc-400">Qualité Réseau</span>
-                                <span className="font-bold dark:text-white">{score2.network}/10</span>
-                            </div>
-                            <div className="flex justify-between items-center pb-2">
-                                <span className="font-medium text-zinc-600 dark:text-zinc-400">Service Client</span>
-                                <span className="font-bold dark:text-white">{score2.service}/10</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="prose prose-lg dark:prose-invert max-w-none">
-                    <h2 className="text-2xl font-black mb-4">Notre verdict : Qui a la meilleure offre Internet et Mobile ?</h2>
-                    <p>
-                        Le combat entre {op1} et {op2} est serré sur le territoire national. Cependant, la vérité se cache souvent dans les tarifs pratiqués en rétention client ou via les offres Business (B2B). 
-                    </p>
-                    <p>
-                        Si vous payez le tarif affiché publiquement en agence, vous êtes probablement perdant. Utilisez notre détecteur d'arnaque pour révéler l'offre qui vous permettra d'obtenir le même service, beaucoup moins cher.
-                    </p>
-                </div>
-                
-            </div>
-        </main>
-    );
+export default async function VersusPage({params}:Props){
+ const pair=parse((await params).slug)
+ if(!pair)notFound()
+ const {data,error}=await supabase.from('plans')
+  .select('title,price_dh,download_speed_mbps,source_url,source_checked_at,operators(name)')
+  .eq('is_active',true).eq('technology','FTTH')
+  .order('price_dh',{ascending:true})
+ const offers=((data||[]) as unknown as Listing[]).filter(row=>pair.includes(row.operators?.name||''))
+ const speeds=[20,50,100,200,500,1000]
+ const grouped=pair.map(name=>offers.filter(p=>p.operators?.name===name))
+ const best=(group:Listing[],speed:number)=>group.find(p=>p.download_speed_mbps===speed)
+ return <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
+  <Navigation/>
+  <section className="bg-zinc-950 text-white pt-28 pb-16 px-5 text-center">
+   <p className="text-blue-300 text-xs tracking-widest font-bold uppercase mb-5">Comparatif factuel • Maroc</p>
+   <h1 className="max-w-5xl mx-auto text-4xl md:text-5xl font-black">{label(pair[0])} vs {label(pair[1])}</h1>
+   <p className="max-w-2xl mx-auto mt-5 text-zinc-300">Les tarifs fibre annoncés par les opérateurs, sans notes arbitraires ni classement fictif.</p>
+  </section>
+  <section className="max-w-5xl mx-auto px-4 py-12 space-y-6">
+   <div className="rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-5 text-sm">
+    Les tarifs sont indicatifs et ont été consultés le <strong>15 novembre 2026</strong>. Les vitesses sont les débits annoncés, non des mesures de performance réelle. La couverture, les frais et les conditions sont à confirmer auprès de l’opérateur.
+   </div>
+   <div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+    <table className="w-full min-w-[580px] text-left">
+     <thead><tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800">
+      <th className="p-5">Débit descendant annoncé</th>
+      {pair.map(n=><th key={n} className="p-5">{label(n)}</th>)}
+     </tr></thead>
+     <tbody>{speeds.map(speed=><tr key={speed} className="border-b border-zinc-100 dark:border-zinc-800">
+       <td className="p-5 font-semibold">{speed===1000?'1 Gb/s':speed+' Mb/s'}</td>
+       {grouped.map((group,i)=>{const item=best(group,speed);return <td key={pair[i]} className="p-5">
+         {item?<><strong className="text-lg">{item.price_dh} DH/mois</strong>
+           {item.source_url&&<a href={item.source_url} target="_blank" rel="noopener noreferrer" className="block mt-1 text-xs underline text-blue-700 dark:text-blue-300">Voir la source officielle</a>}
+          </>:<span className="text-zinc-400">Offre non vérifiée</span>}
+       </td>})}
+      </tr>)}</tbody>
+    </table>
+   </div>
+   {error&&<p className="text-sm text-amber-700">Données des offres momentanément indisponibles.</p>}
+   <div className="flex flex-wrap gap-3">
+    <Link href="/offers?category=internet" className="rounded-xl bg-blue-600 px-6 py-4 text-white font-bold">Comparer toutes les offres</Link>
+    <Link href="/eligibilite" className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-6 py-4 font-bold">Demander une mise en relation</Link>
+   </div>
+   <p className="text-xs text-zinc-500">MonForfait.ma est un service indépendant de comparaison. La présence d’un opérateur dans ce tableau ne signifie pas qu’un partenariat commercial existe avec lui.</p>
+  </section>
+ </main>
 }
