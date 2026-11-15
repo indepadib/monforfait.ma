@@ -269,6 +269,16 @@ Deno.serve(async req => {
     return response({success:true,total:n[0],consented:n[1],last_30_days:n[2],
       by_stage:Object.fromEntries(stages.map((stage,i)=>[stage,n[i+3]]))},200,origin);
   }
+
+  if(body.action==="admin.analytics"){
+    const [daily,sources]=await Promise.all([
+      rest("monforfait_daily_metrics?select=day,leads,consented,professional,in_progress&order=day.desc&limit=90"),
+      rest("monforfait_source_metrics?select=source,leads,consented,professional&order=leads.desc&limit=30")
+    ]);
+    if(!daily.ok||!sources.ok)return response({error:"Reporting indisponible."},503,origin);
+    return response({success:true,daily:await daily.json(),sources:await sources.json()},200,origin);
+  }
+
   if (body.action === "admin.list") {
     const limit=Math.max(1,Math.min(100,Math.floor(Number(body.limit)||50)));
     const offset=Math.max(0,Math.min(10000,Math.floor(Number(body.offset)||0)));
@@ -277,6 +287,7 @@ Deno.serve(async req => {
     const term=text(body.search,80).replace(/[^\p{L}\p{N}\s-]/gu,"").trim();
     let q="leads?select=id,user_name,user_phone,user_email,city,status,sales_status,consent_to_share,consent_at,created_at,is_pro,needs_details&order=created_at.desc&limit="+limit+"&offset="+offset;
     if(stages.includes(stage))q+="&sales_status=eq."+stage;
+    if(body.consented_only===true)q+="&consent_to_share=eq.true";
     if(term.length>=2){
       const needle=term.split(/\s+/).join("*");
       q+="&or="+encodeURIComponent("(user_name.ilike.*"+needle+"*,city.ilike.*"+needle+"*,phone_normalized.ilike.*"+needle+"*)");
@@ -306,8 +317,9 @@ Deno.serve(async req => {
         sales_status_changed_at:new Date().toISOString(),sales_status_changed_by:adminUserId})
     });
     if(!r.ok)return response({error:"Update failed"},503,origin);
-    return response((await r.json()).length?{success:true}:{error:"Dossier introuvable"},
-      r.ok?200:404,origin);
+    const changed=await r.json();
+    return response(changed.length?{success:true}:{error:"Dossier introuvable"},
+      changed.length?200:404,origin);
   }
   if (body.action === "admin.partners") {
     const r=await rest("monforfait_partners?select=id,business_name,business_email,contact_name,contact_phone,partner_type,regions,services,estimated_volume,sales_status,source,created_at,contract_reference,contract_verified_at&order=created_at.desc&limit=150");
@@ -348,12 +360,12 @@ Deno.serve(async req => {
         !Number.isFinite(amount) || amount<=0 || amount>50000 || Math.abs(Math.round(amount*100)-amount*100)>0.00001)
       return response({error:"Paramètres de proposition invalides"},422,origin);
     const [leadRes,partnerRes]=await Promise.all([
-      rest("leads?id=eq."+encodeURIComponent(leadId)+"&select=id,consent_to_share&limit=1"),
+      rest("leads?id=eq."+encodeURIComponent(leadId)+"&select=id,consent_to_share,consent_at,consent_version&limit=1"),
       rest("monforfait_partners?id=eq."+encodeURIComponent(partnerId)+"&select=id,sales_status,contract_verified_at&limit=1")
     ]);
     if (!leadRes.ok || !partnerRes.ok) return response({error:"Impossible de vérifier l'éligibilité commerciale."},503,origin);
     const [leads,partners]=await Promise.all([leadRes.json(),partnerRes.json()]);
-    if (!leads[0]?.consent_to_share) return response({error:"Prospect sans consentement documenté : proposition refusée."},403,origin);
+    if (!leads[0]?.consent_to_share||!leads[0]?.consent_at||!leads[0]?.consent_version) return response({error:"Prospect sans consentement documenté : proposition refusée."},403,origin);
     if (!["pilot","contracted","active"].includes(partners[0]?.sales_status))
       return response({error:"Le partenaire doit être en pilote, sous contrat ou actif."},403,origin);
     const r=await rest("monforfait_lead_sales",{
