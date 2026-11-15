@@ -360,12 +360,14 @@ Deno.serve(async req => {
         !Number.isFinite(amount) || amount<=0 || amount>50000 || Math.abs(Math.round(amount*100)-amount*100)>0.00001)
       return response({error:"Paramètres de proposition invalides"},422,origin);
     const [leadRes,partnerRes]=await Promise.all([
-      rest("leads?id=eq."+encodeURIComponent(leadId)+"&select=id,consent_to_share,consent_at,consent_version&limit=1"),
+      rest("leads?id=eq."+encodeURIComponent(leadId)+"&select=id,consent_to_share,consent_at,consent_version,sales_status&limit=1"),
       rest("monforfait_partners?id=eq."+encodeURIComponent(partnerId)+"&select=id,sales_status,contract_verified_at&limit=1")
     ]);
     if (!leadRes.ok || !partnerRes.ok) return response({error:"Impossible de vérifier l'éligibilité commerciale."},503,origin);
     const [leads,partners]=await Promise.all([leadRes.json(),partnerRes.json()]);
     if (!leads[0]?.consent_to_share||!leads[0]?.consent_at||!leads[0]?.consent_version) return response({error:"Prospect sans consentement documenté : proposition refusée."},403,origin);
+    if(!["qualified","contacted","partner_proposed"].includes(leads[0]?.sales_status))
+      return response({error:"Le prospect doit être qualifié avant une proposition commerciale."},403,origin);
     if (!["pilot","contracted","active"].includes(partners[0]?.sales_status))
       return response({error:"Le partenaire doit être en pilote, sous contrat ou actif."},403,origin);
     const r=await rest("monforfait_lead_sales",{
@@ -381,7 +383,7 @@ Deno.serve(async req => {
     const invoice=text(body.invoice_reference,140),payment=text(body.payment_reference,140);
     if (!idPattern.test(saleId) || !["accepted","activated","invoiced","paid","rejected"].includes(next))
       return response({error:"Étape commerciale invalide"},422,origin);
-    const oldRes=await rest("monforfait_lead_sales?id=eq."+encodeURIComponent(saleId)+"&select=id,sales_stage,invoice_reference,activated_at,invoiced_at,paid_at&limit=1");
+    const oldRes=await rest("monforfait_lead_sales?id=eq."+encodeURIComponent(saleId)+"&select=id,sales_stage,shared_at,invoice_reference,activated_at,invoiced_at,paid_at&limit=1");
     if(!oldRes.ok)return response({error:"Suivi indisponible"},503,origin);
     const before=(await oldRes.json())[0];
     if(!before)return response({error:"Dossier inconnu"},404,origin);
@@ -394,6 +396,8 @@ Deno.serve(async req => {
     };
     if(!moves[before.sales_stage]?.includes(next))
       return response({error:"Transition non autorisée depuis l'étape actuelle"},422,origin);
+    if(["activated","invoiced","paid"].includes(next)&&!before.shared_at)
+      return response({error:"Une mise en relation validée sous contrat est nécessaire avant activation ou facturation."},403,origin);
     if(next==="activated" && note.length<8)
       return response({error:"Renseignez la preuve de l'activation (référence ou note vérifiable)."},422,origin);
     if(next==="invoiced" && invoice.length<3)
@@ -457,12 +461,13 @@ Deno.serve(async req => {
     if(!sale||sale.sales_stage!=="accepted"||sale.shared_at)
       return response({error:"Seul un dossier accepté et non partagé peut être transmis."},403,origin);
     const [lr,pr]=await Promise.all([
-      rest("leads?id=eq."+sale.lead_id+"&select=id,consent_to_share,consent_at,consent_version&limit=1"),
+      rest("leads?id=eq."+sale.lead_id+"&select=id,consent_to_share,consent_at,consent_version,sales_status&limit=1"),
       rest("monforfait_partners?id=eq."+sale.partner_id+"&select=id,sales_status&limit=1")
     ]);
     if(!lr.ok||!pr.ok)return response({error:"Vérification indisponible."},503,origin);
     const lead=(await lr.json())[0],partner=(await pr.json())[0];
     if(!lead?.consent_to_share||!lead.consent_at||!lead.consent_version
+      ||!["qualified","contacted","partner_proposed"].includes(lead.sales_status)
       ||!partner||!["contracted","active"].includes(partner.sales_status)||!partner.contract_verified_at)
       return response({error:"Consentement documenté et partenaire sous contrat indispensables."},403,origin);
     const now=new Date(),expiry=new Date(now.getTime()+30*86400*1000);
