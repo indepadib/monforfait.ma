@@ -516,35 +516,18 @@ Deno.serve(async req => {
   if(body.action==="admin.sales.release"){
     const saleId=text(body.sale_id),contract=text(body.contract_reference,180);
     if(!idPattern.test(saleId)||contract.length<6)
-      return response({error:"Contrat de distribution signé et référence nécessaires."},422,origin);
-    const r=await rest("monforfait_lead_sales?id=eq."+saleId+
-      "&select=id,lead_id,partner_id,sales_stage,shared_at&limit=1");
-    if(!r.ok)return response({error:"Dossier indisponible."},503,origin);
-    const sale=(await r.json())[0];
-    if(!sale||sale.sales_stage!=="accepted"||sale.shared_at)
-      return response({error:"Seul un dossier accepté et non partagé peut être transmis."},403,origin);
-    const [lr,pr]=await Promise.all([
-      rest("leads?id=eq."+sale.lead_id+"&select=id,consent_to_share,consent_at,consent_version,sales_status&limit=1"),
-      rest("monforfait_partners?id=eq."+sale.partner_id+"&select=id,sales_status&limit=1")
-    ]);
-    if(!lr.ok||!pr.ok)return response({error:"Vérification indisponible."},503,origin);
-    const lead=(await lr.json())[0],partner=(await pr.json())[0];
-    if(!lead?.consent_to_share||!lead.consent_at||!lead.consent_version
-      ||!["qualified","contacted","partner_proposed"].includes(lead.sales_status)
-      ||!partner||!["contracted","active"].includes(partner.sales_status)||!partner.contract_verified_at)
-      return response({error:"Consentement documenté et partenaire sous contrat indispensables."},403,origin);
-    const now=new Date(),expiry=new Date(now.getTime()+30*86400*1000);
-    const update=await rest("monforfait_lead_sales?id=eq."+saleId+"&shared_at=is.null&sales_stage=eq.accepted",{
-      method:"PATCH",headers:restHeaders("return=representation"),
-      body:JSON.stringify({shared_at:now.toISOString(),shared_by:adminUserId,
-        contract_reference:contract,access_expires_at:expiry.toISOString()})
+      return response({error:"Une référence de contrat signé est obligatoire."},422,origin);
+    // Atomic DB operation locks the lead before the sale to serialize with
+    // self-service consent withdrawal; it also checks the partner account.
+    const r=await rest("rpc/monforfait_release_sale",{
+      method:"POST",
+      body:JSON.stringify({p_sale_id:saleId,p_admin_user:adminUserId,p_contract:contract})
     });
-    if(!update.ok)return response({error:"Transmission non enregistrée."},503,origin);
-    const updated=await update.json();
-    return response(updated.length===1?{success:true,shared_at:now.toISOString(),expires_at:expiry.toISOString()}
-      :{error:"Dossier déjà modifié."},updated.length===1?200:409,origin);
+    if(!r.ok)return response({error:"Transmission indisponible. Aucun accès n'a été confirmé."},503,origin);
+    const result=await r.json();
+    return response(result?.success?result:{error:result?.error||"Transmission refusée."},
+      result?.success?200:403,origin);
   }
-
 
   if(body.action==="admin.catalog.list"){
     const [plans,operators,audit]=await Promise.all([
