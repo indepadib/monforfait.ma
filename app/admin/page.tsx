@@ -3,6 +3,7 @@ import {useCallback,useEffect,useState} from 'react'
 import Link from 'next/link'
 import {supabase} from '@/lib/supabaseClient'
 import {AdminAnalytics} from '@/components/AdminAnalytics'
+import {AdminContactInbox} from '@/components/AdminContactInbox'
 import {AdminCatalogManager} from '@/components/AdminCatalogManager'
 import {AdminRevenuePipeline} from '@/components/AdminRevenuePipeline'
 import {AdminPartnerManager,type BusinessPartner} from '@/components/AdminPartnerManager'
@@ -167,6 +168,7 @@ export default function AdminDashboard(){
       <p className="text-xs text-zinc-500">{label}</p><p className="text-3xl md:text-4xl font-bold mt-2">{value}</p>
      </div>)}
    </section>
+   <AdminContactInbox/>
    <AdminAnalytics/>
    <AdminCatalogManager/>
    <section className="rounded-2xl bg-white border p-5 md:p-7 space-y-5">
