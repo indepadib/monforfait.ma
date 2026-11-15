@@ -24,7 +24,7 @@ export function B2BBanner() {
             <span className="text-blue-400">Pour Votre Entreprise</span>
           </h2>
           <p className="text-lg text-zinc-300 max-w-xl mb-8 leading-relaxed">
-            Flotte mobile, Fibre dédiée, ou standards téléphoniques. Obtenez un devis gratuit en 2 minutes et réduisez vos coûts de télécommunication de 30% en moyenne.
+            Flotte mobile, Fibre dédiée, ou standards téléphoniques. Décrivez vos besoins en connectivité professionnelle. Votre demande pourra être transmise avec votre accord à un partenaire adapté, sous réserve de sa disponibilité.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -54,18 +54,18 @@ export function B2BBanner() {
         {/* Highlight Stats Box */}
         <div className="w-full md:w-auto bg-black/40 backdrop-blur-md border border-white/10 p-6 rounded-2xl flex flex-col gap-6">
           <div>
-            <div className="text-sm text-zinc-400 mb-1 font-medium">Temps de réponse</div>
-            <div className="text-2xl font-black text-white">&lt; 30 minutes</div>
+            <div className="text-sm text-zinc-400 mb-1 font-medium">Prise de contact</div>
+            <div className="text-2xl font-black text-white">Selon la disponibilité du partenaire</div>
           </div>
           <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
           <div>
-            <div className="text-sm text-zinc-400 mb-1 font-medium">Bénéfice moyen</div>
-            <div className="text-2xl font-black text-green-400">-30% sur facture</div>
+            <div className="text-sm text-zinc-400 mb-1 font-medium">Économies</div>
+            <div className="text-2xl font-black text-green-400">À évaluer par devis</div>
           </div>
           <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
           <div>
-             <div className="text-sm text-zinc-400 mb-1 font-medium">Conseillers dédiés</div>
-             <div className="text-2xl font-black text-white">100% Gratuits</div>
+             <div className="text-sm text-zinc-400 mb-1 font-medium">Frais de comparaison</div>
+             <div className="text-2xl font-black text-white">Gratuit sur MonForfait</div>
           </div>
         </div>
       </div>

@@ -3,7 +3,6 @@
 import { ComparisonSection } from '@/components/ComparisonSection';
 import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { FAQ } from '@/components/FAQ';
-import { SavingsCalculator } from '@/components/SavingsCalculator';
 import { Navigation } from '@/components/Navigation';
 import Link from 'next/link';
 import { Sparkles, Target, Shield, Clock, ArrowRight } from 'lucide-react';
@@ -121,7 +120,7 @@ export function HomeClient() {
               <Target className="w-7 h-7" />
             </div>
             <h3 className="text-lg font-bold mb-2 text-zinc-900 dark:text-white">Recommandations personnalisées</h3>
-            <p className="text-zinc-600 dark:text-zinc-400">Notre quiz trouve le meilleur forfait adapté à VOS besoins (Fibre, forfait pas cher) en 60 secondes.</p>
+            <p className="text-zinc-600 dark:text-zinc-400">Notre quiz vous aide à préciser vos besoins en fibre ou en mobile et à comparer les tarifs publiés.</p>
           </div>
           <div className="text-center">
             <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-green-600">
@@ -134,15 +133,10 @@ export function HomeClient() {
             <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-purple-600">
               <Clock className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-bold mb-2 text-zinc-900 dark:text-white">Prix vérifiés quotidiennement</h3>
-            <p className="text-zinc-600 dark:text-zinc-400">Nos données télécom sont mises à jour chaque jour pour vous garantir les meilleurs tarifs du marché.</p>
+            <h3 className="text-lg font-bold mb-2 text-zinc-900 dark:text-white">Tarifs publics sourcés</h3>
+            <p className="text-zinc-600 dark:text-zinc-400">Chaque offre active dispose d'une source officielle et d'une date de vérification. Les conditions peuvent évoluer.</p>
           </div>
         </div>
-      </section>
-
-      {/* Savings Calculator */}
-      <section aria-label="Calculateur d'économies" className="max-w-4xl mx-auto px-4 py-8 md:py-16">
-        <SavingsCalculator />
       </section>
 
       {/* B2B Banner Offer */}
