@@ -19,13 +19,13 @@ function OffersContent() {
     const rawCategory = searchParams.get('category') || searchParams.get('type') || 'all'
     const initialCategory = rawCategory === 'mobile' ? 'mobile' :
       ['fibre','adsl','box','internet','ftth','4g','5g'].includes(rawCategory.toLowerCase()) ? 'internet' : 'all'
-    const initialSort = searchParams.get('sort') || 'recommended'
+    const initialSort = ['price_asc','price_desc','data_desc','speed_desc'].includes(searchParams.get('sort')||'') ? searchParams.get('sort')! : 'price_asc'
 
     const [offers, setOffers] = useState<OfferProps[]>([])
     const [loading, setLoading] = useState(true)
     const [category, setCategory] = useState(initialCategory)
     const [sort, setSort] = useState(initialSort)
-    const [searchQuery, setSearchQuery] = useState('')
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('q')||'')
 
     useEffect(() => {
         loadOffers()
@@ -34,11 +34,12 @@ function OffersContent() {
     useEffect(() => {
         const params = new URLSearchParams()
         if (category !== 'all') params.set('category', category)
-        if (sort !== 'recommended') params.set('sort', sort)
+        if (sort !== 'price_asc') params.set('sort', sort)
+        if (searchQuery.trim()) params.set('q',searchQuery.trim())
 
         const newPath = `/offers${params.toString() ? `?${params.toString()}` : ''}`
-        router.push(newPath, { scroll: false })
-    }, [category, sort, router])
+        router.replace(newPath, { scroll: false })
+    }, [category, sort, searchQuery, router])
 
     async function loadOffers() {
         setLoading(true)
@@ -100,7 +101,7 @@ function OffersContent() {
             if (sort === 'price_desc') return b.price_dh - a.price_dh
             if (sort === 'data_desc') return (b.mobile_data_gb || 0) - (a.mobile_data_gb || 0)
             if (sort === 'speed_desc') return (b.download_speed || 0) - (a.download_speed || 0)
-            return 0 // Recommended (default DB order or custom score logic)
+            return a.price_dh - b.price_dh // Deterministic: no unverifiable recommendation algorithm
         })
 
     return (
