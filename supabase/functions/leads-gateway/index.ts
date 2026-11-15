@@ -206,10 +206,10 @@ Deno.serve(async req => {
     const access=await authorizePartner(req);
     if(!access)return response({error:"Compte partenaire non autorisé."},403,origin);
     const partnerRes=await rest("monforfait_partners?id=eq."+access.partnerId+
-      "&select=id,business_name,partner_type,sales_status,business_email&limit=1");
+      "&select=id,business_name,partner_type,sales_status,business_email,contract_verified_at&limit=1");
     if(!partnerRes.ok)return response({error:"Partenaire indisponible"},503,origin);
     const partner=(await partnerRes.json())[0];
-    if(!partner||!["contracted","active"].includes(partner.sales_status))
+    if(!partner||!["contracted","active"].includes(partner.sales_status)||!partner.contract_verified_at)
       return response({error:"Accès partenaire en attente de contrat."},403,origin);
     if(body.action==="partner.profile")return response({success:true,partner},200,origin);
     const now=new Date().toISOString();
@@ -310,16 +310,25 @@ Deno.serve(async req => {
       r.ok?200:404,origin);
   }
   if (body.action === "admin.partners") {
-    const r=await rest("monforfait_partners?select=id,business_name,business_email,contact_name,contact_phone,partner_type,regions,services,estimated_volume,sales_status,source,created_at&order=created_at.desc&limit=150");
+    const r=await rest("monforfait_partners?select=id,business_name,business_email,contact_name,contact_phone,partner_type,regions,services,estimated_volume,sales_status,source,created_at,contract_reference,contract_verified_at&order=created_at.desc&limit=150");
     return response(r.ok?{success:true,partners:await r.json()}:{error:"Database unavailable"},r.ok?200:503,origin);
   }
   if (body.action === "admin.update_partner") {
     const partnerId=text(body.partner_id);
     const status=text(body.sales_status);
     const allowed=["prospect","inbound","contacted","pilot","contracted","active","rejected"];
+    const contractReference=text(body.contract_reference,180);
     if (!idPattern.test(partnerId)||!allowed.includes(status)) return response({error:"Invalid partner status"},422,origin);
+    if(["contracted","active"].includes(status)&&contractReference.length<6)
+      return response({error:"Référence du contrat signé obligatoire avant activation."},422,origin);
+    const changes:Record<string,unknown>={sales_status:status};
+    if(["contracted","active"].includes(status)){
+      changes.contract_reference=contractReference;
+      changes.contract_verified_at=new Date().toISOString();
+      changes.contract_verified_by=adminUserId;
+    }
     const r=await rest("monforfait_partners?id=eq."+encodeURIComponent(partnerId),{
-      method:"PATCH",headers:restHeaders("return=minimal"),body:JSON.stringify({sales_status:status})
+      method:"PATCH",headers:restHeaders("return=minimal"),body:JSON.stringify(changes)
     });
     return response(r.ok?{success:true}:{error:"Update failed"},r.ok?200:503,origin);
   }
@@ -340,7 +349,7 @@ Deno.serve(async req => {
       return response({error:"Paramètres de proposition invalides"},422,origin);
     const [leadRes,partnerRes]=await Promise.all([
       rest("leads?id=eq."+encodeURIComponent(leadId)+"&select=id,consent_to_share&limit=1"),
-      rest("monforfait_partners?id=eq."+encodeURIComponent(partnerId)+"&select=id,sales_status&limit=1")
+      rest("monforfait_partners?id=eq."+encodeURIComponent(partnerId)+"&select=id,sales_status,contract_verified_at&limit=1")
     ]);
     if (!leadRes.ok || !partnerRes.ok) return response({error:"Impossible de vérifier l'éligibilité commerciale."},503,origin);
     const [leads,partners]=await Promise.all([leadRes.json(),partnerRes.json()]);
@@ -394,11 +403,11 @@ Deno.serve(async req => {
     const partnerId=text(body.partner_id);
     if(!idPattern.test(partnerId))return response({error:"Partenaire invalide."},422,origin);
     const r=await rest("monforfait_partners?id=eq."+partnerId+
-      "&select=id,business_name,business_email,sales_status&limit=1");
+      "&select=id,business_name,business_email,sales_status,contract_verified_at&limit=1");
     if(!r.ok)return response({error:"Partenaire indisponible."},503,origin);
     const partner=(await r.json())[0];
     if(!partner||!["contracted","active"].includes(partner.sales_status)
-      ||!text(partner.business_email))return response({error:"Un partenaire sous contrat avec email vérifié est requis."},422,origin);
+      ||!text(partner.business_email)||!partner.contract_verified_at)return response({error:"Un partenaire sous contrat avec email vérifié est requis."},422,origin);
     const users=await fetch(supabaseUrl+"/auth/v1/admin/users?page=1&per_page=200",{
       headers:{"apikey":serviceKey,"Authorization":"Bearer "+serviceKey}
     });
@@ -442,7 +451,7 @@ Deno.serve(async req => {
     if(!lr.ok||!pr.ok)return response({error:"Vérification indisponible."},503,origin);
     const lead=(await lr.json())[0],partner=(await pr.json())[0];
     if(!lead?.consent_to_share||!lead.consent_at||!lead.consent_version
-      ||!partner||!["contracted","active"].includes(partner.sales_status))
+      ||!partner||!["contracted","active"].includes(partner.sales_status)||!partner.contract_verified_at)
       return response({error:"Consentement documenté et partenaire sous contrat indispensables."},403,origin);
     const now=new Date(),expiry=new Date(now.getTime()+30*86400*1000);
     const update=await rest("monforfait_lead_sales?id=eq."+saleId+"&shared_at=is.null&sales_stage=eq.accepted",{
