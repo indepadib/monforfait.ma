@@ -3,6 +3,7 @@ import {useCallback,useEffect,useState} from 'react'
 import Link from 'next/link'
 import {supabase} from '@/lib/supabaseClient'
 import {AdminAnalytics} from '@/components/AdminAnalytics'
+import {AdminCatalogManager} from '@/components/AdminCatalogManager'
 import {AdminRevenuePipeline} from '@/components/AdminRevenuePipeline'
 import {AdminPartnerManager,type BusinessPartner} from '@/components/AdminPartnerManager'
 import {Search,ShieldCheck,RefreshCcw,Download,LogOut,Filter,ChevronLeft,ChevronRight} from 'lucide-react'
@@ -167,6 +168,7 @@ export default function AdminDashboard(){
      </div>)}
    </section>
    <AdminAnalytics/>
+   <AdminCatalogManager/>
    <section className="rounded-2xl bg-white border p-5 md:p-7 space-y-5">
     <div className="flex flex-wrap justify-between gap-3 items-start">
      <div><h2 className="text-2xl font-bold">Demandes et qualification</h2><p className="mt-1 text-sm text-zinc-500">{total} résultats selon filtres. Recherche sur la base entière, pas seulement la page courante.</p></div>
