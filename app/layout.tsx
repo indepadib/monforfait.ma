@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import "./globals.css";
 import { CompareBar } from '@/components/CompareBar';
 import { CookieConsent } from '@/components/CookieConsent';
+import { ConsentControlledScripts } from '@/components/ConsentControlledScripts';
 import { Footer } from '@/components/Footer';
 import { StickyMobileFooter } from '@/components/StickyMobileFooter';
 import { AgentChatbot } from '@/components/AgentChatbot';
@@ -104,30 +104,6 @@ export default function RootLayout({
             }),
           }}
         />
-        {/* Google Analytics is only loaded when configured. */}
-        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && <><Script
-          strategy="lazyOnload"
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
-        />
-        <Script
-          id="google-analytics"
-          strategy="lazyOnload"
-        >
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
-          `}
-        </Script>
-        </>}
-        {/* Google AdSense */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5443016381737012"
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
       </head>
       <body className="antialiased">
         <LocaleProvider>
@@ -135,6 +111,7 @@ export default function RootLayout({
           <AgentChatbot />
           <Footer />
           <CookieConsent />
+          <ConsentControlledScripts />
           <CompareBar />
           <StickyMobileFooter />
         </LocaleProvider>

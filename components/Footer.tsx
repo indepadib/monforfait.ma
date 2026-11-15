@@ -27,6 +27,7 @@ export function Footer() {
                         <h4 className="font-bold text-zinc-900 dark:text-white mb-4">{t('footer_nav')}</h4>
                         <ul className="space-y-2 text-sm text-zinc-500">
                             <li><Link href="/offers" className="hover:text-blue-600 transition-colors">{t('nav_offers')}</Link></li>
+                            <li><Link href="/suivi" className="hover:text-blue-600 transition-colors">Suivre ma demande</Link></li>
                             <li><Link href="/quiz" className="hover:text-blue-600 transition-colors">{t('nav_quiz')}</Link></li>
                             <li><Link href="/compare" className="hover:text-blue-600 transition-colors">{t('nav_comparator')}</Link></li>
                             <li><Link href="/blog" className="hover:text-blue-600 transition-colors">Blog & Actualités</Link></li>
@@ -52,6 +53,7 @@ export function Footer() {
                             <li><Link href="/legal/mentions" className="hover:text-blue-600 transition-colors font-sans">Mentions Légales</Link></li>
                             <li><Link href="/legal/privacy" className="hover:text-blue-600 transition-colors font-sans">Confidentialité</Link></li>
                             <li><Link href="/legal/cgu" className="hover:text-blue-600 transition-colors font-sans">Conditions Générales</Link></li>
+                            <li><Link href="/espace-partenaire" className="hover:text-blue-600 transition-colors">Espace partenaire</Link></li>
                             <li><Link href="/contact" className="hover:text-blue-600 transition-colors font-sans">Contact</Link></li>
                         </ul>
                     </div>
@@ -62,7 +64,8 @@ export function Footer() {
                         &copy; {new Date().getFullYear()} {t('footer_rights')}
                     </div>
                     <div className="flex items-center gap-4">
-                        {/* Social links */}
+                        <button type="button" onClick={()=>window.dispatchEvent(new Event('monforfait:open-cookie-settings'))}
+  className="text-sm text-blue-600 dark:text-blue-300 hover:underline">Préférences de confidentialité</button>
                     </div>
                 </div>
             </div>

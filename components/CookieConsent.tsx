@@ -1,64 +1,34 @@
-"use client"
+'use client'
+import {useEffect,useState} from 'react'
+import {Cookie,ShieldCheck} from 'lucide-react'
+import Link from 'next/link'
+import {useTranslation} from '@/lib/LocaleContext'
 
-import { useState, useEffect } from 'react'
-import { Cookie, X } from 'lucide-react'
-import { useTranslation } from '@/lib/LocaleContext'
-
-export function CookieConsent() {
-    const { t, isRtl } = useTranslation()
-    const [show, setShow] = useState(false)
-
-    useEffect(() => {
-        const consent = localStorage.getItem('monforfait_cookie_consent')
-        if (!consent) {
-            // Delay slightly to not annoy immediately
-            setTimeout(() => setShow(true), 1000)
-        }
-    }, [])
-
-    function accept() {
-        localStorage.setItem('monforfait_cookie_consent', 'accepted')
-        setShow(false)
-    }
-
-    if (!show) return null
-
-    return (
-        <div className={`fixed bottom-20 md:bottom-24 ${isRtl ? 'left-4 md:left-4 md:right-auto' : 'left-4 right-4 md:left-auto md:right-4'} max-w-sm z-40 animate-in slide-in-from-bottom-5 fade-in duration-500`} dir={isRtl ? 'rtl' : 'ltr'}>
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-2xl border border-zinc-200 dark:border-zinc-800 relative">
-                <button
-                    onClick={() => setShow(false)}
-                    className={`absolute top-2 ${isRtl ? 'left-2' : 'right-2'} p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-white`}
-                >
-                    <X className="w-4 h-4" />
-                </button>
-
-                <div className="flex items-start gap-4">
-                    <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl shrink-0">
-                        <Cookie className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="text-start">
-                        <h3 className="font-bold text-zinc-900 dark:text-white mb-1">{t('cookie_title')}</h3>
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 leading-relaxed">
-                            {t('cookie_desc')}
-                        </p>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={accept}
-                                className="flex-1 px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-bold rounded-lg hover:opacity-90 transition-opacity"
-                            >
-                                {t('cookie_accept')}
-                            </button>
-                            <button
-                                onClick={() => setShow(false)}
-                                className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm font-bold rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-                            >
-                                {t('cookie_refuse')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
+export function CookieConsent(){
+ const {isRtl}=useTranslation()
+ const [show,setShow]=useState(false)
+ useEffect(()=>{
+  const previous=window.localStorage.getItem('monforfait_cookie_consent')
+  if(previous!=='accepted'&&previous!=='refused')setShow(true)
+  const open=()=>setShow(true)
+  window.addEventListener('monforfait:open-cookie-settings',open)
+  return()=>window.removeEventListener('monforfait:open-cookie-settings',open)
+ },[])
+ function choose(value:'accepted'|'refused'){
+  const before=window.localStorage.getItem('monforfait_cookie_consent')
+  window.localStorage.setItem('monforfait_cookie_consent',value)
+  window.dispatchEvent(new Event('monforfait:analytics-consent-changed'))
+  setShow(false)
+  if(before==='accepted'&&value==='refused')window.location.reload()
+ }
+ if(!show)return null
+ return <aside aria-label="Préférences de confidentialité" className={`fixed bottom-20 ${isRtl?'left-3':'right-3'} z-[95] w-[calc(100%-1.5rem)] sm:max-w-sm rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6 shadow-2xl`} dir={isRtl?'rtl':'ltr'}>
+  <div className="flex items-center gap-3"><Cookie className="w-7 h-7 text-blue-600"/><h2 className="font-bold text-lg text-zinc-900 dark:text-white">Vos choix de confidentialité</h2></div>
+  <p className="text-sm text-zinc-600 dark:text-zinc-300 mt-3 leading-relaxed">Les cookies strictement nécessaires permettent le fonctionnement du site. Avec votre accord, nous pouvons activer les statistiques de fréquentation et les services publicitaires tiers. Le refus n'empêche pas de comparer les offres.</p>
+  <p className="flex gap-2 items-start text-xs text-zinc-500 mt-3"><ShieldCheck className="w-4 h-4 shrink-0"/>Vous pouvez modifier votre choix dans le pied de page. <Link href="/legal/privacy" className="underline text-blue-600">Confidentialité</Link>.</p>
+  <div className="mt-5 grid grid-cols-2 gap-3">
+   <button type="button" onClick={()=>choose('refused')} className="rounded-xl border border-zinc-300 dark:border-zinc-600 px-3 py-3 text-sm font-semibold text-zinc-900 dark:text-white">Tout refuser</button>
+   <button type="button" onClick={()=>choose('accepted')} className="rounded-xl bg-blue-600 px-3 py-3 text-sm font-semibold text-white">Tout accepter</button>
+  </div>
+ </aside>
 }

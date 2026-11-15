@@ -136,7 +136,7 @@ function QuizContent() {
             const fullContext = {
                 ...answers,
                 city,
-                leadData,
+                leadData: {name:leadData.name},
                 leadId: data?.[0]?.id
             }
             sessionStorage.setItem('quiz_answers', JSON.stringify(fullContext))
