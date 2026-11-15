@@ -1,161 +1,77 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from 'react';
-import { Search, AlertTriangle, CheckCircle2, ShieldAlert, ArrowRight, Loader2, Zap } from 'lucide-react';
-import { PromoUnlockerForm } from './PromoUnlockerForm';
-import { event } from '@/lib/analytics';
-import { useTranslation } from '@/lib/LocaleContext';
+import { useEffect,useMemo,useState } from 'react'
+import Link from 'next/link'
+import { supabase } from '@/lib/supabaseClient'
+import { Search, ArrowRight, ShieldCheck } from 'lucide-react'
 
-export function ScamDetector() {
-    const { locale, t, isRtl } = useTranslation();
-    const [step, setStep] = useState<'input' | 'scanning' | 'result'>('input');
-    const [operator, setOperator] = useState('');
-    const [price, setPrice] = useState('');
-    const [progress, setProgress] = useState(0);
-    const [showUnlocker, setShowUnlocker] = useState(false);
-
-    useEffect(() => {
-        if (step === 'scanning') {
-            const interval = setInterval(() => {
-                setProgress(p => {
-                    if (p >= 100) {
-                        clearInterval(interval);
-                        setStep('result');
-                        event({ action: 'scam_scan_completed', category: 'engagement', label: operator, value: Number(price) });
-                        return 100;
-                    }
-                    return p + Math.floor(Math.random() * 15) + 5;
-                });
-            }, 300);
-            return () => clearInterval(interval);
-        }
-    }, [step, operator, price]);
-
-    const handleScan = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!operator || !price) return;
-        setStep('scanning');
-        setProgress(0);
-        event({ action: 'scam_scan_started', category: 'engagement', label: operator });
-    };
-
-    if (showUnlocker) {
-        return (
-            <div className="bg-white dark:bg-zinc-950 p-6 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in fade-in zoom-in-95 duration-500">
-                <PromoUnlockerForm />
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-white/10 dark:bg-zinc-900/50 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/20 dark:border-zinc-700 shadow-2xl relative overflow-hidden text-zinc-900 dark:text-white">
-            
-            <div className={`absolute top-0 ${isRtl ? 'left-0' : 'right-0'} p-4 opacity-10 pointer-events-none`}>
-                <ShieldAlert className="w-48 h-48" />
-            </div>
-
-            {step === 'input' && (
-                <div className="relative z-10 animate-in fade-in duration-500">
-                    <div className={`flex items-center justify-between mb-6 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                        <div className={`flex items-center gap-2 text-red-500 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                            <Zap className="w-6 h-6 animate-pulse" />
-                            <h3 className="font-black text-xl uppercase tracking-wider">{t('scam_title')}</h3>
-                        </div>
-                        <div className={`flex items-center gap-1.5 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded-lg text-[10px] font-bold text-green-500 uppercase ${isRtl ? 'flex-row-reverse' : ''}`}>
-                            <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
-                            Live
-                        </div>
-                    </div>
-
-                    
-                    <form onSubmit={handleScan} className="space-y-4">
-                        <div className={isRtl ? 'text-right' : 'text-left'}>
-                            <label className="block text-sm font-bold mb-2 text-zinc-300">{t('scam_label_operator')}</label>
-                            <select 
-                                required
-                                value={operator}
-                                onChange={e => setOperator(e.target.value)}
-                                className={`w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-red-500 outline-none appearance-none ${isRtl ? 'text-right' : ''}`}
-                            >
-                                <option value="" disabled>{t('scam_select')}</option>
-                                <option value="Orange">{locale === 'ar' ? 'أورنج (Orange)' : 'Orange'}</option>
-                                <option value="Maroc Telecom">{locale === 'ar' ? 'اتصالات المغرب (IAM)' : 'Maroc Telecom (IAM)'}</option>
-                                <option value="Inwi">{locale === 'ar' ? 'إنوي (Inwi)' : 'Inwi'}</option>
-                            </select>
-                        </div>
-                        <div className={isRtl ? 'text-right' : 'text-left'}>
-                            <label className="block text-sm font-bold mb-2 text-zinc-300">{t('scam_label_price')}</label>
-                            <input 
-                                type="number" 
-                                required
-                                min="0"
-                                placeholder="ex: 349"
-                                value={price}
-                                onChange={e => setPrice(e.target.value)}
-                                className={`w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-red-500 outline-none placeholder:text-zinc-600 ${isRtl ? 'text-right' : ''}`}
-                            />
-                        </div>
-                        
-                        <button 
-                            type="submit"
-                            className={`w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all hover:scale-[1.02] flex items-center justify-center gap-2 uppercase tracking-wide ${isRtl ? 'flex-row-reverse' : ''}`}
-                        >
-                            {t('scam_btn_scan')}
-                            <Search className="w-5 h-5" />
-                        </button>
-                    </form>
-                    <p className="text-center text-xs text-zinc-400 mt-4">{t('scam_footer')}</p>
-                </div>
-            )}
-
-            {step === 'scanning' && (
-                <div className="relative z-10 py-10 text-center animate-in slide-in-from-right-4 duration-500">
-                    <Loader2 className="w-16 h-16 animate-spin text-red-500 mx-auto mb-6" />
-                    <h3 className="text-xl font-bold mb-2 text-white">{t('scam_scanning')}</h3>
-                    <p className="text-zinc-400 text-sm mb-8 h-6">
-                        {progress < 30 && t('scam_step_connect')}
-                        {progress >= 30 && progress < 60 && t('scam_step_b2b')}
-                        {progress >= 60 && progress < 90 && t('scam_step_margin')}
-                        {progress >= 90 && t('scam_step_report')}
-                    </p>
-                    <div className="w-full bg-black/50 rounded-full h-3 mb-2 overflow-hidden border border-white/10">
-                        <div className="bg-gradient-to-r from-red-600 to-orange-500 h-3 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
-                    </div>
-                    <p className={`${isRtl ? 'text-left' : 'text-right'} text-xs font-bold font-mono text-red-400`}>{progress}%</p>
-                </div>
-            )}
-
-            {step === 'result' && (
-                <div className="relative z-10 animate-in zoom-in-95 duration-700">
-                    <div className="bg-red-500/10 border border-red-500/50 rounded-2xl p-6 text-center mb-6">
-                        <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4 animate-pulse" />
-                        <h3 className="text-2xl font-black text-white mb-2">{t('scam_alert_title')}</h3>
-                        <p className="text-red-200">
-                            {t('scam_alert_desc').replace('{price}', price).replace('{operator}', locale === 'ar' ? (operator === 'Orange' ? 'أورنج' : operator === 'Inwi' ? 'إنوي' : 'اتصالات المغرب') : operator)}
-                        </p>
-                    </div>
-
-                    <div className="space-y-3 mb-6">
-                        <div className={`flex items-center gap-3 text-sm text-zinc-300 bg-white/5 p-3 rounded-lg border border-white/5 ${isRtl ? 'flex-row-reverse text-right' : ''}`}>
-                            <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
-                            <span>{t('scam_match_1')}</span>
-                        </div>
-                        <div className={`flex items-center gap-3 text-sm text-zinc-300 bg-white/5 p-3 rounded-lg border border-white/5 ${isRtl ? 'flex-row-reverse text-right' : ''}`}>
-                            <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
-                            <span>{t('scam_match_2').replace('{savings}', Math.floor(Number(price) * 0.45 * 12).toString())}</span>
-                        </div>
-                    </div>
-
-                    <button 
-                        onClick={() => setShowUnlocker(true)}
-                        className={`w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all hover:scale-[1.02] flex items-center justify-center gap-2 uppercase animate-bounce ${isRtl ? 'flex-row-reverse' : ''}`}
-                    >
-                        {t('scam_btn_prove')}
-                        <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
-                    </button>
-                    <p className="text-center text-xs text-zinc-500 mt-4">Accès limité à la base de données privée.</p>
-                </div>
-            )}
-        </div>
-    );
+type Offer={
+ id:string;title:string;price_dh:number;category:string;technology:string|null;
+ download_speed_mbps:number|null;source_url:string|null;source_checked_at:string|null;
+ operators:{name:string}|null
+}
+export function ScamDetector(){
+ const [type,setType]=useState('fibre')
+ const [speed,setSpeed]=useState('100')
+ const [monthly,setMonthly]=useState('')
+ const [offers,setOffers]=useState<Offer[]>([])
+ const [status,setStatus]=useState<'loading'|'ready'|'error'>('loading')
+ const [show,setShow]=useState(false)
+ useEffect(()=>{
+  let mounted=true
+  ;(async()=>{
+   const {data,error}=await supabase.from('plans')
+      .select('id,title,price_dh,category,technology,download_speed_mbps,source_url,source_checked_at,operators(name)')
+      .eq('is_active',true).limit(100)
+   if(mounted){setStatus(error?'error':'ready');setOffers((data||[]) as unknown as Offer[])}
+  })()
+  return ()=>{mounted=false}
+ },[])
+ const matched=useMemo(()=>offers.filter(o=>type==='fibre'
+   ? o.category==='internet'&&o.technology==='FTTH'&&o.download_speed_mbps===Number(speed)
+   : o.category==='mobile').sort((a,b)=>Number(a.price_dh)-Number(b.price_dh)),[offers,type,speed])
+ const price=Number(monthly)
+ const valid=Number.isFinite(price)&&price>0&&price<50000
+ const cheap=matched[0]
+ const difference=cheap&&valid?Math.max(0,price-Number(cheap.price_dh)):0
+ return <section className="rounded-3xl border border-white/10 bg-zinc-900/80 p-6 sm:p-8 text-white shadow-xl">
+  <div className="flex items-center gap-2 text-blue-300 mb-3 text-xs font-black uppercase tracking-widest">
+   <Search className="w-4 h-4"/> Comparateur de prix publics
+  </div>
+  <h2 className="text-2xl sm:text-3xl font-black mb-3">Votre forfait actuel est-il compétitif ?</h2>
+  <p className="text-zinc-300 text-sm mb-6">Comparez votre facture à des tarifs annoncés sur les sites officiels. Nous ne testons pas votre réseau et ne disposons pas de tarifs privés cachés.</p>
+  <form onSubmit={e=>{e.preventDefault();setShow(true)}} className="space-y-4">
+   <label className="block text-sm font-semibold">Votre type d'abonnement
+    <select value={type} onChange={e=>{setType(e.target.value);setShow(false)}} className="mt-2 block w-full rounded-xl bg-zinc-800 border border-white/20 px-4 py-3">
+     <option value="fibre">Fibre optique</option><option value="mobile">Forfait mobile</option>
+    </select>
+   </label>
+   {type==='fibre'&&<label className="block text-sm font-semibold">Débit de référence
+    <select value={speed} onChange={e=>{setSpeed(e.target.value);setShow(false)}} className="mt-2 block w-full rounded-xl bg-zinc-800 border border-white/20 px-4 py-3">
+     {[20,50,100,200,500,1000].map(n=><option key={n} value={n}>{n===1000?'1 Gb/s':n+' Mb/s'}</option>)}
+    </select>
+   </label>}
+   <label className="block text-sm font-semibold">Votre mensualité actuelle en DH
+    <input required type="number" min={1} max={50000} step="1" value={monthly} onChange={e=>{setMonthly(e.target.value);setShow(false)}}
+     placeholder="Ex : 349" className="mt-2 block w-full rounded-xl bg-zinc-800 border border-white/20 px-4 py-3 text-white"/>
+   </label>
+   <button type="submit" disabled={status!=='ready'||!valid} className="w-full rounded-xl bg-blue-600 hover:bg-blue-500 py-4 px-5 font-bold disabled:opacity-50">
+    {status==='loading'?'Chargement des tarifs…':'Comparer avec les tarifs publics'}
+   </button>
+  </form>
+  {status==='error'&&<p role="alert" className="mt-4 text-amber-300 text-sm">Catalogue temporairement indisponible. Consultez la page des offres.</p>}
+  {show&&status==='ready'&&<div className="mt-6 rounded-xl border border-blue-400/20 bg-blue-950/30 p-5 space-y-3">
+    <p className="text-sm text-zinc-300">Pour {type==='fibre'?speed+' Mb/s':'les forfaits mobiles'} : {matched.length} tarif(s) public(s) répertorié(s).</p>
+    {cheap?<><p className="text-xl font-bold">Prix le plus bas dans cette sélection : {Number(cheap.price_dh)} DH/mois</p>
+      <p className="text-sm">Écart arithmétique avec votre facture : {difference.toFixed(0)} DH/mois. {type==='mobile'?'Les volumes de data et d’appels varient selon les offres.':'Le débit annoncé ne suffit pas à démontrer une équivalence de service.'}</p>
+      {cheap.source_url&&<a href={cheap.source_url} target="_blank" rel="noopener noreferrer" className="text-sm underline text-blue-300">Vérifier le tarif sur le site officiel</a>}
+    </>:<p className="text-sm">Aucun tarif vérifié dans cette catégorie pour l’instant.</p>}
+    <p className="text-xs text-zinc-300">Il ne s'agit pas d'une économie garantie. L'éligibilité, les frais, les options et les conditions contractuelles peuvent modifier la comparaison.</p>
+  </div>}
+  <div className="mt-5 flex flex-wrap gap-3 items-center">
+    <Link href="/offers" className="inline-flex items-center gap-2 font-bold text-sm text-blue-300">Toutes les offres <ArrowRight className="w-4 h-4"/></Link>
+    <Link href="/eligibilite" className="inline-flex items-center gap-2 text-sm text-zinc-200">Demander un rappel</Link>
+  </div>
+  <p className="mt-5 flex gap-2 text-xs text-zinc-400"><ShieldCheck className="w-4 h-4 shrink-0"/>Aucune donnée personnelle n'est nécessaire pour cette comparaison.</p>
+ </section>
 }
