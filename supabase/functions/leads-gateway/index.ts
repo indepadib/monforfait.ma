@@ -50,6 +50,22 @@ async function authorizePartner(req:Request):Promise<{userId:string,partnerId:st
   const row=(await r.json())[0];
   return row?.partner_id&&idPattern.test(row.partner_id)?{userId,partnerId:row.partner_id}:null;
 }
+
+function verifiedSource(url:unknown,operator:string){
+  const raw=text(url,500);
+  try{
+    const parsed=new URL(raw);
+    if(parsed.protocol!=="https:" || parsed.username || parsed.password || parsed.port)return null;
+    const host=parsed.hostname.toLowerCase();
+    const allowed:Record<string,string[]>={
+      "Inwi":["inwi.ma"],"Orange Morocco":["orange.ma"],
+      "Maroc Telecom":["iam.ma"]
+    };
+    if(!(allowed[operator]||[]).some(domain=>host===domain||host.endsWith("."+domain)))return null;
+    return parsed.toString();
+  }catch{return null}
+}
+
 async function sha256(input:string):Promise<string>{
   const bytes=new TextEncoder().encode(input);
   return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)),
@@ -463,6 +479,80 @@ Deno.serve(async req => {
     const updated=await update.json();
     return response(updated.length===1?{success:true,shared_at:now.toISOString(),expires_at:expiry.toISOString()}
       :{error:"Dossier déjà modifié."},updated.length===1?200:409,origin);
+  }
+
+
+  if(body.action==="admin.catalog.list"){
+    const [plans,operators,audit]=await Promise.all([
+      rest("plans?select=id,title,operator_id,category,technology,download_speed_mbps,mobile_data_gb,voice_minutes,price_dh,is_active,source_url,source_checked_at,operators(id,name)&order=source_checked_at.desc.nullslast&limit=200"),
+      rest("operators?select=id,name&order=name.asc"),
+      rest("monforfait_catalog_audit?select=id,plan_id,action,old_price_dh,new_price_dh,created_at&order=created_at.desc&limit=70")
+    ]);
+    if(!plans.ok||!operators.ok||!audit.ok)return response({error:"Catalogue interne indisponible"},503,origin);
+    return response({success:true,plans:await plans.json(),operators:await operators.json(),audit:await audit.json()},200,origin);
+  }
+  if(body.action==="admin.catalog.create"||body.action==="admin.catalog.update"){
+    const id=text(body.plan_id,64),operatorId=text(body.operator_id,64);
+    const title=text(body.title,140),amount=Number(body.price_dh);
+    const category=text(body.category,20);
+    const speed=Number(body.download_speed_mbps),dataGb=Number(body.mobile_data_gb);
+    if(title.length<3||!Number.isFinite(amount)||amount<=0||amount>3000||
+       Math.abs(amount*100-Math.round(amount*100))>0.00001)
+      return response({error:"Nom et prix valide obligatoires."},422,origin);
+    let existing:Record<string,unknown>|null=null;
+    if(body.action==="admin.catalog.update"){
+      if(!idPattern.test(id))return response({error:"Référence invalide."},422,origin);
+      const r=await rest("plans?id=eq."+id+"&select=id,title,operator_id,category&limit=1");
+      if(!r.ok)return response({error:"Offre introuvable."},503,origin);
+      existing=(await r.json())[0]||null;
+      if(!existing)return response({error:"Offre introuvable."},404,origin);
+    }else{
+      if(!idPattern.test(operatorId)||!["internet","mobile"].includes(category))
+        return response({error:"Opérateur et catégorie requis."},422,origin);
+      if(category==="internet"&&(!Number.isInteger(speed)||speed<1||speed>2000))
+        return response({error:"Débit fibre valide requis."},422,origin);
+      if(category==="mobile"&&(!Number.isInteger(dataGb)||dataGb<1||dataGb>1000))
+        return response({error:"Data mobile valide requise."},422,origin);
+    }
+    const operator=await rest("operators?id=eq."+(existing?.operator_id||operatorId)+"&select=id,name&limit=1");
+    if(!operator.ok)return response({error:"Opérateur introuvable."},503,origin);
+    const op=(await operator.json())[0];
+    if(!op)return response({error:"Opérateur inconnu."},404,origin);
+    const url=verifiedSource(body.source_url,op.name);
+    if(!url)return response({error:"Une URL officielle HTTPS du bon opérateur est obligatoire."},422,origin);
+    const now=new Date().toISOString();
+    const changed=body.action==="admin.catalog.update"
+      ? await rest("plans?id=eq."+id,{
+          method:"PATCH",headers:restHeaders("return=representation"),
+          body:JSON.stringify({title,price_dh:amount,source_url:url,source_checked_at:now,
+            source_checked_by:adminUserId,is_active:true,is_sponsored:false,highlight_badge:null})
+        })
+      : await rest("plans?select=id",{
+          method:"POST",headers:restHeaders("return=representation"),
+          body:JSON.stringify({operator_id:operatorId,title,price_dh:amount,category,
+            technology:category==="internet"?"FTTH":null,
+            download_speed_mbps:category==="internet"?speed:null,
+            mobile_data_gb:category==="mobile"?dataGb:null,
+            target_audience:"individual",is_active:true,is_sponsored:false,
+            source_url:url,source_checked_at:now,source_checked_by:adminUserId,
+            setup_fee_dh:null,commitment_months:null,
+            features:{source:"official",checked_on:now.slice(0,10),subject_to_eligibility:true}})
+        });
+    if(!changed.ok)return response({error:"Enregistrement du tarif impossible."},503,origin);
+    const result=await changed.json();
+    return response(result.length?{success:true,plan_id:result[0].id}:{error:"Offre introuvable."},result.length?200:404,origin);
+  }
+  if(body.action==="admin.catalog.archive"){
+    const id=text(body.plan_id,64);
+    if(!idPattern.test(id))return response({error:"Offre invalide"},422,origin);
+    const r=await rest("plans?id=eq."+id,{
+      method:"PATCH",headers:restHeaders("return=representation"),
+      body:JSON.stringify({is_active:false,is_sponsored:false,highlight_badge:null,
+        source_checked_by:adminUserId})
+    });
+    if(!r.ok)return response({error:"Archivage impossible"},503,origin);
+    const rows=await r.json();
+    return response(rows.length?{success:true}:{error:"Offre introuvable"},rows.length?200:404,origin);
   }
 
   if (body.action === "admin.create_partner") {
