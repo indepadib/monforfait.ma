@@ -1,3 +1,4 @@
+import {normalizeMoroccanPhone,publicProgressLabel,isTerminalStatus,mayAdvanceCommercialStage} from './rules.ts';
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
@@ -18,11 +19,7 @@ function response(data: Record<string, unknown>, status: number, origin: string 
 }
 const text = (value: unknown, max = 200) => typeof value === "string" ? value.trim().slice(0,max) : "";
 const idPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const normalizePhone = (raw: unknown) => {
-  const digits = text(raw, 32).replace(/\D/g, "");
-  let phone = digits.startsWith("00212") ? "0" + digits.slice(5) : digits.startsWith("212") ? "0" + digits.slice(3) : digits;
-  return /^0[567]\d{8}$/.test(phone) ? phone : null;
-};
+const normalizePhone = normalizeMoroccanPhone;
 function restHeaders(prefer?: string) {
   return {"apikey":serviceKey, "Authorization":"Bearer "+serviceKey, "Content-Type":"application/json", ...(prefer ? {"Prefer":prefer}: {})};
 }
@@ -126,17 +123,10 @@ Deno.serve(async req => {
     if(!r.ok)return response({error:"Suivi momentanément indisponible."},503,origin);
     const lead=(await r.json())[0];
     if(!lead)return response({error:"Référence inconnue ou expirée."},404,origin);
-    const statuses:Record<string,string>={
-      unreviewed:"Demande reçue",needs_verification:"Vérification en cours",
-      qualified:"Demande qualifiée",contacted:"Prise de contact en cours",
-      partner_proposed:"Étude de mise en relation",
-      activated:"Activation à confirmer",invoiced:"Dossier en cours",
-      paid:"Dossier finalisé",lost:"Demande clôturée",invalid:"Demande non retenue"
-    };
     // Never return client PII, partner pricing, or internal notes through a public receipt.
     return response({success:true,created_at:lead.created_at,
-      status:statuses[lead.sales_status]||"Demande reçue",
-      finished:["lost","invalid","paid"].includes(lead.sales_status)},200,origin);
+      status:publicProgressLabel(lead.sales_status),
+      finished:isTerminalStatus(lead.sales_status)},200,origin);
   }
 
 
@@ -387,14 +377,7 @@ Deno.serve(async req => {
     if(!oldRes.ok)return response({error:"Suivi indisponible"},503,origin);
     const before=(await oldRes.json())[0];
     if(!before)return response({error:"Dossier inconnu"},404,origin);
-    const moves:Record<string,string[]>={
-      proposed:["accepted","rejected"],
-      accepted:["activated","invoiced","rejected"],
-      activated:["invoiced","rejected"],
-      invoiced:["paid","rejected"],
-      paid:[],rejected:[]
-    };
-    if(!moves[before.sales_stage]?.includes(next))
+    if(!mayAdvanceCommercialStage(before.sales_stage,next))
       return response({error:"Transition non autorisée depuis l'étape actuelle"},422,origin);
     if(["activated","invoiced","paid"].includes(next)&&!before.shared_at)
       return response({error:"Une mise en relation validée sous contrat est nécessaire avant activation ou facturation."},403,origin);
