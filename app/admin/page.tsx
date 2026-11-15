@@ -2,6 +2,7 @@
 import {useEffect,useState} from 'react'
 import {supabase} from '@/lib/supabaseClient'
 import Link from 'next/link'
+import { AdminRevenuePipeline } from '@/components/AdminRevenuePipeline'
 type Lead={id:string;user_name:string|null;user_phone:string;user_email:string|null;city:string|null;status:string;created_at:string;consent_to_share:boolean;sales_status:string;is_pro:boolean;needs_details?:{interest?:string;need?:string;installation_timing?:string}}
 type Partner={id:string;business_name:string;business_email:string|null;contact_name?:string|null;contact_phone?:string|null;partner_type:string;regions?:string|null;services?:string|null;estimated_volume?:string|null;source?:string;sales_status:string}
 const stages=['unreviewed','needs_verification','qualified','contacted','partner_proposed','activated','invoiced','paid','lost','invalid']
@@ -74,6 +75,7 @@ export default function AdminDashboard(){
        <td className="p-3"><select aria-label="Statut commercial" className="border rounded-lg p-2" value={l.sales_status||'unreviewed'} onChange={e=>stage(l.id,e.target.value)}>{stages.map(s=><option key={s} value={s}>{s}</option>)}</select></td>
       </tr>)}</tbody></table></div>
    </section>
+   <AdminRevenuePipeline leads={leads} partners={partners} />
    <section className="rounded-2xl border bg-white p-4 md:p-6">
     <h2 className="font-bold text-xl">Prospection des acheteurs</h2><p className="text-sm text-zinc-500 mt-1 mb-4">Enregistrer un partenaire ne lui transmet aucun numéro. Partage sous contrat et validation.</p>
     <form className="flex flex-wrap gap-3 mb-5" onSubmit={addPartner}>
