@@ -506,14 +506,15 @@ Deno.serve(async req => {
       if(!r.ok)return response({error:"Offre introuvable."},503,origin);
       existing=(await r.json())[0]||null;
       if(!existing)return response({error:"Offre introuvable."},404,origin);
+      if(existing.category!==category)return response({error:"La catégorie d'une offre historique n'est pas modifiable."},422,origin);
     }else{
       if(!idPattern.test(operatorId)||!["internet","mobile"].includes(category))
         return response({error:"Opérateur et catégorie requis."},422,origin);
-      if(category==="internet"&&(!Number.isInteger(speed)||speed<1||speed>2000))
-        return response({error:"Débit fibre valide requis."},422,origin);
-      if(category==="mobile"&&(!Number.isInteger(dataGb)||dataGb<1||dataGb>1000))
-        return response({error:"Data mobile valide requise."},422,origin);
     }
+    if(category==="internet"&&(!Number.isInteger(speed)||speed<1||speed>2000))
+      return response({error:"Débit fibre valide requis."},422,origin);
+    if(category==="mobile"&&(!Number.isInteger(dataGb)||dataGb<1||dataGb>1000))
+      return response({error:"Data mobile valide requise."},422,origin);
     const operator=await rest("operators?id=eq."+(existing?.operator_id||operatorId)+"&select=id,name&limit=1");
     if(!operator.ok)return response({error:"Opérateur introuvable."},503,origin);
     const op=(await operator.json())[0];
@@ -525,7 +526,9 @@ Deno.serve(async req => {
       ? await rest("plans?id=eq."+id,{
           method:"PATCH",headers:restHeaders("return=representation"),
           body:JSON.stringify({title,price_dh:amount,source_url:url,source_checked_at:now,
-            source_checked_by:adminUserId,is_active:true,is_sponsored:false,highlight_badge:null})
+            source_checked_by:adminUserId,is_active:true,is_sponsored:false,highlight_badge:null,
+            download_speed_mbps:category==="internet"?speed:null,
+            mobile_data_gb:category==="mobile"?dataGb:null})
         })
       : await rest("plans?select=id",{
           method:"POST",headers:restHeaders("return=representation"),
