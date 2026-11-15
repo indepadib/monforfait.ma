@@ -1,13 +1,14 @@
 'use client'
 import { useCallback,useEffect,useMemo,useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { SaleReleaseControl } from '@/components/SaleReleaseControl'
 
-type Lead={id:string;user_name:string|null;city:string|null;consent_to_share:boolean}
-type Partner={id:string;business_name:string;sales_status:string}
+type Lead={id:string;user_name:string|null;city:string|null;consent_to_share:boolean;sales_status?:string}
+type Partner={id:string;business_name:string;sales_status:string;contract_verified_at?:string|null}
 type Sale={
  id:string;lead_id:string;partner_id:string;commercial_model:string;sales_stage:string;
  agreed_amount_dh:number;invoice_reference:string|null;payment_reference:string|null;
- evidence_notes:string|null;created_at:string;activated_at:string|null;invoiced_at:string|null;paid_at:string|null
+ evidence_notes:string|null;created_at:string;activated_at:string|null;invoiced_at:string|null;paid_at:string|null;shared_at?:string|null;access_expires_at?:string|null
 }
 const transitions: Record<string,string[]> = {
  proposed:['accepted','rejected'],
@@ -66,6 +67,7 @@ function SaleRow({sale,leads,partners,onUpdated}:{
    </label>}
    <button disabled={!next||busy} className="rounded-lg bg-zinc-900 text-white px-4 py-2 disabled:opacity-40">{busy?'…':'Enregistrer'}</button>
   </form>}
+  <SaleReleaseControl sale={sale} partner={partner} onUpdated={onUpdated}/>
   {error&&<p role="alert" className="text-sm text-red-700">{error}</p>}
  </div>
 }
@@ -86,7 +88,7 @@ export function AdminRevenuePipeline({leads,partners}: {leads:Lead[];partners:Pa
   setLoaded(true)
  },[])
  useEffect(()=>{void reload()},[reload])
- const eligible=leads.filter(l=>l.consent_to_share)
+ const eligible=leads.filter(l=>l.consent_to_share&&["qualified","contacted","partner_proposed"].includes(l.sales_status||""))
  const approved=partners.filter(p=>['pilot','contracted','active'].includes(p.sales_status))
  const totals=useMemo(()=>({
   cash:sales.filter(s=>s.paid_at).reduce((a,s)=>a+Number(s.agreed_amount_dh),0),
@@ -118,7 +120,7 @@ export function AdminRevenuePipeline({leads,partners}: {leads:Lead[];partners:Pa
   <div>
    <h3 className="font-bold mb-3">Créer une proposition commerciale</h3>
    <p className="text-xs text-zinc-500 mb-3">Réservé aux leads consentis et aux partenaires marqués pilote, sous contrat ou actifs. La création d’une proposition ne partage aucune coordonnée.</p>
-   {eligible.length===0||approved.length===0?<p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Pour démarrer : obtenir un partenaire pilote validé et une demande récente avec consentement explicite.</p>:
+   {eligible.length===0||approved.length===0?<p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Pour démarrer : qualifier une demande consentie et enregistrer un partenaire pilote.</p>:
     <form className="grid md:grid-cols-2 gap-3" onSubmit={create}>
       <label className="text-sm">Prospect autorisé
        <select required value={leadId} onChange={e=>setLeadId(e.target.value)} className="block mt-1 w-full border rounded-lg p-3">
