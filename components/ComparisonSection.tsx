@@ -115,6 +115,11 @@ export function ComparisonSection(){
   </div>:sorted.length===0?<div className="rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 text-center">
    <h3 className="font-bold text-xl">{tr('Aucune offre source disponible dans cette sélection','لا توجد عروض متاحة في هذه الفئة')}</h3>
    <p className="mt-3 text-zinc-500 text-sm">{tr('Essayez une autre catégorie ou consultez toutes les offres. Aucune offre fictive n’est affichée.','جرّب فئة أخرى أو تصفح كل العروض.')}</p>
+   {audience==='professional'&&<p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto mt-4">{tr(
+     'Les tarifs professionnels sont souvent établis sur devis. Vous pouvez décrire votre besoin, sans garantie de devis ou de partenaire disponible.',
+     'تتطلب عروض الشركات غالبا عرض سعر خاصا. يمكنك إرسال احتياجاتك دون ضمان توفر عرض أو شريك.'
+    )}</p>}
+   {audience==='professional'&&<Link href="/quiz" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 text-white font-bold px-5 py-3 text-sm">{tr('Décrire mon besoin professionnel','تقديم طلب شركة')}<ArrowRight className="w-4 h-4"/></Link>}
    <Link href="/offers" className="mt-5 inline-block text-blue-700 dark:text-blue-300 underline font-semibold">{tr('Voir toutes les offres','عرض كل العروض')}</Link>
   </div>:<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
     {sorted.map(offer=><OfferCard key={offer.id} offer={offer} onSelect={()=>setSelectedOffer(offer)}/>)}
