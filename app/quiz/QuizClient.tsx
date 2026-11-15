@@ -34,6 +34,7 @@ function QuizContent() {
     const [loading, setLoading] = useState(false)
     
   const [consentShare, setConsentShare] = useState(false)
+    const [leadError,setLeadError] = useState('')
     const [emailVerified, setEmailVerified] = useState(false)
 
     const QUESTIONS = [
@@ -118,6 +119,7 @@ function QuizContent() {
         }
 
         setLoading(true)
+        setLeadError('')
 
         try {
             const isPro = answers.userType === 'small_office' || answers.userType === 'enterprise'
@@ -148,8 +150,7 @@ function QuizContent() {
         } catch (err) {
             console.error('Lead capture error:', err)
             setLoading(false)
-            // Continue anyway to show results
-            router.push('/results')
+            setLeadError(err instanceof Error ? err.message : 'Enregistrement impossible. Veuillez réessayer.')
         }
     }
 
@@ -350,6 +351,7 @@ function QuizContent() {
                                         </>
                                     )}
                                 </button>
+                                {leadError && <p role="alert" className="text-red-600 font-medium text-sm">{leadError}</p>}
                                 <LeadShareConsent checked={consentShare} onChange={setConsentShare} />
 
                             </form>
