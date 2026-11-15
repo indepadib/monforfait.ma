@@ -1,300 +1,134 @@
-"use client"
-
-import { useState, useEffect } from 'react'
-import { OfferCard, OfferProps } from './OfferCard'
-import { LeadModal } from './LeadModal'
-import { supabase } from '@/lib/supabaseClient'
-import { ChevronDown, MapPin, Search, ArrowRight, Shield, Zap, Sparkles, AlertCircle, BarChart3, Clock, Gift, Phone, Wifi, Router, Tv, Globe2, Eye, LockKeyhole, User, Briefcase, Filter, CheckCircle, ArrowDown } from 'lucide-react'
-import { PromoUnlockerForm } from './PromoUnlockerForm'
-import { Smartphone } from 'lucide-react'
-
-export function ComparisonSection() {
-    const [offers, setOffers] = useState<OfferProps[]>([])
-    const [loading, setLoading] = useState(true)
-    const [selectedOffer, setSelectedOffer] = useState<OfferProps | null>(null)
-
-    // Filters
-    const [audience, setAudience] = useState<'individual' | 'professional'>('individual')
-    const [category, setCategory] = useState<'internet' | 'mobile'>('internet')
-    const [sortBy, setSortBy] = useState<'cheapest' | 'fastest'>('cheapest')
-    const [isUnlocked, setIsUnlocked] = useState(false)
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search)
-            const urlUnlocked = params.get('unlocked') === 'true'
-            const localUnlocked = localStorage.getItem('monforfait_unlocked') === 'true'
-            
-            if (urlUnlocked) {
-                localStorage.setItem('monforfait_unlocked', 'true')
-                setIsUnlocked(true)
-            } else if (localUnlocked) {
-                setIsUnlocked(true)
-            }
-        }
-    }, [])
-
-    useEffect(() => {
-        async function loadOffers() {
-            setLoading(true)
-            try {
-                const { data, error } = await supabase
-                    .from('plans')
-                    .select(`
-                *,
-                operator:operators(name)
-            `)
-                    .eq('category', category)
-                    .eq('target_audience', audience)
-
-                if (data && data.length > 0) {
-                    const mapped = data.map((p: any) => ({
-                        id: p.id,
-                        operator_name: p.operator?.name || 'Unknown',
-                        title: p.title,
-                        price_dh: p.price_dh,
-                        download_speed: p.download_speed_mbps,
-                        upload_speed: p.upload_speed_mbps,
-                        technology: p.technology,
-                        category: p.category,
-                        target_audience: p.target_audience,
-                        mobile_data_gb: p.mobile_data_gb,
-                        voice_minutes: p.voice_minutes,
-                        is_sponsored: p.is_sponsored,
-                        highlight_badge: p.highlight_badge,
-                        affiliate_link: p.affiliate_link
-                    }))
-                    setOffers(mapped)
-                } else {
-                    console.log("No data from DB, using fallback for demo");
-                    // FALLBACK DUMMY DATA FOR DEMO PURPOSES
-                    const dummies: OfferProps[] = []
-
-                    if (category === 'internet' && audience === 'individual') {
-                        dummies.push(
-                            { id: '1', operator_name: 'Orange', title: 'Fibre 20 Mega', price_dh: 249, download_speed: 20, technology: 'FTTH', category: 'internet', target_audience: 'individual', affiliate_link: 'https://orange.ma/' },
-                            { id: '2', operator_name: 'Inwi', title: 'Fibre 20 Mega', price_dh: 249, download_speed: 20, technology: 'FTTH', category: 'internet', target_audience: 'individual' },
-                            { id: '3', operator_name: 'Maroc Telecom', title: 'Fibre 100 Mega', price_dh: 400, download_speed: 100, technology: 'FTTH', category: 'internet', target_audience: 'individual' },
-                        )
-                    }
-                    if (category === 'internet' && audience === 'professional') {
-                        dummies.push(
-                            { id: 'p1', operator_name: 'Orange', title: 'Pack Pro Fibre', price_dh: 490, download_speed: 100, technology: 'FTTH', highlight_badge: 'IP Fixe', category: 'internet', target_audience: 'professional' },
-                            { id: 'p2', operator_name: 'Inwi', title: 'Business Link', price_dh: 449, download_speed: 100, technology: 'FTTH', category: 'internet', target_audience: 'professional', affiliate_link: 'https://inwi.ma/' },
-                            { id: 'p3', operator_name: 'Maroc Telecom', title: 'Fibre Optique Entreprise', price_dh: 990, download_speed: 200, technology: 'FTTH', category: 'internet', target_audience: 'professional', is_sponsored: true }
-                        )
-                    }
-                    if (category === 'mobile' && audience === 'individual') {
-                        dummies.push(
-                            { id: 'm1', operator_name: 'Inwi', title: 'Forfait 11Go', price_dh: 49, mobile_data_gb: 11, voice_minutes: 1, category: 'mobile', target_audience: 'individual' },
-                            { id: 'm2', operator_name: 'Orange', title: 'Forfait Yo 30Go', price_dh: 99, mobile_data_gb: 30, voice_minutes: -1, highlight_badge: 'Social Media Illimité', category: 'mobile', target_audience: 'individual', affiliate_link: 'https://orange.ma/yo' },
-                            { id: 'm3', operator_name: 'Maroc Telecom', title: 'Forfait Liberté', price_dh: 99, mobile_data_gb: 25, voice_minutes: 2, category: 'mobile', target_audience: 'individual' }
-                        )
-                    }
-                    if (category === 'mobile' && audience === 'professional') {
-                        dummies.push(
-                            { id: 'mp1', operator_name: 'Orange', title: 'Flotte Pro 50Go', price_dh: 150, mobile_data_gb: 50, voice_minutes: -1, category: 'mobile', target_audience: 'professional' },
-                            { id: 'mp2', operator_name: 'Inwi', title: 'Business Mobile', price_dh: 120, mobile_data_gb: 40, voice_minutes: -1, category: 'mobile', target_audience: 'professional' }
-                        )
-                    }
-
-                    setOffers(dummies)
-                }
-            } catch (e) {
-                console.error("Error loading offers", e)
-            } finally {
-                setLoading(false)
-            }
-        }
-        loadOffers()
-    }, [category, audience])
-
-    // Event listener for external triggers to switch to PRO
-    useEffect(() => {
-        const handleSwitchPro = () => {
-            setAudience('professional');
-        };
-        window.addEventListener('switch-audience-pro', handleSwitchPro);
-        return () => window.removeEventListener('switch-audience-pro', handleSwitchPro);
-    }, []);
-
-    const sortedOffers = [...offers].sort((a, b) => {
-        // Sponsored always on top
-        if (a.is_sponsored && !b.is_sponsored) return -1;
-        if (!a.is_sponsored && b.is_sponsored) return 1;
-
-        if (sortBy === 'cheapest') return a.price_dh - b.price_dh
-        if (sortBy === 'fastest') {
-            if (category === 'internet') return (b.download_speed || 0) - (a.download_speed || 0)
-            if (category === 'mobile') return (b.mobile_data_gb || 0) - (a.mobile_data_gb || 0)
-        }
-        return 0
-    })
-
-    return (
-        <div className="max-w-6xl mx-auto px-4 py-12" id="comparator">
-
-            {/* Main Controls - Audience & Vertical */}
-            <div className="flex flex-col items-center gap-8 mb-12">
-
-                {/* Audience Toggle (Pill) */}
-                <div className="bg-zinc-100 dark:bg-zinc-900 p-1.5 rounded-full inline-flex relative">
-                    <div className={`absolute inset-y-1.5 w-1/2 bg-white dark:bg-zinc-800 rounded-full shadow-sm transition-all duration-300 ease-out transform ${audience === 'individual' ? 'left-1.5' : 'left-[calc(50%-0.375rem)] translate-x-full'}`}></div>
-                    <button
-                        onClick={() => setAudience('individual')}
-                        className={`relative z-10 px-8 py-2.5 text-sm font-bold rounded-full transition-colors flex items-center gap-2 ${audience === 'individual' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500'}`}
-                    >
-                        <User className="w-4 h-4" /> Particulier
-                    </button>
-                    <button
-                        onClick={() => setAudience('professional')}
-                        className={`relative z-10 px-8 py-2.5 text-sm font-bold rounded-full transition-colors flex items-center gap-2 ${audience === 'professional' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500'}`}
-                    >
-                        <Briefcase className="w-4 h-4" /> Professional
-                    </button>
-                </div>
-
-                {/* Vertical Selector (Big Cards) */}
-                <div className="grid grid-cols-2 gap-4 w-full max-w-lg">
-                    <button
-                        onClick={() => setCategory('internet')}
-                        className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${category === 'internet'
-                            ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 bg-white dark:bg-zinc-900 text-zinc-500'}`}
-                    >
-                        <Wifi className="w-8 h-8" />
-                        <span className="font-bold">Internet (Fibre/Box)</span>
-                    </button>
-                    <button
-                        onClick={() => setCategory('mobile')}
-                        className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${category === 'mobile'
-                            ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10 text-purple-700 dark:text-purple-400'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 bg-white dark:bg-zinc-900 text-zinc-500'}`}
-                    >
-                        <Smartphone className="w-8 h-8" />
-                        <span className="font-bold">Mobile Plans</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* Sort & Stats */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-6">
-                <div>
-                    <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
-                        {category === 'internet' ? 'Box & Fibre Offers' : 'Mobile Plans'}
-                        <span className="text-zinc-400 font-normal ml-2 text-lg">for {audience === 'individual' ? 'Individuals' : 'Professionals'}</span>
-                    </h2>
-                </div>
-
-                <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                    <Filter className="w-4 h-4 text-zinc-400" />
-                    <span className="text-sm font-medium text-zinc-500 mr-2">Sort by:</span>
-                    <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
-                        className="bg-transparent text-sm font-bold text-zinc-900 dark:text-white outline-none cursor-pointer"
-                    >
-                        <option value="cheapest">Price: Low to High</option>
-                        <option value="fastest">{category === 'internet' ? 'Speed' : 'Data'}: High to Low</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Grid */}
-            {loading ? (
-                <div className="text-center py-20 animate-pulse">
-                    <div className="w-12 h-12 bg-zinc-200 rounded-full mx-auto mb-4"></div>
-                    <div className="text-zinc-400 font-medium">Searching best deals...</div>
-                </div>
-            ) : (
-                <div className="relative">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* Unlocked / Visible Offers (Top 2) */}
-                        {/* Unlocked / Visible Offers (Top 2 or all if <= 2) */}
-                        {sortedOffers.slice(0, (!isUnlocked && sortedOffers.length > 2) ? 2 : sortedOffers.length).map((offer, idx) => (
-                            <div key={offer.id || `visible-${idx}`} className="relative z-10">
-                                {/* AI Banner for top offer */}
-                                {idx === 0 && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-orange-500/30 z-20 whitespace-nowrap">
-                                        ✨ Meilleur Choix
-                                    </div>
-                                )}
-                                <OfferCard
-                                    offer={offer}
-                                    onSelect={() => setSelectedOffer(offer)}
-                                />
-                            </div>
-                        ))}
-
-                    {/* Locked / Blurred Offers - MAX 1 to keep form high */}
-                    {!isUnlocked && sortedOffers.length > 2 && sortedOffers.slice(2, 3).map((offer, idx) => (
-                        <div key={offer.id || `locked-${idx}`} className={`relative filter blur-[6px] opacity-60 select-none pointer-events-none transition-all duration-1000 overflow-hidden`}>
-                            {/* Visual gradient mask over the blurred element to blend it into the background */}
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/90 dark:to-zinc-900/90 z-20"></div>
-                            <OfferCard
-                                offer={offer}
-                                onSelect={() => isUnlocked ? setSelectedOffer(offer) : null}
-                            />
-                        </div>
-                    ))}
-                </div>
-
-                {/* The Conversion Block - Renders IN FLOW directly underneath, not absolute positioned */}
-                {/* The Conversion Block - Renders IN FLOW directly underneath, not absolute positioned */}
-                {!isUnlocked && (
-                    <div className="w-full mt-12 bg-zinc-50/80 dark:bg-zinc-900/40 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 p-4 sm:p-8 lg:p-12 relative overflow-hidden flex flex-col items-center">
-                        <div className="absolute top-[-50%] left-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
-                        <div className="absolute bottom-[-50%] right-[-10%] w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" style={{ animationDelay: '2s' }}></div>
-
-                        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 w-full max-w-5xl items-center relative z-10">
-                            {/* Left Side: Value Prop */}
-                            <div className="flex-1 text-center lg:text-left">
-                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded-full text-sm font-bold mb-6 border border-blue-200 dark:border-blue-500/30">
-                                    <Sparkles className="w-4 h-4" />
-                                    Accès Réservé
-                                </div>
-                                
-                                <h3 className="text-3xl md:text-4xl font-black mb-4 dark:text-white leading-tight">
-                                    {audience === 'professional' 
-                                        ? "Déléguez la négociation de votre flotte."
-                                        : "Débloquez le reste du classement (jusqu'à -50%)."
-                                    }
-                                </h3>
-                                <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-6 leading-relaxed">
-                                    {audience === 'professional'
-                                        ? "Nos experts analysent vos factures et négocient directement avec les opérateurs pour obtenir les meilleurs tarifs PME/GE."
-                                        : "Certaines offres de rétention sont trop incroyables pour être affichées publiquement. Vérifiez votre éligibilité en 10 secondes."
-                                    }
-                                </p>
-                                
-                                <div className="flex flex-col gap-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                                    <div className="flex items-center gap-2 justify-center lg:justify-start">
-                                        <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
-                                        {audience === 'professional' ? "Analyse Gratuite 100% Sans Engagement" : "Gratuit et 100% Sans Engagement"}
-                                    </div>
-                                    <div className="flex items-center gap-2 justify-center lg:justify-start">
-                                        <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
-                                        {audience === 'professional' ? "Tarifs grossiste inaccessibles aux particuliers" : "Offres Exclusives Non Disponibles en Boutique"}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right Side: The Form */}
-                            <div className="flex-[0.8] w-full max-w-md transform transition-all hover:-translate-y-1">
-                                <PromoUnlockerForm mode={audience === 'professional' ? 'b2b' : 'b2c'} />
-                            </div>
-                        </div>
-                    </div>
-                )}
-                </div>
-            )}
-
-            {selectedOffer && (
-                <LeadModal
-                    offer={selectedOffer}
-                    onClose={() => setSelectedOffer(null)}
-                />
-            )}
-        </div>
-    )
+'use client'
+import {useCallback,useEffect,useMemo,useState} from 'react'
+import Link from 'next/link'
+import {OfferCard,type OfferProps} from './OfferCard'
+import {LeadModal} from './LeadModal'
+import {supabase} from '@/lib/supabaseClient'
+import {useTranslation} from '@/lib/LocaleContext'
+import {Wifi,Smartphone,Briefcase,UserRound,ArrowUpDown,AlertCircle,ShieldCheck,RefreshCcw,ArrowRight} from 'lucide-react'
+type Audience='individual'|'professional'
+type Category='internet'|'mobile'
+type Sort='price'|'features'
+export function ComparisonSection(){
+ const {locale,isRtl}=useTranslation()
+ const ar=locale==='ar'
+ const tr=(fr:string,arabic:string)=>ar?arabic:fr
+ const [audience,setAudience]=useState<Audience>('individual')
+ const [category,setCategory]=useState<Category>('internet')
+ const [sortBy,setSortBy]=useState<Sort>('price')
+ const [offers,setOffers]=useState<OfferProps[]>([])
+ const [loading,setLoading]=useState(true)
+ const [error,setError]=useState('')
+ const [selectedOffer,setSelectedOffer]=useState<OfferProps|null>(null)
+ const load=useCallback(async()=>{
+  setLoading(true);setError('')
+  try{
+   const {data,error:e}=await supabase.from('plans').select(
+    'id,title,category,target_audience,price_dh,download_speed_mbps,upload_speed_mbps,mobile_data_gb,voice_minutes,technology,source_url,source_checked_at,operators(name)'
+   ).eq('is_active',true).eq('category',category).eq('target_audience',audience)
+    .not('source_url','is',null).order('price_dh',{ascending:true}).limit(100)
+   if(e)throw e
+   setOffers((data||[]).map((o:any)=>({
+    id:o.id,title:o.title,operator_name:o.operators?.name||tr('Opérateur','مشغل'),
+    category:o.category,target_audience:o.target_audience,
+    price_dh:Number(o.price_dh),download_speed:o.download_speed_mbps,
+    upload_speed:o.upload_speed_mbps,mobile_data_gb:o.mobile_data_gb,
+    voice_minutes:o.voice_minutes,technology:o.technology,
+    source_url:o.source_url,source_checked_at:o.source_checked_at
+   })))
+  }catch{
+   setOffers([])
+   setError(tr('Impossible de charger les tarifs actuellement.','تعذر تحميل العروض حاليا.'))
+  }finally{setLoading(false)}
+ },[audience,category,locale])
+ useEffect(()=>{void load()},[load])
+ useEffect(()=>{
+  const pro=()=>setAudience('professional')
+  window.addEventListener('switch-audience-pro',pro)
+  return()=>window.removeEventListener('switch-audience-pro',pro)
+ },[])
+ const sorted=useMemo(()=>[...offers].sort((a,b)=>
+  sortBy==='price'?a.price_dh-b.price_dh:
+  category==='internet'?(b.download_speed||0)-(a.download_speed||0):
+   (b.mobile_data_gb||0)-(a.mobile_data_gb||0)
+ ),[offers,sortBy,category])
+ return <section className="max-w-7xl mx-auto px-5 py-14 sm:py-20" id="comparateur" dir={isRtl?'rtl':'ltr'} aria-labelledby="offers-comparison-heading">
+  <div className="flex flex-col md:flex-row justify-between gap-5 items-start md:items-end mb-8">
+   <div className="max-w-2xl">
+    <p className="text-blue-700 dark:text-blue-300 uppercase tracking-widest text-xs font-bold">{tr('Comparer librement','قارن بحرية')}</p>
+    <h2 id="offers-comparison-heading" className="text-3xl sm:text-4xl font-black text-zinc-900 dark:text-white mt-3">
+     {tr('Les offres, sans conditions cachées.','العروض دون شروط مخفية.')}
+    </h2>
+    <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-4 leading-relaxed">
+     {tr('Consultez les tarifs publics sourcés sans créer de compte. Demandez à être recontacté seulement si une offre vous intéresse.',
+     'تصفح الأسعار العمومية الموثقة دون إنشاء حساب. اطلب التواصل فقط عند اهتمامك بعرض.')}
+    </p>
+   </div>
+   <Link href="/offers" className="inline-flex gap-2 items-center text-blue-700 dark:text-blue-300 text-sm font-bold hover:underline">
+    {tr('Catalogue complet','كل العروض')}<ArrowRight className="w-4 h-4"/>
+   </Link>
+  </div>
+  <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 sm:p-6 mb-8">
+   <div className="flex flex-wrap gap-4 justify-between items-center">
+    <div className="inline-flex gap-1 p-1 bg-zinc-100 dark:bg-zinc-950 rounded-xl" role="group" aria-label={tr('Type de client','نوع العميل')}>
+     <button type="button" onClick={()=>setAudience('individual')} aria-pressed={audience==='individual'}
+      className={'flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold transition-colors '+(audience==='individual'?'bg-white dark:bg-zinc-800 shadow text-blue-700 dark:text-blue-300':'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300')}>
+      <UserRound className="w-4 h-4"/>{tr('Particulier','أفراد')}
+     </button>
+     <button type="button" onClick={()=>setAudience('professional')} aria-pressed={audience==='professional'}
+      className={'flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold transition-colors '+(audience==='professional'?'bg-white dark:bg-zinc-800 shadow text-blue-700 dark:text-blue-300':'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300')}>
+      <Briefcase className="w-4 h-4"/>{tr('Entreprise','شركات')}
+     </button>
+    </div>
+    <div className="inline-flex gap-2">
+     <button type="button" aria-pressed={category==='internet'} onClick={()=>setCategory('internet')}
+      className={'rounded-xl px-4 py-3 text-sm font-bold inline-flex gap-2 items-center border transition-colors '+(category==='internet'?'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300':'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400')}>
+      <Wifi className="w-4 h-4"/>{tr('Internet','إنترنت')}
+     </button>
+     <button type="button" aria-pressed={category==='mobile'} onClick={()=>setCategory('mobile')}
+      className={'rounded-xl px-4 py-3 text-sm font-bold inline-flex gap-2 items-center border transition-colors '+(category==='mobile'?'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300':'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400')}>
+      <Smartphone className="w-4 h-4"/>{tr('Mobile','هاتف')}
+     </button>
+    </div>
+   </div>
+  </div>
+  <div className="flex flex-wrap justify-between gap-4 items-center mb-6">
+   <p className="text-zinc-600 dark:text-zinc-400 text-sm">
+    {loading?tr('Recherche en cours…','جاري التحميل…'):tr(sorted.length+' offre(s) sourcée(s) disponible(s)',sorted.length+' عرض متاح بمرجع رسمي')}
+   </p>
+   <div className="flex items-center gap-2">
+    <ArrowUpDown className="w-4 h-4 text-zinc-500"/>
+    <label htmlFor="home-sort" className="text-sm text-zinc-500">{tr('Trier :','الترتيب:')}</label>
+    <select id="home-sort" value={sortBy} onChange={e=>setSortBy(e.target.value as Sort)}
+     className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-2.5 text-sm text-zinc-900 dark:text-white">
+     <option value="price">{tr('Prix croissant','السعر تصاعديا')}</option>
+     <option value="features">{category==='internet'?tr('Débit annoncé','سرعة الإنترنت'):tr('Volume de données','حجم الإنترنت')}</option>
+    </select>
+   </div>
+  </div>
+  {loading?<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+   {[1,2,3].map(x=><div key={x} className="h-[340px] rounded-3xl bg-zinc-100 dark:bg-zinc-900 animate-pulse"/>)}
+  </div>:error?<div role="alert" className="rounded-2xl border border-red-200 bg-red-50 text-red-800 p-7 flex gap-4 items-start">
+   <AlertCircle className="w-6 h-6 shrink-0"/><div><p className="font-bold">{error}</p>
+    <button onClick={()=>void load()} type="button" className="mt-4 underline inline-flex items-center gap-2"><RefreshCcw className="w-4 h-4"/>{tr('Réessayer','أعد المحاولة')}</button>
+   </div>
+  </div>:sorted.length===0?<div className="rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 text-center">
+   <h3 className="font-bold text-xl">{tr('Aucune offre source disponible dans cette sélection','لا توجد عروض متاحة في هذه الفئة')}</h3>
+   <p className="mt-3 text-zinc-500 text-sm">{tr('Essayez une autre catégorie ou consultez toutes les offres. Aucune offre fictive n’est affichée.','جرّب فئة أخرى أو تصفح كل العروض.')}</p>
+   {audience==='professional'&&<p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto mt-4">{tr(
+     'Les tarifs professionnels sont souvent établis sur devis. Vous pouvez décrire votre besoin, sans garantie de devis ou de partenaire disponible.',
+     'تتطلب عروض الشركات غالبا عرض سعر خاصا. يمكنك إرسال احتياجاتك دون ضمان توفر عرض أو شريك.'
+    )}</p>}
+   {audience==='professional'&&<Link href="/quiz" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 text-white font-bold px-5 py-3 text-sm">{tr('Décrire mon besoin professionnel','تقديم طلب شركة')}<ArrowRight className="w-4 h-4"/></Link>}
+   <Link href="/offers" className="mt-5 inline-block text-blue-700 dark:text-blue-300 underline font-semibold">{tr('Voir toutes les offres','عرض كل العروض')}</Link>
+  </div>:<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {sorted.map(offer=><OfferCard key={offer.id} offer={offer} onSelect={()=>setSelectedOffer(offer)}/>)}
+   </div>}
+  <div className="mt-8 flex items-start gap-3 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 text-sm text-zinc-600 dark:text-zinc-400 bg-white dark:bg-zinc-900">
+   <ShieldCheck className="w-6 h-6 shrink-0 text-blue-600"/>
+   <p>{tr("Toutes les offres affichées disposent d'une source renseignée. La date de vérification figure sur leur fiche. Les conditions de couverture, d'engagement et les frais éventuels restent à confirmer avec l’opérateur.",
+    'كل العروض المعروضة لها مصدر. تحقق من تاريخ مراجعة كل عرض ومن شروط التغطية والعقد والتكاليف لدى المشغل.')}</p>
+  </div>
+  {selectedOffer&&<LeadModal offer={selectedOffer} onClose={()=>setSelectedOffer(null)}/>}
+ </section>
 }

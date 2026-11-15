@@ -1,7 +1,6 @@
 "use client";
 
 import { ComparisonSection } from '@/components/ComparisonSection';
-import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { FAQ } from '@/components/FAQ';
 import { Navigation } from '@/components/Navigation';
 import Link from 'next/link';
@@ -28,7 +27,7 @@ export function HomeClient() {
         {/* Animated Premium Background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]"></div>
         <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 py-12 md:py-20 lg:py-24 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
@@ -47,7 +46,7 @@ export function HomeClient() {
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.15]">
                 {t('hero_title_normal')} <br className="hidden sm:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-sky-300">
                   {t('hero_title_highlight')}
                 </span>
               </h1>
@@ -71,7 +70,7 @@ export function HomeClient() {
                   </div>
                   <div className="hidden sm:block w-1 h-1 rounded-full bg-zinc-700"></div>
                   <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <Sparkles className="w-4 h-4 text-blue-300" />
                     {t('hero_no_commitment')}
                   </div>
                   <div className="hidden sm:block w-1 h-1 rounded-full bg-zinc-700"></div>
@@ -215,14 +214,13 @@ export function HomeClient() {
       </section>
 
       {/* Trust Badges */}
-      <section aria-label="Nos partenaires" className="max-w-6xl mx-auto px-4">
+      <section aria-label="Transparence de la comparaison" className="max-w-6xl mx-auto px-4">
         <TrustBadges />
       </section>
 
 
 
-      {/* Exit Intent Popup */}
-      <ExitIntentPopup />
+
     </main>
   );
 }
