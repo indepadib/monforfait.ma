@@ -41,7 +41,7 @@ export function Navigation(){
    <div className="hidden lg:flex items-center gap-5 xl:gap-7 text-[13px] xl:text-sm">
     {navItems.map(l=><Link key={l.href} href={l.href}
      aria-current={path===l.href?'page':undefined}
-     className={\`font-semibold transition-colors hover:text-blue-700 dark:hover:text-blue-300 \${path===l.href?'text-blue-700 dark:text-blue-300':'text-zinc-600 dark:text-zinc-300'}\`}>
+     className={`font-semibold transition-colors hover:text-blue-700 dark:hover:text-blue-300 ${path===l.href?'text-blue-700 dark:text-blue-300':'text-zinc-600 dark:text-zinc-300'}`}>
       {tr(l.fr,l.ar)}
      </Link>)}
    </div>
@@ -67,7 +67,7 @@ export function Navigation(){
    <div className="flex flex-col gap-1 max-w-2xl mx-auto">
     {navItems.map(l=><Link key={l.href} href={l.href} onClick={()=>setOpened(false)}
      aria-current={path===l.href?'page':undefined}
-     className={\`rounded-xl px-4 py-3.5 text-sm font-semibold \${path===l.href?'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300':'text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900'}\`}>
+     className={`rounded-xl px-4 py-3.5 text-sm font-semibold ${path===l.href?'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300':'text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}>
      {tr(l.fr,l.ar)}</Link>)}
     <div className="border-t border-zinc-200 dark:border-zinc-800 my-2"/>
     <Link href="/contact" onClick={()=>setOpened(false)} className="rounded-xl px-4 py-3 text-sm font-semibold text-zinc-800 dark:text-zinc-200">{tr('Contact et assistance','اتصل بنا')}</Link>
