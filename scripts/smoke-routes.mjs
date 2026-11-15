@@ -38,6 +38,16 @@ try{
    failed++;process.stderr.write('FAIL '+path+': '+String(e)+'\n')
   }
  }
+ // The business widget is intentionally embeddable; private CRM pages are not.
+ const widget=await request('/widget')
+ const privatePage=await request('/admin')
+ if((widget.headers.get('x-frame-options')||'').toUpperCase()==='DENY'){
+  failed++;process.stderr.write('FAIL /widget is blocked by X-Frame-Options DENY\\n')
+ }
+ if((privatePage.headers.get('x-frame-options')||'').toUpperCase()!=='DENY'){
+  failed++;process.stderr.write('FAIL /admin lacks X-Frame-Options DENY\\n')
+ }
+ if(failed===0)process.stdout.write('PASS embed header policy: public widget only\\n')
  if(failed)throw new Error(failed+' route(s) did not pass HTTP smoke tests')
  process.stdout.write('Verified '+expected.length+' HTML/route endpoints without test leads.\n')
 }finally{
