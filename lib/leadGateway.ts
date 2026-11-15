@@ -27,3 +27,12 @@ export async function captureLead(lead: NewLead): Promise<{id: string | null; du
   }
   return {id:data.lead_id || null, duplicate:Boolean(data.duplicate),tracking_token:token}
 }
+
+export async function selectOfferFromReceipt(selectedPlanId:string):Promise<void>{
+  const token=typeof window!=='undefined' ? window.localStorage.getItem('monforfait_tracking_token') : null
+  if(!token)throw new Error('Référence introuvable : veuillez remplir une nouvelle demande.')
+  const {data,error}=await supabase.functions.invoke('leads-gateway',{
+    body:{action:'tracking.select',tracking_token:token,selected_plan_id:selectedPlanId}
+  })
+  if(error||!data?.success)throw new Error(data?.error||'La sélection de cette offre n’a pas été enregistrée.')
+}
