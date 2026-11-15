@@ -13,9 +13,17 @@ const nextConfig: NextConfig = {
       headers:[
         {key:'X-Content-Type-Options',value:'nosniff'},
         {key:'Referrer-Policy',value:'strict-origin-when-cross-origin'},
-        {key:'X-Frame-Options',value:'DENY'},
+
         {key:'Permissions-Policy',value:'camera=(), microphone=(), geolocation=()'}
       ]
+    },{
+      // All private and normal website pages resist clickjacking.
+      // Public /widget contains only published tariff data and may be embedded.
+      source:'/:path((?!widget$).*)',
+      headers:[{key:'X-Frame-Options',value:'DENY'}]
+    },{
+      source:'/widget',
+      headers:[{key:'Content-Security-Policy',value:'frame-ancestors https:'}]
     },{
       source:'/suivi',
       headers:[{key:'Referrer-Policy',value:'no-referrer'}, {key:'Cache-Control',value:'no-store'}]
