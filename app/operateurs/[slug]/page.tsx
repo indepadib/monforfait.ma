@@ -1,227 +1,80 @@
-import { Suspense } from 'react'
-import { Navigation } from '@/components/Navigation'
-import { Footer } from '@/components/Footer'
-import { OfferCard } from '@/components/OfferCard'
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { supabase } from '@/lib/supabaseClient'
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import { PromoUnlockerForm } from '@/components/PromoUnlockerForm'
-import { CheckCircle, Shield, Sparkles } from 'lucide-react'
-
-// Operator mappings for SEO
-const OPERATORS: Record<string, {
-    name: string,
-    color: string,
-    fullName: string,
-}> = {
-    'inwi': {
-        name: 'Inwi',
-        color: 'from-purple-500 to-pink-500',
-        fullName: 'Inwi Maroc'
-    },
-    'orange': {
-        name: 'Orange',
-        color: 'from-orange-500 to-red-500',
-        fullName: 'Orange Maroc'
-    },
-    'iam': {
-        name: 'IAM',
-        color: 'from-blue-600 to-indigo-600',
-        fullName: 'Maroc Telecom'
-    }
+import type {Metadata} from 'next'
+import {notFound} from 'next/navigation'
+import Link from 'next/link'
+import {Navigation} from '@/components/Navigation'
+import {OfferCard,type OfferProps} from '@/components/OfferCard'
+import {supabase} from '@/lib/supabaseClient'
+import {ShieldCheck,ExternalLink,ArrowLeft,Wifi,Smartphone} from 'lucide-react'
+export const dynamic='force-dynamic'
+const OPERATORS:Record<string,{name:string;dbName:string;description:string}>={
+ inwi:{name:'inwi',dbName:'Inwi',description:'Découvrez les tarifs publics des forfaits inwi référencés et sourcés.'},
+ orange:{name:'Orange Maroc',dbName:'Orange Morocco',description:'Comparez les forfaits Orange Maroc figurant dans notre catalogue sourcé.'},
+ iam:{name:'Maroc Telecom',dbName:'Maroc Telecom',description:'Retrouvez les offres Maroc Telecom disponibles dans le référentiel MonForfait.'}
 }
-
-// Generate Static Params for build time
-export function generateStaticParams() {
-    return Object.keys(OPERATORS).map((slug) => ({
-        slug: slug,
-    }))
+type Props={params:Promise<{slug:string}>}
+export function generateStaticParams(){return Object.keys(OPERATORS).map(slug=>({slug}))}
+export async function generateMetadata({params}:Props):Promise<Metadata>{
+ const {slug}=await params
+ const op=OPERATORS[slug?.toLowerCase()]
+ if(!op)return{title:'Opérateur introuvable'}
+ return{
+  title:`Offres Internet et Mobile ${op.name} — Tarifs publics au Maroc`,
+  description:`Comparez les prix publics internet et mobile ${op.name}, les caractéristiques et les sources officielles. Disponibilité et raccordement à confirmer.`,
+  alternates:{canonical:`https://monforfait.ma/operateurs/${slug.toLowerCase()}`}
+ }
 }
-
-// Dynamic Metadata Generation
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-    const resolvedParams = await params;
-    const operator = OPERATORS[resolvedParams.slug.toLowerCase()]
-
-    if (!operator) {
-        return { title: 'Opérateur non trouvé' }
-    }
-
-    return {
-        title: `Forfaits ${operator.fullName} : Les Meilleures Offres (2026)`,
-        description: `Comparez tous les forfaits mobile et fibre optique de ${operator.fullName}. Économisez jusqu'à -50% avec notre comparateur de forfaits au Maroc.`,
-        alternates: {
-            canonical: `https://monforfait.ma/operateurs/${resolvedParams.slug}`
-        },
-        openGraph: {
-            title: `Comparatif Forfaits ${operator.fullName} - MonForfait.ma`,
-            description: `Découvrez les offres exclusives et remises cachées chez ${operator.fullName}. Forfaits mobiles pas cher et Fibre Optique.`,
-        }
-    }
-}
-
-export default async function OperatorPage({ params }: { params: Promise<{ slug: string }> }) {
-    const resolvedParams = await params;
-    const slug = resolvedParams.slug.toLowerCase()
-    const operatorInfo = OPERATORS[slug]
-
-    if (!operatorInfo) {
-        notFound()
-    }
-
-    // Server-Side Supabase Fetching
-    const { data: offers, error } = await supabase
-        .from('plans')
-        .select(`
-            id,
-            title,
-            category,
-            price_dh,
-            download_speed_mbps,
-            mobile_data_gb,
-            technology,
-            highlight_badge,
-            target_audience,
-            voice_minutes,
-            upload_speed_mbps,
-            is_sponsored,
-            operators!inner (name)
-        `)
-        .eq('is_active', true)
-        .ilike('operators.name', `%${operatorInfo.name}%`)
-        .order('price_dh', { ascending: true })
-
-    if (error) {
-        console.error('Error fetching operator offers:', error)
-    }
-
-    // Map data to match OfferProps, especially operator_name
-    const displayOffers = offers ? offers.map((p: any) => ({
-        ...p,
-        operator_name: p.operators?.name || operatorInfo.name
-    })) : []
-
-    return (
-        <div className="min-h-screen bg-white dark:bg-black">
-            <Navigation />
-
-            {/* Programmatic JSON-LD specific to this operator hub */}
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        '@context': 'https://schema.org',
-                        '@type': 'WebPage',
-                        name: `Forfaits et Offres ${operatorInfo.fullName}`,
-                        description: `Comparatif complet des forfaits mobile et internet fibre/ADSL proposés par ${operatorInfo.fullName}.`,
-                        provider: {
-                            '@type': 'Organization',
-                            name: operatorInfo.fullName
-                        }
-                    })
-                }}
-            />
-
-            <main className="pb-24">
-                {/* Operator Hero Section */}
-                <section className="relative overflow-hidden bg-zinc-950 text-white border-b border-zinc-800">
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]"></div>
-                    <div className={`absolute top-[-50%] left-[50%] -translate-x-1/2 w-[800px] h-[800px] bg-gradient-to-br ${operatorInfo.color} rounded-full blur-[150px] pointer-events-none opacity-20`}></div>
-
-                    <div className="max-w-7xl mx-auto px-4 py-16 md:py-24 relative z-10 text-center">
-                        <Breadcrumbs items={[
-                            { label: 'Opérateurs', href: '#' },
-                            { label: operatorInfo.name, href: `/operateurs/${slug}` },
-                        ]} />
-
-                        <div className="inline-flex items-center gap-2 mt-8 mb-6 bg-white/10 backdrop-blur border border-white/20 px-4 py-2 rounded-full text-sm font-bold">
-                            <Shield className="w-4 h-4 text-green-400" />
-                            Comparatif {new Date().getFullYear()} Officiel
-                        </div>
-
-                        <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight">
-                            Les meilleurs forfaits <br />
-                            <span className={`text-transparent bg-clip-text bg-gradient-to-r ${operatorInfo.color}`}>
-                                {operatorInfo.fullName}
-                            </span>
-                        </h1>
-
-                        <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-                            Comparez les {displayOffers.length} offres internet et mobile disponibles chez {operatorInfo.name}.
-                            Découvrez les promotions actuelles et trouvez le forfait le moins cher adapté à vos besoins.
-                        </p>
-                    </div>
-                </section>
-
-                <div className="max-w-7xl mx-auto px-4 py-16">
-                    {displayOffers.length === 0 ? (
-                        <div className="text-center py-20 bg-zinc-50 dark:bg-zinc-900 rounded-3xl">
-                            <h3 className="text-xl font-bold dark:text-white mb-2">Aucune offre trouvée pour le moment.</h3>
-                            <p className="text-zinc-500">Nous rattachons actuellement les forfaits de cet opérateur.</p>
-                        </div>
-                    ) : (
-                        <div className="relative">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {/* Top 3 Visible */}
-                                {displayOffers.slice(0, 3).map((offer, idx) => (
-                                    <div key={offer.id || idx} className="relative z-10">
-                                        <OfferCard offer={offer as any} />
-                                    </div>
-                                ))}
-
-                                {/* The rest blurred (Gated Content Flow) */}
-                                {displayOffers.length > 3 && displayOffers.slice(3, 4).map((offer, idx) => (
-                                    <div key={offer.id || `locked-${idx}`} className="relative filter blur-[6px] opacity-60 select-none pointer-events-none transition-all duration-1000 overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/90 dark:to-zinc-900/90 z-20"></div>
-                                        <OfferCard offer={offer as any} />
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Gated Content Smart Wall specifically for Operator Page */}
-                            {displayOffers.length > 3 && (
-                                <div className="w-full mt-12 bg-zinc-50/80 dark:bg-zinc-900/40 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 p-4 sm:p-8 lg:p-12 relative overflow-hidden flex flex-col items-center rounded-3xl">
-                                    <div className="absolute top-[-50%] left-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
-
-                                    <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 w-full max-w-5xl items-center relative z-10">
-                                        <div className="flex-1 text-center lg:text-left">
-                                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded-full text-sm font-bold mb-6 border border-blue-200 dark:border-blue-500/30">
-                                                <Sparkles className="w-4 h-4" />
-                                                Accès Exclusif
-                                            </div>
-
-                                            <h3 className="text-3xl md:text-3xl font-black mb-4 dark:text-white leading-tight">
-                                                Débloquez tout le catalogue {operatorInfo.name}.
-                                            </h3>
-                                            <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-6 leading-relaxed">
-                                                Les opérateurs comme {operatorInfo.name} cachent leurs meilleures réductions de rétention. Nous avons négocié jusqu'à -50%.
-                                            </p>
-
-                                            <div className="flex flex-col gap-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                                                <div className="flex items-center gap-2 justify-center lg:justify-start">
-                                                    <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
-                                                    Gratuit et 100% Sans Engagement
-                                                </div>
-                                                <div className="flex items-center gap-2 justify-center lg:justify-start">
-                                                    <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
-                                                    Offres Exclusives Non Disponibles en Agence
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex-[0.8] w-full max-w-md transform transition-all hover:-translate-y-1">
-                                            <PromoUnlockerForm mode="b2c" />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </main>
-
-            <Footer />
-        </div>
-    )
+export default async function OperatorPage({params}:Props){
+ const {slug}=await params
+ const config=OPERATORS[slug?.toLowerCase()]
+ if(!config)notFound()
+ const {data,error}=await supabase.from('plans')
+  .select('id,title,category,price_dh,download_speed_mbps,upload_speed_mbps,mobile_data_gb,voice_minutes,technology,target_audience,source_url,source_checked_at,operators!inner(name)')
+  .eq('is_active',true).eq('operators.name',config.dbName)
+  .order('price_dh',{ascending:true})
+ const offers:OfferProps[]=(data||[]).map((o:any)=>({
+  id:o.id,title:o.title,operator_name:config.name,
+  category:o.category,price_dh:Number(o.price_dh),
+  download_speed:o.download_speed_mbps,upload_speed:o.upload_speed_mbps,
+  mobile_data_gb:o.mobile_data_gb,voice_minutes:o.voice_minutes,technology:o.technology,
+  target_audience:o.target_audience||'individual',
+  source_url:o.source_url,source_checked_at:o.source_checked_at
+ }))
+ const fibre=offers.filter(o=>o.category==='internet').length
+ const mobile=offers.filter(o=>o.category==='mobile').length
+ return <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white">
+  <Navigation/>
+  <header className="bg-zinc-950 text-white pt-28 pb-16 px-5">
+   <div className="max-w-6xl mx-auto">
+    <Link href="/offers" className="text-blue-300 text-sm inline-flex items-center gap-2"><ArrowLeft className="w-4 h-4"/> Toutes les offres</Link>
+    <p className="mt-9 text-sm uppercase font-bold tracking-widest text-blue-300">Comparaison indépendante</p>
+    <h1 className="mt-4 text-4xl md:text-6xl font-black">Forfaits {config.name}</h1>
+    <p className="mt-5 max-w-2xl text-zinc-300 text-lg">{config.description} MonForfait.ma ne représente pas officiellement cet opérateur et ne garantit pas de tarifs exclusifs.</p>
+    <div className="flex flex-wrap gap-3 mt-7">
+     <span className="inline-flex items-center gap-2 bg-white/10 rounded-xl px-4 py-3 text-sm"><Wifi className="w-4 h-4"/>{fibre} offre(s) internet</span>
+     <span className="inline-flex items-center gap-2 bg-white/10 rounded-xl px-4 py-3 text-sm"><Smartphone className="w-4 h-4"/>{mobile} offre(s) mobile</span>
+    </div>
+   </div>
+  </header>
+  <div className="max-w-6xl mx-auto px-5 py-12 space-y-7">
+   <div className="flex flex-wrap gap-4 justify-between items-center">
+    <div><h2 className="text-2xl font-bold">Tarifs publics référencés</h2><p className="text-sm text-zinc-500 mt-2">Triés par prix mensuel croissant. Source et date de vérification sur chaque fiche.</p></div>
+    <Link href="/offers" className="rounded-xl border border-zinc-300 dark:border-zinc-700 px-5 py-3 font-semibold text-sm">Comparer tous les opérateurs</Link>
+   </div>
+   {error?<p role="alert" className="rounded-xl bg-red-50 text-red-700 p-5">Impossible de charger les offres de cet opérateur actuellement.</p>:
+    offers.length===0?<div className="rounded-2xl bg-white dark:bg-zinc-900 border dark:border-zinc-800 p-10 text-center">
+     <p className="font-bold">Aucune offre vérifiée disponible pour le moment.</p>
+     <p className="text-zinc-500 text-sm mt-3">Consultez les autres opérateurs ou réessayez après la prochaine révision du catalogue.</p>
+     <Link href="/offers" className="text-blue-600 underline inline-block mt-4">Voir le comparateur complet</Link>
+    </div>:
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+     {offers.map(o=><div key={o.id} className="space-y-2"><OfferCard offer={o}/>
+      <Link href={`/offres/${o.id}`} className="text-xs text-blue-600 underline inline-flex items-center gap-2">Fiche complète et conditions <ExternalLink className="w-3 h-3"/></Link>
+     </div>)}
+    </div>}
+   <aside className="rounded-2xl border dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 flex gap-4 items-start">
+    <ShieldCheck className="w-8 h-8 text-blue-600 shrink-0"/>
+    <p className="text-sm text-zinc-600 dark:text-zinc-400">La couverture, l'éligibilité technique, les frais d'installation, les éventuels engagements et le prix final dépendent de l'opérateur et de l'adresse de raccordement. Vérifiez toujours la source officielle avant une souscription.</p>
+   </aside>
+  </div>
+ </main>
 }
