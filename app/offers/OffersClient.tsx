@@ -16,7 +16,9 @@ function OffersContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
 
-    const initialCategory = searchParams.get('category') || 'all'
+    const rawCategory = searchParams.get('category') || searchParams.get('type') || 'all'
+    const initialCategory = rawCategory === 'mobile' ? 'mobile' :
+      ['fibre','adsl','box','internet','ftth','4g','5g'].includes(rawCategory.toLowerCase()) ? 'internet' : 'all'
     const initialSort = searchParams.get('sort') || 'recommended'
 
     const [offers, setOffers] = useState<OfferProps[]>([])
@@ -206,7 +208,7 @@ function OffersContent() {
                             </div>
                         </div>
 
-                        <p className="mb-5 text-sm text-zinc-500 dark:text-zinc-400">Tarifs publiés par les opérateurs et vérifiés le 15 novembre 2026. Confirmation d’éligibilité et conditions contractuelles auprès de l’opérateur.</p>
+                        <p className="mb-5 text-sm text-zinc-500 dark:text-zinc-400">Tarifs affichés selon les sources et dates de vérification de chaque offre. Les prix et les conditions de raccordement doivent être confirmés auprès de l’opérateur.</p>
                         {/* Loading / Grid */}
                         {loading ? (
                             <div className="flex items-center justify-center py-20">
