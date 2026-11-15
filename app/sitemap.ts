@@ -45,19 +45,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch(e) {}
 
-  // Fetch plans (offers)
-  let planRoutes: any[] = [];
-  try {
-    const { data: plans } = await supabase.from('plans').select('id');
-    if (plans) {
-      planRoutes = plans.map((plan) => ({
-        url: `${baseUrl}/offers/${plan.id}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: 0.9,
-      }));
-    }
-  } catch(e) {}
+  // Offer IDs are not routable at /offers/<uuid>. Index the canonical /offers page instead.
+  // Add individual offers here only when an actual public URL is implemented and verified.
+  return [...defaultRoutes, ...blogRoutes];
 
-  return [...defaultRoutes, ...blogRoutes, ...planRoutes];
 }
