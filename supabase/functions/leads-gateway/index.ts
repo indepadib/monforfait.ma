@@ -142,7 +142,7 @@ Deno.serve(async req => {
     const trackingHash=await sha256(trackingToken);
     // Limit repeated submissions. Never reveal existing IDs to unauthenticated callers.
     const since=new Date(Date.now()-10*60*1000).toISOString();
-    const prior=await rest("leads?phone_normalized=eq."+encodeURIComponent(phone)+"&created_at=gte."+encodeURIComponent(since)+"&select=id&limit=1");
+    const prior=await rest("leads?phone_normalized=eq."+encodeURIComponent(phone)+"&created_at=gte."+encodeURIComponent(since)+"&consent_to_share=eq.true&tracking_token_hash=not.is.null&select=id&limit=1");
     if (prior.ok && (await prior.json()).length > 0) {
       return response({success:true,lead_id:null,duplicate:true},200,origin);
     }
