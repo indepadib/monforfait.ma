@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowDown, ArrowUp, Wifi, Smartphone, Phone, MessageSquare, Briefcase, User, Star, GitCompare, Check } from 'lucide-react';
 import { event } from '@/lib/analytics';
+import { LeadModal } from './LeadModal';
 import { useTranslation } from '@/lib/LocaleContext';
 
 export interface OfferProps {
@@ -24,12 +25,15 @@ export interface OfferProps {
     features?: any;
     is_sponsored?: boolean;
     highlight_badge?: string;
+    source_url?: string;
+    source_checked_at?: string;
     affiliate_link?: string;
 }
 
 export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: () => void }) {
     const { locale, t, isRtl } = useTranslation();
     const [isInComparison, setIsInComparison] = useState(false)
+    const [showLeadModal,setShowLeadModal] = useState(false)
 
     useEffect(() => {
         // Check if this offer is in comparison
@@ -123,6 +127,7 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
     const isPro = offer.target_audience === 'professional';
 
     return (
+      <>
         <div className={`group border-2 border-transparent ${borderColor} rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 bg-white dark:bg-zinc-950 relative overflow-hidden ${isRtl ? 'text-right' : 'text-left'}`}>
             {/* Badges */}
             <div className={`absolute top-0 ${isRtl ? 'left-0' : 'right-0'} flex flex-col items-end`}>
@@ -191,7 +196,7 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{t('card_calls')}</span>
                                 </div>
                                 <span className="font-bold text-lg leading-none">
-                                    {offer.voice_minutes === -1 ? t('card_unlimited') : `${offer.voice_minutes}${locale === 'ar' ? ' س' : 'h'}`}
+                                    {offer.voice_minutes === -1 ? t('card_unlimited') : typeof offer.voice_minutes === 'number' ? `${Math.floor(offer.voice_minutes / 60)}h${offer.voice_minutes % 60 ? String(offer.voice_minutes % 60).padStart(2,'0') : ''}` : '—'}
                                 </span>
                             </div>
                         </>
@@ -215,7 +220,7 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                         </a>
                     ) : (
                         <button
-                            onClick={onSelect}
+                            onClick={() => onSelect ? onSelect() : setShowLeadModal(true)}
                             className={`w-full py-3 px-4 rounded-xl font-bold text-white shadow-md transform transition-all group-hover:-translate-y-0.5
                                 ${isOrange ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20' : ''}
                                 ${isInwi ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/20' : ''}
@@ -223,7 +228,7 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                                 ${!isOrange && !isInwi && !isIam ? 'bg-zinc-900 hover:bg-zinc-800' : ''}
                             `}
                         >
-                            {isPro ? t('card_pro_quote') : t('card_order')}
+                            {isPro ? 'Demander un devis' : 'Demander une mise en relation'}
                         </button>
                     )}
 
@@ -253,6 +258,9 @@ export function OfferCard({ offer, onSelect }: { offer: OfferProps, onSelect?: (
                     )}
                 </div>
             </div>
+            {offer.source_url && <div className="px-5 pb-4 text-xs text-zinc-500 dark:text-zinc-400"><a href={offer.source_url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Source officielle</a> · Prix consulté le {offer.source_checked_at ? new Date(offer.source_checked_at).toLocaleDateString('fr-FR') : '15/11/2026'} · Sous réserve d’éligibilité</div>}
         </div>
+        {showLeadModal && <LeadModal offer={offer} onClose={() => setShowLeadModal(false)} />}
+      </>
     );
 }
