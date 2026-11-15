@@ -15,7 +15,7 @@ export function PartnerLogos() {
                 <div className="flex flex-col items-center justify-center gap-8 md:flex-row md:justify-between">
                     <div className="flex items-center gap-3 text-zinc-400 font-bold uppercase tracking-widest text-xs">
                         <ShieldCheck className="w-5 h-5 text-green-500" />
-                        Partenaires Officiels
+                        Opérateurs comparés
                     </div>
                     
                     <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
@@ -27,7 +27,7 @@ export function PartnerLogos() {
                     </div>
 
                     <div className="hidden lg:block text-zinc-400 text-sm font-medium italic">
-                        "Les meilleures offres directes, sans surcoût."
+                        "Comparaison indépendante — aucune affiliation implicite."
                     </div>
                 </div>
             </div>

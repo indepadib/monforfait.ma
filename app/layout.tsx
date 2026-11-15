@@ -5,9 +5,7 @@ import { CompareBar } from '@/components/CompareBar';
 import { CookieConsent } from '@/components/CookieConsent';
 import { Footer } from '@/components/Footer';
 import { StickyMobileFooter } from '@/components/StickyMobileFooter';
-import { SocialProofToast } from '@/components/SocialProofToast';
 import { AgentChatbot } from '@/components/AgentChatbot';
-import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 
 export const viewport: Viewport = {
   themeColor: "#3B82F6",
@@ -22,7 +20,7 @@ export const metadata: Metadata = {
     default: "MonForfait.ma - Comparez Internet & Mobile au Maroc",
     template: "%s | MonForfait.ma"
   },
-  description: "Comparateur N°1 au Maroc. Trouvez le meilleur forfait Internet (Fibre, ADSL) et Mobile (4G, 5G) chez Orange, Inwi et Maroc Telecom (IAM).",
+  description: "Comparateur indépendant au Maroc. Comparez les offres Internet (Fibre, ADSL) et Mobile (4G, 5G) chez Orange, Inwi et Maroc Telecom (IAM).",
   keywords: ["forfait maroc", "internet fibre maroc", "iam", "inwi", "orange maroc", "comparateur telecom", "recharge", "facture"],
   authors: [{ name: "MonForfait.ma Team" }],
   creator: "MonForfait.ma",
@@ -106,8 +104,8 @@ export default function RootLayout({
             }),
           }}
         />
-        {/* Google Analytics */}
-        <Script
+        {/* Google Analytics is only loaded when configured. */}
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && <><Script
           strategy="lazyOnload"
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
         />
@@ -122,6 +120,7 @@ export default function RootLayout({
             gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
           `}
         </Script>
+        </>}
         {/* Google AdSense */}
         <Script
           async
@@ -133,9 +132,7 @@ export default function RootLayout({
       <body className="antialiased">
         <LocaleProvider>
           {children}
-          <SocialProofToast />
           <AgentChatbot />
-          <ExitIntentPopup />
           <Footer />
           <CookieConsent />
           <CompareBar />

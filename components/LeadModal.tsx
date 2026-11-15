@@ -5,9 +5,8 @@ import { LeadShareConsent } from '@/components/LeadShareConsent'
 import * as React from 'react'
 import { useState } from 'react'
 import { X, Loader2, CheckCircle, Flame, ShieldCheck, Zap } from 'lucide-react'
-import { OfferProps } from './OfferCard'
+import type { OfferProps } from './OfferCard'
 import { event as trackEvent } from '@/lib/analytics'
-import { CONFIG } from '@/lib/config'
 
 export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () => void }) {
     const [name, setName] = useState('')
@@ -16,7 +15,7 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
     const [address, setAddress] = useState('')
     const [email, setEmail] = useState('')
     const [reason, setReason] = useState('')
-    const [timing, setTiming] = useState('asap')
+    const [timing, setTiming] = useState('compare')
     const [preferredOperator, setPreferredOperator] = useState(offer.operator_name || '')
     const [loading, setLoading] = useState(false)
     const [sent, setSent] = useState(false);
@@ -43,32 +42,13 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
             return;
         }
 
-        // WhatsApp Redirect Message
-        const timingLabel = timing === 'asap' ? 'Dès que possible' : timing === '1_month' ? 'D\'ici 1 mois' : 'En comparaison'
-        let message = `Bonjour, je souhaite finaliser ma demande pour l'offre ${offer.operator_name} ${offer.title}.\n\n`
-        message += `📍 Ville: ${city}\n`
-        message += `🏠 Adresse: ${address}\n`
-        message += `🔎 Motif: ${reason}\n`
-        message += `⏳ Installation: ${timingLabel}\n`
-        if (preferredOperator && preferredOperator !== offer.operator_name) {
-            message += `💡 Préférence alternative: ${preferredOperator}`
-        }
-
-        // Track Event
         trackEvent({
             action: 'lead_submitted_intent',
             category: 'lead',
-            label: `${offer.operator_name} - ${offer.title} (${timing})`,
-            value: offer.price_dh
-        })
-
-        setTimeout(() => {
-            const whatsappUrl = `https://wa.me/${CONFIG.SUPPORT_WHATSAPP}?text=${encodeURIComponent(message)}`
-            window.open(whatsappUrl, '_blank')
-            setLoading(false)
-            setSent(true)
-            setTimeout(onClose, 2000)
-        }, 800)
+            label: `${offer.operator_name} - ${offer.title} (${timing})`
+        });
+        setLoading(false);
+        setSent(true);
     }
 
     if (sent) {
@@ -86,6 +66,7 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                     <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl text-[11px] text-zinc-400 font-bold uppercase tracking-widest border border-zinc-100 dark:border-zinc-800">
                         Demande enregistrée
                     </div>
+                    <button type="button" onClick={onClose} className="mt-6 w-full rounded-xl bg-blue-600 text-white font-bold py-3">Fermer</button>
                 </div>
             </div>
         )
@@ -241,18 +222,18 @@ export function LeadModal({ offer, onClose }: { offer: OfferProps, onClose: () =
                                 {loading ? (
                                     <div className="flex items-center gap-3">
                                         <Loader2 className="animate-spin w-5 h-5" />
-                                        <span className="text-sm uppercase tracking-widest">Génération du Dossier...</span>
+                                        <span className="text-sm uppercase tracking-widest">Enregistrement…</span>
                                     </div>
                                 ) : (
                                     <>
-                                        <span className="text-lg uppercase tracking-tight italic">CONFIRMER MON RACCORDEMENT 🚀</span>
+                                        <span className="text-lg uppercase tracking-tight italic">DEMANDER UN RAPPEL</span>
                                         <span className="text-[10px] font-medium opacity-70 tracking-widest uppercase mb-0.5 group-hover:opacity-100 transition-opacity">Expertise et devis 100% gratuits</span>
                                     </>
                                 )}
                             </button>
                             <div className="absolute -bottom-10 left-0 w-full text-center">
                                 <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest px-4 leading-relaxed">
-                                    🔒 Cryptage SSL 256-bit — Vos données sont sécurisées
+                                    Vos coordonnées sont utilisées conformément à votre consentement
                                 </p>
                             </div>
                         </div>

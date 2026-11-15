@@ -35,7 +35,7 @@ export default function EligibilityContent() {
 
                     <div className={`flex flex-wrap justify-center gap-6 text-sm font-medium text-blue-100 ${isRtl ? 'flex-row-reverse' : ''}`}>
                         <span className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}><ShieldCheck className="w-4 h-4 text-green-400" /> {t('elig_page_secure')}</span>
-                        <span className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}><Users className="w-4 h-4 text-blue-300" /> {t('elig_page_stat')}</span>
+                        <span className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}><Crosshair className="w-4 h-4 text-blue-300" /> {isRtl ? 'التغطية تخضع للتأكيد' : 'Couverture à confirmer'}</span>
                     </div>
                 </div>
             </div>

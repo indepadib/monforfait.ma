@@ -21,6 +21,7 @@ export function QuickCaptureForm() {
     last_name: '',
     email: '',
     phone: '',
+    city: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,9 +49,10 @@ export function QuickCaptureForm() {
         throw new Error('Le numéro de téléphone doit être un numéro marocain valide (ex: 0612345678).')
       }
 
+      if (formData.city.trim().length < 2) throw new Error('La ville est nécessaire pour vérifier les offres.')
       await captureLead({
         user_name:formData.first_name+' '+formData.last_name,
-        user_email:formData.email,user_phone:cleanPhone,status:'new',
+        user_email:formData.email,user_phone:cleanPhone,city:formData.city.trim(),status:'new',
         consent_to_share:consentShare,consent_voice:false,
         needs_details:{interest:formData.need,source:'hero_quick_capture'}
       });
@@ -156,6 +158,14 @@ export function QuickCaptureForm() {
             />
           </div>
         </div>
+
+        <label className="block text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+          Ville / commune
+          <input type="text" required minLength={2} maxLength={100} value={formData.city}
+           onChange={e=>setFormData({...formData,city:e.target.value})}
+           placeholder="Ex : Casablanca"
+           className="mt-2 w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"/>
+        </label>
 
         {error && (
           <p className="text-red-500 text-sm font-medium">{error}</p>

@@ -22,7 +22,7 @@ export function PromoUnlockerForm({ mode = 'b2c' }: { mode?: 'b2c' | 'b2b' }) {
     need: 'fibre',
     currentBill: '200',
     firstName: '',
-    city: 'Casablanca',
+    city: '',
     phone: '',
   })
 
