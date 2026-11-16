@@ -1,0 +1,86 @@
+name: Monitor MonForfait domain and routes
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/domain-health.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: External DNS and HTTP reachability
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: DNS diagnostics for apex and www
+        shell: bash
+        run: |
+          echo "Timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          for host in monforfait.ma www.monforfait.ma monforfait.netlify.app; do
+            echo "::group::DNS $host"
+            for resolver in 1.1.1.1 8.8.8.8; do
+              echo "Resolver $resolver"
+              for type in A AAAA CNAME NS; do
+                echo -n "$type: "
+                timeout 8 dig +short +tries=1 +time=2 @"$resolver" "$host" "$type" | paste -sd ',' - || true
+              done
+            done
+            echo "::endgroup::"
+          done
+
+      - name: Compare authoritative Capconnect name servers
+        shell: bash
+        run: |
+          for server in ns1.capconnect.com ns2.capconnect.com ns3.capconnect.com ns4.capconnect.com; do
+            echo "::group::Authoritative DNS $server"
+            for query in 'monforfait.ma A' 'monforfait.ma AAAA' 'www.monforfait.ma CNAME'; do
+              echo "Query: $query"
+              timeout 8 dig +short +tries=1 +time=2 @"$server" $query || true
+            done
+            echo "::endgroup::"
+          done
+
+      - name: HTTP route diagnostics (follow redirects)
+        shell: bash
+        run: |
+          set +e
+          urls=(
+            'https://monforfait.ma/'
+            'https://monforfait.ma/login?next=%2Fadmin'
+            'https://monforfait.ma/offers'
+            'https://monforfait.ma/api/health'
+            'https://www.monforfait.ma/'
+            'https://www.monforfait.ma/login'
+            'https://monforfait.netlify.app/'
+            'https://monforfait.netlify.app/login'
+            'https://6afa447ecada7533b73b3a8c--monforfait.netlify.app/login'
+          )
+          failed=0
+          for url in "${urls[@]}"; do
+            echo "::group::HTTP $url"
+            for attempt in 1 2; do
+              body="/tmp/monforfait-${RANDOM}.html"
+              stats=$(curl -sSL --max-time 20 --connect-timeout 10 --retry 0 -o "$body" \
+                 -w '%{http_code}|%{url_effective}|%{remote_ip}|%{time_total}|%{errormsg}' "$url")
+              result=$?
+              echo "attempt=$attempt curl_exit=$result result=$stats"
+              if grep -qi 'Site not found\|Page not found' "$body" 2>/dev/null; then
+                echo "WARNING: Netlify 404 marker in response body"
+              fi
+              [ "$result" -eq 0 ] && [ "${stats:0:3}" = "200" ] && break
+              sleep 2
+            done
+            if [ "$result" -ne 0 ] || [ "${stats:0:3}" != "200" ]; then
+              echo "::error::Public URL not healthy: $url [$stats]"
+              failed=$((failed+1))
+            fi
+            echo "::endgroup::"
+          done
+          echo "UNHEALTHY_ROUTES=$failed" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$failed" -ne 0 ]; then exit 1; fi
