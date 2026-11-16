@@ -89,7 +89,7 @@ export default function PrivateLogin(){
    <div><h1 className="text-3xl font-black">Connexion sécurisée</h1><p className="mt-2 text-zinc-400">L'accès aux données des demandes exige une identité vérifiée et une autorisation explicite.</p></div>
    {usingFallbackHost&&<p role="note" className="rounded-xl border border-amber-700/50 bg-amber-900/20 text-amber-100 p-4 text-sm leading-relaxed">
     Vous utilisez l'adresse de secours Netlify. Les liens de connexion sont conçus pour revenir sur <strong>monforfait.ma</strong>. Si ce domaine affiche « Site not found », l'envoi d'un nouveau lien ne résoudra pas ce problème de domaine.
-   </p>
+   </p>}
    <div className="grid grid-cols-2 gap-2 rounded-xl bg-black/40 p-1" role="tablist" aria-label="Type de compte">
     <button type="button" role="tab" aria-selected={role==='admin'} onClick={()=>{setRole('admin');setMessage('')}} className={`rounded-lg p-3 font-semibold text-sm flex justify-center items-center gap-2 ${role==='admin'?'bg-blue-600 text-white':'text-zinc-400'}`}><LockKeyhole className="w-4 h-4"/> Administration</button>
     <button type="button" role="tab" aria-selected={role==='partner'} onClick={()=>{setRole('partner');setMessage('')}} className={`rounded-lg p-3 font-semibold text-sm flex justify-center items-center gap-2 ${role==='partner'?'bg-blue-600 text-white':'text-zinc-400'}`}><Building2 className="w-4 h-4"/> Partenaire</button>
