@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Browsers and legacy crawlers still request /favicon.ico regardless of the
+  // PNG icon declared by the app. Reuse the existing published brand asset.
+  async redirects(){
+    return [{source:'/favicon.ico',destination:'/branding/forfait.png',permanent:false}]
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
