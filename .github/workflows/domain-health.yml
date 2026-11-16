@@ -54,7 +54,6 @@ jobs:
             'https://monforfait.ma/'
             'https://monforfait.ma/login?next=%2Fadmin'
             'https://monforfait.ma/auth/callback?next=%2Fadmin'
-            'https://monforfait.ma/favicon.ico'
             'https://monforfait.ma/offers'
             'https://monforfait.ma/api/health'
             'https://www.monforfait.ma/'
@@ -63,6 +62,11 @@ jobs:
             'https://monforfait.netlify.app/login'
             'https://6afa447ecada7533b73b3a8c--monforfait.netlify.app/login'
           )
+          # On pull requests, production still serves the previous deploy.
+          # Test new favicon only after publication; local Next smoke tests it in PR.
+          if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
+            urls+=('https://monforfait.ma/favicon.ico')
+          fi
           failed=0
           for url in "${urls[@]}"; do
             echo "::group::HTTP $url"
