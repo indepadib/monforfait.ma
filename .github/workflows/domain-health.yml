@@ -53,6 +53,8 @@ jobs:
           urls=(
             'https://monforfait.ma/'
             'https://monforfait.ma/login?next=%2Fadmin'
+            'https://monforfait.ma/auth/callback?next=%2Fadmin'
+            'https://monforfait.ma/favicon.ico'
             'https://monforfait.ma/offers'
             'https://monforfait.ma/api/health'
             'https://www.monforfait.ma/'
