@@ -25,6 +25,9 @@ try{
   ['/',[200]],['/offers',[200]],['/contact',[200]],
   ['/suivi',[200]],['/espace-partenaire',[200]],
   ['/admin',[200]],['/widget',[200]],['/partenaires',[200]],
+  ['/login?next=%2Fadmin',[200]],['/auth/callback',[200]],
+  ['/auth/callback?next=%2Fadmin',[200]],
+  ['/auth/callback?next=https%3A%2F%2Fevil.example',[200]],
   ['/api/send-guide',[307,308]]
  ]
  let failed=0
