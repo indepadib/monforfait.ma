@@ -28,7 +28,7 @@ try{
   ['/login?next=%2Fadmin',[200]],['/auth/callback',[200]],
   ['/auth/callback?next=%2Fadmin',[200]],
   ['/auth/callback?next=https%3A%2F%2Fevil.example',[200]],
-  ['/api/send-guide',[307,308]]
+  ['/api/send-guide',[307,308]],['/favicon.ico',[307,308]]
  ]
  let failed=0
  for(const [path,codes] of expected){
@@ -39,6 +39,16 @@ try{
    if(!success)failed++
   }catch(e){
    failed++;process.stderr.write('FAIL '+path+': '+String(e)+'\n')
+  }
+ }
+ // The fallback favicon must always point to the existing PNG on this origin.
+ const favicon=await request('/favicon.ico')
+ if(favicon.status!==307 && favicon.status!==308) {
+  failed++;process.stderr.write('FAIL /favicon.ico missing redirect\\n')
+ } else {
+  const loc=favicon.headers.get('location')||''
+  if(!loc.endsWith('/branding/forfait.png')){
+   failed++;process.stderr.write('FAIL /favicon.ico unexpected redirect: '+loc+'\\n')
   }
  }
  // The business widget is intentionally embeddable; private CRM pages are not.
