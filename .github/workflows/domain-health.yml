@@ -53,6 +53,7 @@ jobs:
           urls=(
             'https://monforfait.ma/'
             'https://monforfait.ma/login?next=%2Fadmin'
+            'https://monforfait.ma/login?next=%2Fadmin&utm_source=chatgpt.com'
             'https://monforfait.ma/auth/callback?next=%2Fadmin'
             'https://monforfait.ma/offers'
             'https://monforfait.ma/api/health'
@@ -60,6 +61,7 @@ jobs:
             'https://www.monforfait.ma/login'
             'https://monforfait.netlify.app/'
             'https://monforfait.netlify.app/login'
+            'https://monforfait.netlify.app/login?utm_source=chatgpt.com'
             'https://6afa447ecada7533b73b3a8c--monforfait.netlify.app/login'
           )
           # On pull requests, production still serves the previous deploy.
