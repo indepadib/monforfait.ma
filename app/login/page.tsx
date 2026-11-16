@@ -4,6 +4,7 @@ import {useRouter} from 'next/navigation'
 import {supabase} from '@/lib/supabaseClient'
 import Link from 'next/link'
 import {LockKeyhole,Building2,ShieldCheck} from 'lucide-react'
+import {authCallbackUrl,privateDestination} from '@/lib/authRouting'
 
 export default function PrivateLogin(){
  const router=useRouter()
@@ -12,8 +13,11 @@ export default function PrivateLogin(){
  const [password,setPassword]=useState('')
  const [message,setMessage]=useState('')
  const [busy,setBusy]=useState(false)
- useEffect(()=>{if(new URLSearchParams(window.location.search).get('tab')==='partner')setRole('partner')},[])
- const destination=role==='partner'?'/espace-partenaire':'/admin'
+ useEffect(()=>{
+  const params=new URLSearchParams(window.location.search)
+  if(params.get('tab')==='partner'||params.get('next')==='/espace-partenaire')setRole('partner')
+ },[])
+ const destination=privateDestination(role)
  async function logIn(e:React.FormEvent){
   e.preventDefault();setBusy(true);setMessage('')
   const {error}=await supabase.auth.signInWithPassword({email,password})
@@ -25,9 +29,13 @@ export default function PrivateLogin(){
   if(!email)return
   setBusy(true);setMessage('')
   const {error}=await supabase.auth.signInWithOtp({email,
-    options:{emailRedirectTo:window.location.origin+destination,shouldCreateUser:role==='partner'}})
+    options:{
+      // Explicitly return to MonForfait, never to the shared Supabase Site URL fallback.
+      emailRedirectTo:authCallbackUrl(destination,window.location.origin),
+      shouldCreateUser:role==='partner'
+    }})
   setBusy(false)
-  setMessage(error?'Lien non envoyé. Vérifiez l’adresse et réessayez.':'Si cet email est autorisé, un lien de connexion a été envoyé. Vérifiez votre boîte de réception.')
+  setMessage(error?'Lien non envoyé. Vérifiez l’adresse et réessayez.':'Si cet email est autorisé, vérifiez votre boîte de réception. Le lien doit vous ramener sur monforfait.ma, jamais sur une autre application.')
  }
  return <main className="min-h-screen flex items-center justify-center bg-zinc-950 p-5 text-white">
   <div className="w-full max-w-lg space-y-6 rounded-3xl border border-zinc-800 bg-zinc-900 p-7 md:p-10">
